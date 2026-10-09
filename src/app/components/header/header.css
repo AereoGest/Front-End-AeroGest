@@ -1,10 +1,18 @@
 :host {
     display: block;
-    background-color: #3CA5E399;
+    background-color: #1D3557;
     position: sticky;
     top: 0;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+}
+
+#nombre{
+    color: white;
+}
+
+span{
+    color: #2b7fb3;
 }
 
 .header {
@@ -29,6 +37,12 @@
 #nav ul {
     display: flex;
     gap: 5vw;
+    list-style: none;
+}
+
+a{
+    text-decoration: none;
+    color: white
 }
 
 #buttons {
@@ -44,4 +58,31 @@
     padding: 2%;
 }
 
+#buttons button {
+    padding: 0.6rem 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+    background-color: transparent;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background-color 0.25s ease,
+                border-color 0.25s ease,
+                transform 0.15s ease;
+}
 
+#buttons button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: #fff;
+}
+
+#buttons button:active {
+    transform: scale(0.97);
+}
+
+#buttons button:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
