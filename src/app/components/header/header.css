@@ -1,0 +1,47 @@
+:host {
+    display: block;
+    background-color: #3CA5E399;
+    position: sticky;
+    top: 0;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    width: 100%;
+}
+
+#principal {
+    justify-self: left;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+}
+
+#nav {
+    justify-self: center;
+}
+
+#nav ul {
+    display: flex;
+    gap: 5vw;
+}
+
+#buttons {
+    justify-self: right;
+    margin: 2%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+#log,
+#register {
+    padding: 2%;
+}
+
+
