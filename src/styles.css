@@ -3,3 +3,53 @@ html, body{
     padding: 0;
     height: 100%;
 }
+
+:root {
+  --black:#000000;
+  --navy: #0b123b;
+  --navy-mid: #0a123f;
+  --navy-light: #182366;
+  --light-blue-1: #6e90e3;
+  --blue: #3ca5e3;
+  --blue-light: #6ebee3;
+  --blue-pale: #c3e3f7;
+  --cream: #e7eeff;
+  --white: #fffeff;
+  --pink: #d50488;
+  --gray-500: #8f91ae;
+  --gray-700: #40414a;
+  --danger: #c02b2b;
+  --success: #1A7A4A;
+  --font-display: 'Barlow', arial, sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --shadow-sm: 0 2px 8px rgba(10,22,40,0.08);
+  --shadow-md: 0 8px 32px rgba(10,22,40,0.14);
+  --shadow-lg: 0 20px 60px rgba(10,22,40,0.22);
+  --radius: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --transition: 0.25s ease;
+}
+
+/* ── Section commons ── */
+.section { padding: 100px 0; }
+.section-alt { background: var(--white); }
+.section-dark { background: var(--navy); }
+.section-header { text-align: center; margin-bottom: 60px; }
+.section-eyebrow {
+  display: inline-block;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--blue);
+  margin-bottom: 14px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.5vw, 44px);
+  font-weight: 800; color: var(--navy); line-height: 1.15;
+}
+.section-dark .section-title { color: var(--white); }
+.section-subtitle {
+  font-size: 16px; color: var(--gray-500);
+  max-width: 520px; margin: 16px auto 0;
+}
+.section-dark .section-subtitle { color: rgba(255,255,255,0.55); }
