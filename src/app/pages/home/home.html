@@ -1,1 +1,141 @@
-<p>home works!</p>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-pattern"></div>
+  <div class="hero-grid-lines"></div>
+  <div class="container">
+    <div class="hero-content">
+      <!-- Left -->
+      <div>
+        <p class="hero-eyebrow animate">La aerolínea que te lleva más lejos</p>
+        <h1 class="hero-title animate delay-1">
+          Volá hacia tu próxima <em>aventura</em>
+        </h1>
+        <p class="hero-subtitle animate delay-2">
+          Encontrá los mejores vuelos al precio justo. Más de 150 destinos, atención personalizada y el confort que
+          merecés.
+        </p>
+        <div class="hero-actions animate delay-3">
+          <a routerLink="/vuelos" class="btn btn-primary btn-lg">Buscar vuelos</a>
+          <a (click)="irASeccion('destinos')" class="btn btn-outline btn-lg" role="button" tabindex="0"
+            (keydown.enter)="irASeccion('destinos')">Ver destinos</a>
+        </div>
+        <div class="hero-stats animate delay-4">
+          @for (s of stats; track s.etiqueta) {
+            <div>
+              <div class="hero-stat-value">{{ s.valor }}</div>
+              <div class="hero-stat-label">{{ s.etiqueta }}</div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Search Card -->
+      <div class="search-card">
+        <h2 class="sr-only">Buscador de vuelos</h2>
+        <div class="search-card-header">
+          <div class="search-tab">Solo ida</div>
+        </div>
+
+        <form (submit)="buscarVuelos($event)">
+          <div class="search-row">
+            <div class="form-group">
+              <label for="origen">Origen</label>
+              <input type="text" id="origen" name="origen" class="form-control"
+                placeholder="Ciudad o aeropuerto" [(ngModel)]="origen" />
+            </div>
+            <div class="search-divider">
+              <button type="button" class="search-swap" (click)="swapAirports()" title="Intercambiar">⇄</button>
+            </div>
+            <div class="form-group">
+              <label for="destino">Destino</label>
+              <input type="text" id="destino" name="destino" class="form-control"
+                placeholder="Ciudad o aeropuerto" [(ngModel)]="destino" />
+            </div>
+          </div>
+
+          <div class="search-row search-row-1" id="fechas-row">
+            <div class="form-group">
+              <label for="fecha-ida">Ida</label>
+              <input type="date" id="fecha-ida" name="fechaIda" class="form-control" [(ngModel)]="fechaIda" />
+            </div>
+          </div>
+
+          <div class="search-row search-row-2">
+            <div class="form-group">
+              <label for="pasajeros">Pasajeros</label>
+              <select id="pasajeros" name="pasajeros" class="form-control" [(ngModel)]="pasajeros">
+                @for (p of opcionesPasajeros; track p) {
+                  <option [value]="p">{{ p }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="clase">Clase</label>
+              <select id="clase" name="clase" class="form-control" [(ngModel)]="clase">
+                @for (c of opcionesClase; track c) {
+                  <option [value]="c">{{ c }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg"
+            style="width:100%;justify-content:center;margin-top:6px">
+            ✈ Buscar vuelos
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POR QUÉ ELEGIRNOS -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-eyebrow">¿Por qué AeroGest?</span>
+      <h2 class="section-title">Volamos distinto</h2>
+      <p class="section-subtitle">Más de 20 años conectando personas con sus destinos soñados</p>
+    </div>
+    <div class="why-grid">
+      @for (b of beneficios; track b.titulo) {
+        <div class="why-card">
+          <div class="why-icon">{{ b.icono }}</div>
+          <h3 class="why-title">{{ b.titulo }}</h3>
+          <p class="why-desc">{{ b.desc }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- DESTINOS -->
+<section class="section" id="destinos">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-eyebrow">Destinos populares</span>
+      <h2 class="section-title">¿A dónde querés ir?</h2>
+      <p class="section-subtitle">Explorá nuestros destinos más buscados con las mejores tarifas</p>
+    </div>
+    <div class="destinations-grid">
+      @for (d of destinos; track d.ciudad) {
+        <div class="dest-card" [class.dest-card-featured]="d.destacado" (click)="irADestino(d.ciudad)">
+          <div class="dest-bg" [style.background]="d.gradiente">
+            <div class="dest-icon" [style.opacity]="d.opacidad" [style.font-size.px]="d.destacado ? 80 : 60">
+              {{ d.icono }}
+            </div>
+            <div class="dest-card-overlay"></div>
+            <div class="dest-card-body">
+              <div class="dest-card-city">{{ d.ciudad }}</div>
+              <div class="dest-card-country">{{ d.pais }}</div>
+              <div class="dest-card-price">
+                <span class="dest-price-from">Desde</span>
+                <span class="dest-price-amount">{{ d.desde }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
