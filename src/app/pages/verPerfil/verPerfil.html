@@ -1,0 +1,132 @@
+<section class="profile-page" aria-labelledby="perfil-titulo">
+  <div class="container profile-layout">
+    @if (perfilIncompleto()) {
+      <aside class="profile-alert" role="note">
+        <strong>Tu perfil está incompleto.</strong>
+        Completá todos los campos para poder realizar compras y guardar favoritos.
+      </aside>
+    }
+
+    <article class="auth-card animate">
+      <header class="auth-header">
+        <h1 class="auth-title" id="perfil-titulo">Mi <em>Perfil</em></h1>
+        <p class="auth-subtitle">Actualizá tus datos personales para usar todos los servicios.</p>
+      </header>
+
+      @if (cuentaSinVerificar()) {
+        <p class="profile-warning" role="alert">
+          <strong>Cuenta no verificada:</strong> revisá tu email para verificarla.
+          No vas a poder reservar ni comprar vuelos hasta hacerlo.
+        </p>
+      }
+
+      <form class="profile-form" (submit)="guardar($event)" novalidate>
+        <div class="field">
+          <input id="p-nombre" type="text" class="field-input" placeholder=" " autocomplete="given-name"
+            [formField]="perfilForm.nombre" [attr.aria-invalid]="errorVisible(perfilForm.nombre)"
+            aria-describedby="p-nombre-error" />
+          <label class="field-label" for="p-nombre">Nombre</label>
+          @if (errorVisible(perfilForm.nombre)) {
+            <p class="field-error" id="p-nombre-error">Ingresá tu nombre, solo con letras y espacios.</p>
+          }
+        </div>
+
+        <div class="field">
+          <input id="p-apellido" type="text" class="field-input" placeholder=" " autocomplete="family-name"
+            [formField]="perfilForm.apellido" [attr.aria-invalid]="errorVisible(perfilForm.apellido)"
+            aria-describedby="p-apellido-error" />
+          <label class="field-label" for="p-apellido">Apellido</label>
+          @if (errorVisible(perfilForm.apellido)) {
+            <p class="field-error" id="p-apellido-error">Ingresá tu apellido, solo con letras y espacios.</p>
+          }
+        </div>
+
+        <div class="field full">
+          <input id="p-email" type="email" class="field-input" placeholder=" " autocomplete="email"
+            [value]="perfil()?.email ?? ''" readonly />
+          <label class="field-label" for="p-email">Email</label>
+        </div>
+
+        <div class="field full">
+          <input id="p-telefono" type="tel" class="field-input" placeholder=" " inputmode="numeric"
+            autocomplete="tel" (input)="soloDigitos('telefono', $event)"
+            [formField]="perfilForm.telefono" [attr.aria-invalid]="errorVisible(perfilForm.telefono)"
+            aria-describedby="p-telefono-error" />
+          <label class="field-label" for="p-telefono">Teléfono</label>
+          @if (errorVisible(perfilForm.telefono)) {
+            <p class="field-error" id="p-telefono-error">Ingresá un teléfono de hasta 15 dígitos.</p>
+          }
+        </div>
+
+        <div class="field">
+          <select id="p-identificador" class="field-input" [formField]="perfilForm.identificador">
+            @for (tipo of tiposDocumento; track tipo.valor) {
+              <option [value]="tipo.valor">{{ tipo.etiqueta }}</option>
+            }
+          </select>
+          <label class="field-label" for="p-identificador">Tipo de documento</label>
+        </div>
+
+        <div class="field">
+          <input id="p-dni" type="text" class="field-input" placeholder=" " inputmode="numeric"
+            (input)="soloDigitos('numeroIdentificador', $event)"
+            [formField]="perfilForm.numeroIdentificador"
+            [attr.aria-invalid]="errorVisible(perfilForm.numeroIdentificador)" aria-describedby="p-dni-error" />
+          <label class="field-label" for="p-dni">Número de documento</label>
+          @if (errorVisible(perfilForm.numeroIdentificador)) {
+            <p class="field-error" id="p-dni-error">Ingresá un documento de 7 u 8 dígitos.</p>
+          }
+        </div>
+
+        <div class="field">
+          <select id="p-sexo" class="field-input" [formField]="perfilForm.sexo"
+            [attr.aria-invalid]="errorVisible(perfilForm.sexo)" aria-describedby="p-sexo-error">
+            <option value="" disabled>Seleccioná...</option>
+            @for (genero of generos; track genero.valor) {
+              <option [value]="genero.valor">{{ genero.etiqueta }}</option>
+            }
+          </select>
+          <label class="field-label" for="p-sexo">Género</label>
+          @if (errorVisible(perfilForm.sexo)) {
+            <p class="field-error" id="p-sexo-error">Seleccioná un género.</p>
+          }
+        </div>
+
+        <div class="field">
+          <input id="p-nacimiento" type="date" class="field-input" autocomplete="bday" [attr.max]="fechaMaxima"
+            [formField]="perfilForm.fechaNacimiento"
+            [attr.aria-invalid]="errorVisible(perfilForm.fechaNacimiento)" aria-describedby="p-nacimiento-error" />
+          <label class="field-label" for="p-nacimiento">Fecha de nacimiento</label>
+          @if (errorVisible(perfilForm.fechaNacimiento)) {
+            <p class="field-error" id="p-nacimiento-error">Ingresá una fecha de nacimiento anterior a hoy.</p>
+          }
+        </div>
+
+        <button type="submit" class="btn btn-lg btn-block auth-btn-accent full">Guardar cambios</button>
+      </form>
+    </article>
+
+    <aside class="profile-panel animate delay-1" aria-labelledby="seguridad-titulo">
+      <header class="profile-panel-header">
+        <h2 id="seguridad-titulo">Seguridad</h2>
+        <p>Opciones preparadas para doble factor.</p>
+      </header>
+
+      <label class="security-option">
+        <input type="checkbox" [checked]="perfil()?.twoFactorEnabled ?? false" [disabled]="!perfil()" />
+        <span>
+          <strong>2FA por correo</strong>
+          <small>Enviar código de verificación al iniciar sesión.</small>
+        </span>
+      </label>
+
+      <label class="security-option">
+        <input type="checkbox" disabled />
+        <span>
+          <strong>App autenticadora</strong>
+          <small>Usar códigos temporales de una app compatible.</small>
+        </span>
+      </label>
+    </aside>
+  </div>
+</section>
