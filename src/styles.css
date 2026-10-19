@@ -166,3 +166,80 @@ img { max-width: 100%; display: block; }
   max-width: 320px;
 
 }
+
+/* ── Campos con etiqueta flotante ──
+   Uso: <div class="field"> <input class="field-input" placeholder=" "> <label class="field-label"> </div>
+   El input va antes del label para poder reaccionar con el selector "+".
+   El input necesita un placeholder (" " si no hay texto de ayuda): :placeholder-shown detecta si está vacío.
+   El texto del placeholder solo se ve con foco, cuando la etiqueta ya subió. */
+.field { position: relative; min-width: 0; }
+
+.field-input {
+  display: block;
+  width: 100%;
+  height: 52px;
+  padding: 0 16px;
+  border: 1px solid color-mix(in srgb, var(--navy) 30%, transparent);
+  border-radius: 12px;
+  background: white;
+  color: var(--navy);
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.22s, box-shadow 0.22s;
+}
+.field-input::placeholder { color: transparent; transition: color 0.22s; }
+.field-input:focus::placeholder { color: color-mix(in srgb, var(--navy) 55%, transparent); }
+select.field-input { cursor: pointer; }
+.field-input[readonly] { color: color-mix(in srgb, var(--navy) 60%, transparent); cursor: default; }
+
+.field-label {
+  position: absolute;
+  top: 26px;
+  left: 12px;
+  max-width: calc(100% - 32px);
+  padding: 0 4px;
+  overflow: hidden;
+  background: white;
+  color: color-mix(in srgb, var(--navy) 60%, transparent);
+  font-size: 16px;
+  line-height: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transform: translateY(-50%);
+  transform-origin: left center;
+  pointer-events: none;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), color 0.22s;
+}
+
+/* Con foco, con valor, o en campos que siempre muestran algo (select, fecha), la etiqueta sube al borde. */
+.field-input:focus + .field-label,
+.field-input:not(:placeholder-shown) + .field-label,
+.field-input:autofill + .field-label,
+select.field-input + .field-label,
+.field-input[type="date"] + .field-label {
+  transform: translateY(calc(-50% - 26px)) scale(0.78);
+}
+
+.field-input:hover:not(:focus, [readonly]) { border-color: color-mix(in srgb, var(--navy) 60%, transparent); }
+.field-input:focus {
+  border-color: var(--light-blue);
+  box-shadow: 0 0 0 1px var(--light-blue);
+}
+.field-input:focus + .field-label { color: var(--navy); }
+
+.field-input[aria-invalid="true"] { border-color: var(--burgundy); }
+.field-input[aria-invalid="true"]:focus { box-shadow: 0 0 0 1px var(--burgundy); }
+.field-input[aria-invalid="true"] + .field-label { color: var(--burgundy); }
+
+.field-error {
+  margin-top: 6px;
+  padding-left: 16px;
+  color: var(--burgundy);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field-input, .field-label { transition-duration: 0.01ms; }
+}
