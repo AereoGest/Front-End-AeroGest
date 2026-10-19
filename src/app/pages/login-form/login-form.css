@@ -1,0 +1,253 @@
+
+/* ── Login AeroGest ── */
+
+.auth-container-log {
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  align-items: start;
+  padding: 40px 20px 80px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 520px;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--light-blue-1);
+  padding: 40px;
+  box-shadow: var(--shadow-lg);
+  transition: border-color var(--transition);
+}
+
+.auth-card:hover {
+  border-color: var(--blue);
+}
+
+/* Encabezado */
+
+.auth-header {
+  margin-bottom: 28px;
+}
+
+.auth-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+
+.auth-title em {
+  font-style: italic;
+  color: var(--blue);
+}
+
+.auth-subtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--gray-500);
+}
+
+/* Formulario */
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--pink);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--navy);
+  background: var(--white);
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.form-control::placeholder {
+  color: var(--pink);
+  opacity: 0.8;
+}
+
+.form-control:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(60, 165, 227, 0.12);
+}
+
+/* Enlace y botones */
+
+.auth-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.auth-forgot {
+  align-self: flex-end;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--gray-500);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.auth-forgot:hover {
+  color: var(--blue);
+  text-decoration: underline;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: all var(--transition);
+}
+
+.btn-primary {
+  background: var(--white);
+  color: var(--navy);
+}
+
+.btn-lg {
+  padding: 16px 36px;
+  font-size: 15px;
+}
+
+.btn-block {
+  width: 100%;
+  justify-content: center;
+}
+
+.auth-btn-accent {
+  background: var(--navy);
+  color: var(--white);
+  border: 1.5px solid var(--navy);
+}
+
+.auth-btn-accent:hover:not(:disabled) {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: var(--white);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.auth-btn-accent:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mensajes de validación */
+
+.mensaje-error {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.5;
+  color: #c62828;
+}
+
+/* Botón para volver desde el 2FA */
+
+.btn-volver {
+  background: transparent;
+  border: none;
+  color: var(--gray-500);
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 8px;
+  transition: color var(--transition);
+}
+
+.btn-volver:hover {
+  color: var(--blue);
+}
+
+.btn-volver:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Animación */
+
+.auth-card.animate {
+  animation: fadeInUp 0.6s ease both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+
+@media (max-width: 600px) {
+  .auth-container-log {
+    padding: 24px 16px 56px;
+  }
+
+  .auth-card {
+    padding: 24px;
+    border-radius: var(--radius-md);
+  }
+
+  .auth-title {
+    font-size: 27px;
+  }
+
+  .auth-form {
+    gap: 18px;
+  }
+
+  .form-control {
+    padding: 12px;
+  }
+
+  .btn-lg {
+    padding: 14px 20px;
+  }
+}

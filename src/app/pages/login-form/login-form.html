@@ -1,0 +1,141 @@
+
+<main class="section">
+  <div class="auth-container-log">
+    <div class="auth-card animate">
+
+      <div class="auth-header">
+        <h2 class="auth-title">
+          @if (!paso2FA()) {
+            Iniciar <em>Sesión</em>
+          } @else {
+            Verificar <em>Código</em>
+          }
+        </h2>
+
+        <p class="auth-subtitle">
+          @if (!paso2FA()) {
+            Qué bueno verte de nuevo. ¡Prepará tu próximo viaje!
+          } @else {
+            Ingresá el código de verificación que enviamos a tu email.
+          }
+        </p>
+      </div>
+
+      @if (!paso2FA()) {
+        <form class="auth-form" (submit)="iniciarSesion($event)">
+
+          <div class="form-group">
+            <label for="login-email">Correo electrónico</label>
+
+            <input
+              id="login-email"
+              type="email"
+              class="form-control"
+              placeholder="ejemplo@correo.com"
+              autocomplete="email"
+              [formField]="loginForm.email"
+            />
+
+            @if (
+              (loginForm.email().touched() || intentoEnviar()) &&
+              loginForm.email().invalid()
+            ) {
+              @for (error of loginForm.email().errors(); track error.kind) {
+                <p class="mensaje-error">
+                  @if (error.kind === 'required') {
+                    El correo electrónico es obligatorio.
+                  } @else if (error.kind === 'email') {
+                    Ingresá un correo electrónico válido.
+                  }
+                </p>
+              }
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="login-password">Contraseña</label>
+
+            <input
+              id="login-password"
+              type="password"
+              class="form-control"
+              placeholder="Ingresá tu contraseña"
+              autocomplete="current-password"
+              [formField]="loginForm.password"
+            />
+
+            @if (
+              (loginForm.password().touched() || intentoEnviar()) &&
+              loginForm.password().invalid()
+            ) {
+              <p class="mensaje-error">
+                La contraseña es obligatoria.
+              </p>
+            }
+          </div>
+
+          <div class="auth-actions">
+            <a routerLink="/recuperar-password" class="auth-forgot">
+              ¿Olvidaste tu contraseña?
+            </a>
+
+            <button
+              type="submit"
+              class="btn btn-primary btn-lg btn-block auth-btn-accent"
+              [disabled]="cargando()"
+            >
+              {{ cargando() ? 'Ingresando...' : 'Ingresar' }}
+            </button>
+          </div>
+
+        </form>
+      } @else {
+        <form class="auth-form" (submit)="verificarCodigo($event)">
+
+          <div class="form-group">
+            <label for="login-2fa">Código de verificación</label>
+
+            <input
+              id="login-2fa"
+              type="text"
+              class="form-control"
+              placeholder="Ingresá el código"
+              autocomplete="one-time-code"
+              [formField]="form2FA.code"
+            />
+
+            @if (
+              (form2FA.code().touched() || intentoEnviar2FA()) &&
+              form2FA.code().invalid()
+            ) {
+              <p class="mensaje-error">
+                El código de verificación es obligatorio.
+              </p>
+            }
+          </div>
+
+          <div class="auth-actions">
+            <button
+              type="submit"
+              class="btn btn-primary btn-lg btn-block auth-btn-accent"
+              [disabled]="cargando()"
+            >
+              {{ cargando() ? 'Verificando...' : 'Verificar código' }}
+            </button>
+
+            <button
+              type="button"
+              class="btn-volver"
+              (click)="paso2FA.set(false)"
+              [disabled]="cargando()"
+            >
+              Volver al inicio de sesión
+            </button>
+          </div>
+
+        </form>
+      }
+
+    </div>
+  </div>
+</main>
