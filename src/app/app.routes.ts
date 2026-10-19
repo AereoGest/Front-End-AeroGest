@@ -8,6 +8,6 @@ import { LoginForm } from './pages/login-form/login-form';
 export const routes: Routes = [
     {path: "", component: Home},
     {path: "register", component: RegistrationForm},
-    {path: "perfil", component: VerPerfil},
+    {path: "perfil", component: VerPerfil}
     {path: "login", component: LoginForm}
 ];
