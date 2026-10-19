@@ -161,9 +161,9 @@
 }
 
 .auth-btn-accent:hover:not(:disabled) {
-  background: var(--blue);
-  border-color: var(--blue);
-  color: var(--white);
+  background: var(--light-blue);
+  border-color: var(--light-blue);
+  color: var(--cream);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
