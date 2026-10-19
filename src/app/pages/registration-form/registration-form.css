@@ -1,0 +1,246 @@
+
+/* ── Registro ── */
+
+.auth-container-sign {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    align-items: start;
+    padding: 140px 20px 100px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* ── Tarjeta de registro ── */
+
+.auth-card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--white);
+    border: 1px solid var(--light-blue-1);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    box-shadow: var(--shadow-lg);
+    transition: border-color var(--transition);
+}
+
+.auth-card:hover {
+    border-color: var(--blue);
+}
+
+/* ── Encabezado ── */
+
+.auth-header {
+    margin-bottom: 28px;
+}
+
+.auth-title {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--navy);
+    margin-bottom: 8px;
+}
+
+.auth-title em {
+    font-style: italic;
+    color: var(--blue);
+}
+
+.auth-subtitle {
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--gray-500);
+}
+
+/* ── Formulario ── */
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Nombre y apellido */
+
+.checkout-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+/* Grupos de campos */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.form-group label {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+}
+
+/* Inputs */
+
+.form-control {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--light-blue-1);
+    border-radius: var(--radius);
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--navy);
+    background: var(--white);
+    outline: none;
+    transition: border-color var(--transition),
+                box-shadow var(--transition);
+}
+
+.form-control::placeholder {
+    color: var(--gray-500);
+    opacity: 0.7;
+}
+
+.form-control:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(60, 165, 227, 0.12);
+}
+
+/* ── Términos y condiciones ── */
+
+.auth-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--gray-700);
+    cursor: pointer;
+}
+
+.auth-checkbox input {
+    flex-shrink: 0;
+    margin-top: 4px;
+    cursor: pointer;
+    accent-color: var(--blue);
+}
+
+.auth-checkbox label {
+    cursor: pointer;
+}
+
+/* ── Mensajes de validación ── */
+
+.mensaje-error {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 12px;
+    line-height: 1.5;
+    color: #c62828;
+}
+
+.mensaje-success {
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px solid #a5d6a7;
+    border-radius: var(--radius-md);
+    background: #e8f5e9;
+    color: #2e7d32;
+    font-family: var(--font-body);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* ── Botón de registro ── */
+
+.btn-block {
+    width: 100%;
+    justify-content: center;
+}
+
+.auth-btn-accent {
+    background: var(--navy);
+    color: var(--white);
+    border: 1.5px solid var(--navy);
+}
+
+.auth-btn-accent:hover:not(:disabled) {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: var(--white);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.auth-btn-accent:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ── Animación ── */
+
+.auth-card.animate {
+    animation: fadeInUp 0.6s ease both;
+}
+
+.auth-card.delay-1 {
+    animation-delay: 0.1s;
+}
+
+/* ── Responsive: tablets ── */
+
+@media (max-width: 768px) {
+    .auth-container-sign {
+        padding: 110px 20px 70px;
+    }
+
+    .auth-card {
+        max-width: 520px;
+        padding: 32px;
+    }
+
+    .auth-title {
+        font-size: 28px;
+    }
+}
+
+/* ── Responsive: celulares ── */
+
+@media (max-width: 480px) {
+    .auth-container-sign {
+        padding: 90px 16px 48px;
+    }
+
+    .auth-card {
+        padding: 24px 20px;
+        border-radius: var(--radius-md);
+    }
+
+    .auth-title {
+        font-size: 25px;
+    }
+
+    .checkout-grid-2 {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .auth-form {
+        gap: 18px;
+    }
+
+    .form-control {
+        padding: 12px;
+    }
+}
