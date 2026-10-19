@@ -1,0 +1,157 @@
+
+<div class="auth-container-sign">
+  <div class="auth-card animate delay-1">
+
+    <div class="auth-header">
+      <h2 class="auth-title">Crear <em>Cuenta</em></h2>
+      <p class="auth-subtitle">
+        Registrate en segundos y empezá a acumular millas.
+      </p>
+    </div>
+
+    <form class="auth-form" (submit)="registrar($event)">
+
+      <!-- Nombre y apellido -->
+      <div class="checkout-grid-2">
+
+        <div class="form-group">
+          <label for="reg-name">Nombre</label>
+
+          <input
+            id="reg-name"
+            type="text"
+            class="form-control"
+            placeholder="Juan"
+            [formField]="registroForm.nombre"
+          />
+
+          @if (registroForm.nombre().touched() && registroForm.nombre().invalid()) {
+            @for (error of registroForm.nombre().errors(); track error.kind) {
+              <p class="mensaje-error">
+                @if (error.kind === 'required') {
+                  El nombre es obligatorio.
+                }
+              </p>
+            }
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="reg-lastname">Apellido</label>
+
+          <input
+            id="reg-lastname"
+            type="text"
+            class="form-control"
+            placeholder="Pérez"
+            [formField]="registroForm.apellido"
+          />
+
+          @if (registroForm.apellido().touched() && registroForm.apellido().invalid()) {
+            @for (error of registroForm.apellido().errors(); track error.kind) {
+              <p class="mensaje-error">
+                @if (error.kind === 'required') {
+                  El apellido es obligatorio.
+                }
+              </p>
+            }
+          }
+        </div>
+
+      </div>
+
+      <!-- Correo electrónico -->
+      <div class="form-group">
+        <label for="reg-email">Correo electrónico</label>
+
+        <input
+          id="reg-email"
+          type="email"
+          class="form-control"
+          placeholder="tu@email.com"
+          [formField]="registroForm.email"
+        />
+
+        @if (registroForm.email().touched() && registroForm.email().invalid()) {
+          @for (error of registroForm.email().errors(); track error.kind) {
+            <p class="mensaje-error">
+              @if (error.kind === 'required') {
+                El correo electrónico es obligatorio.
+              } @else if (error.kind === 'email') {
+                Ingresá un correo electrónico válido.
+              }
+            </p>
+          }
+        }
+      </div>
+
+      <!-- Contraseña -->
+      <div class="form-group">
+        <label for="reg-password">Contraseña</label>
+
+        <input
+          id="reg-password"
+          type="password"
+          class="form-control"
+          placeholder="Mínimo 8 caracteres"
+          [formField]="registroForm.password"
+        />
+
+        @if (registroForm.password().touched() && registroForm.password().invalid()) {
+          @for (error of registroForm.password().errors(); track error.kind) {
+            <p class="mensaje-error">
+              @if (error.kind === 'required') {
+                La contraseña es obligatoria.
+              } @else if (error.kind === 'minLength') {
+                La contraseña debe tener al menos 8 caracteres.
+              }
+            </p>
+          }
+        }
+      </div>
+
+      <!-- Términos y condiciones -->
+      <div class="auth-checkbox">
+        <input
+          id="terms"
+          type="checkbox"
+          [checked]="terminos()"
+          (change)="terminos.set($any($event.target).checked)"
+        />
+
+        <label for="terms">
+          Acepto los términos, condiciones y políticas de privacidad.
+        </label>
+      </div>
+
+      @if (!terminos() && intentoEnviar()) {
+        <p class="mensaje-error">
+          Debés aceptar los términos y condiciones.
+        </p>
+      }
+
+      <!-- Mensajes del registro -->
+      @if (registroExitoso()) {
+        <p class="mensaje-success" role="status">
+          Cuenta creada correctamente. Revisá tu email para verificar tu cuenta.
+        </p>
+      }
+
+      @if (errorRegistro()) {
+        <p class="mensaje-error" role="alert">
+          No se pudo crear la cuenta. Intentá nuevamente.
+        </p>
+      }
+
+      <!-- Botón -->
+      <button
+        type="submit"
+        class="btn btn-primary btn-lg btn-block auth-btn-accent"
+        [disabled]="cargando()"
+      >
+        {{ cargando() ? 'Creando cuenta...' : 'Registrarme' }}
+      </button>
+
+    </form>
+  </div>
+</div>
