@@ -1,9 +1,12 @@
-export type EstadoVuelo =  'DISPONIBLE' | 'MANTENIMIENTO' | 'ACTIVO' | 'BAJA';
+import { Aeropuerto } from "./Aeropuerto";
+import { Avion } from "./Avion";
+
+export type EstadoVuelo =  'PROGRAMADO' | 'BOARDING' | 'ACTIVO' | 'CANCELADO' | 'REPROGRAMADO';
 
 export interface Vuelo {
-  aeropuertoOrigenId: number;
-  aeropuertoDestinoId: number;
-  avionId: number;
+  aeropuertoOrigenId: Aeropuerto;
+  aeropuertoDestinoId: Aeropuerto;
+  avion: Avion;
   fechaSalida: string;   
   fechaLlegada: string;
   horaSalida: string;    
