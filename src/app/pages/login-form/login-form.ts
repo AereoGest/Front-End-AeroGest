@@ -6,9 +6,11 @@ import {
   required,
   email
 } from '@angular/forms/signals';
-import { Auth, LoginResponse } from '../../services/auth';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Auth } from '../../services/auth';
 import { Router } from '@angular/router';
 import { Login } from '../../Models/Login';
+import { AuthResponse } from '../../Models/Perfil';
 
 interface TwoFactorData {
   code: string;
@@ -53,7 +55,7 @@ export class LoginForm {
   intentoEnviar2FA = signal(false);
   cargando = signal(false);
 
-  async iniciarSesion(event: SubmitEvent): Promise<void> {
+  iniciarSesion(event: SubmitEvent): void {
     event.preventDefault();
     this.intentoEnviar.set(true);
 
@@ -63,33 +65,24 @@ export class LoginForm {
 
     this.cargando.set(true);
 
-    try {
-      const data = await this.auth.iniciarSesion(
-        this.datos().email,
-        this.datos().password
-      );
+    this.auth.iniciarSesion(this.datos()).subscribe({
+      next: (data) => {
+        if (data.requires2fa) {
+          this.email2FA.set(data.email || this.datos().email);
+          this.paso2FA.set(true);
+          alert('Se envió un código a tu email.');
+          return;
+        }
 
-      if (data.requires2fa) {
-        this.email2FA.set(data.email || this.datos().email);
-        this.paso2FA.set(true);
-        alert('Se envió un código a tu email.');
-        return;
+        this.completarLogin(data);
+      },
+      error: (error: HttpErrorResponse) => {
+        alert(error.error?.message || 'Error al iniciar sesión.');
       }
-
-      this.completarLogin(data);
-
-    } catch (error: unknown) {
-      alert(
-        error instanceof Error
-          ? error.message
-          : 'Error al iniciar sesión.'
-      );
-    } finally {
-      this.cargando.set(false);
-    }
+    }).add(() => this.cargando.set(false));
   }
 
-  async verificarCodigo(event: SubmitEvent): Promise<void> {
+  verificarCodigo(event: SubmitEvent): void {
     event.preventDefault();
     this.intentoEnviar2FA.set(true);
 
@@ -99,26 +92,15 @@ export class LoginForm {
 
     this.cargando.set(true);
 
-    try {
-      const data = await this.auth.verificarCodigo(
-        this.email2FA(),
-        this.datos2FA().code
-      );
-
-      this.completarLogin(data);
-
-    } catch (error: unknown) {
-      alert(
-        error instanceof Error
-          ? error.message
-          : 'No se pudo verificar el código.'
-      );
-    } finally {
-      this.cargando.set(false);
-    }
+    this.auth.verificarCodigo(this.email2FA(), this.datos2FA().code).subscribe({
+      next: (data) => this.completarLogin(data),
+      error: (error: HttpErrorResponse) => {
+        alert(error.error?.message || 'No se pudo verificar el código.');
+      }
+    }).add(() => this.cargando.set(false));
   }
 
-  private completarLogin(data: LoginResponse): void {
+  private completarLogin(data: AuthResponse): void {
     this.auth.guardarSesion(data);
 
     if (!data.perfilCompleto) {

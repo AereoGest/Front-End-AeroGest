@@ -20,6 +20,17 @@
         </p>
       }
 
+      @if (cargando()) {
+        <p class="auth-subtitle" role="status">Cargando perfil...</p>
+      }
+
+      @if (mensajeExito()) {
+        <p class="mensaje-success" role="status">{{ mensajeExito() }}</p>
+      }
+
+      @if (mensajeError()) {
+        <p class="mensaje-error" role="alert">{{ mensajeError() }}</p>
+      }
       <form class="profile-form" (submit)="guardar($event)" novalidate>
         <div class="field">
           <input id="p-nombre" type="text" class="field-input" placeholder=" " autocomplete="given-name"
@@ -102,7 +113,9 @@
           }
         </div>
 
-        <button type="submit" class="btn btn-lg btn-block auth-btn-accent full">Guardar cambios</button>
+        <button type="submit" class="btn btn-lg btn-block auth-btn-accent full" [disabled]="guardando()">
+          {{ guardando() ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
       </form>
     </article>
 
@@ -113,7 +126,8 @@
       </header>
 
       <label class="security-option">
-        <input type="checkbox" [checked]="perfil()?.twoFactorEnabled ?? false" [disabled]="!perfil()" />
+        <input type="checkbox" [checked]="perfil()?.twoFactorEnabled ?? false" [disabled]="!perfil()"
+          (change)="toggleDosFactores()" />
         <span>
           <strong>2FA por correo</strong>
           <small>Enviar código de verificación al iniciar sesión.</small>

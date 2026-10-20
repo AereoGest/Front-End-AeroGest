@@ -1,0 +1,69 @@
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-eyebrow">Búsqueda de vuelos</span>
+      <h2 class="section-title">Encontrá tu vuelo</h2>
+      <p class="section-subtitle">Filtrá por origen, destino y fecha de salida</p>
+    </div>
+
+    <form class="search-card" style="max-width:720px;margin:0 auto 32px" (submit)="onBuscar($event)">
+      <div class="search-row">
+        <div class="form-group">
+          <label for="v-origen">Origen</label>
+          <input id="v-origen" type="text" class="form-control" placeholder="Ciudad"
+            [value]="origen()" (input)="origen.set($any($event.target).value)" />
+        </div>
+        <div class="form-group">
+          <label for="v-destino">Destino</label>
+          <input id="v-destino" type="text" class="form-control" placeholder="Ciudad"
+            [value]="destino()" (input)="destino.set($any($event.target).value)" />
+        </div>
+        <div class="form-group">
+          <label for="v-fecha">Fecha de ida</label>
+          <input id="v-fecha" type="date" class="form-control"
+            [value]="fechaIda()" (input)="fechaIda.set($any($event.target).value)" />
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-top:6px">
+        ✈ Buscar vuelos
+      </button>
+    </form>
+
+    @if (cargando()) {
+      <p class="auth-subtitle" role="status">Buscando vuelos...</p>
+    }
+
+    @if (error()) {
+      <p class="mensaje-error" role="alert">{{ error() }}</p>
+    }
+
+    @if (!cargando() && busquedaRealizada() && vuelos().length === 0 && !error()) {
+      <p class="auth-subtitle">No encontramos vuelos con esos criterios.</p>
+    }
+
+    <div class="destinations-grid">
+      @for (vuelo of vuelos(); track vuelo.id) {
+        <div class="dest-card">
+          <div class="dest-card-body" style="color:#0f172a">
+            <div class="dest-card-city">
+              {{ vuelo.aeropuertoOrigen?.ciudad }} ({{ vuelo.aeropuertoOrigen?.codigoIata }})
+              →
+              {{ vuelo.aeropuertoDestino?.ciudad }} ({{ vuelo.aeropuertoDestino?.codigoIata }})
+            </div>
+            <div class="dest-card-country">
+              {{ vuelo.fechaSalida }} · {{ formatearHora(vuelo.horaSalida) }} -
+              {{ formatearHora(vuelo.horaLlegada) }} · {{ duracion(vuelo) }}
+            </div>
+            <div class="dest-card-country">
+              {{ vuelo.escala ? 'Con escala' : 'Vuelo directo' }} · Estado: {{ vuelo.estado }}
+            </div>
+            <div class="dest-card-price">
+              <span class="dest-price-from">Desde</span>
+              <span class="dest-price-amount">${{ vuelo.precioVuelo }}</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>

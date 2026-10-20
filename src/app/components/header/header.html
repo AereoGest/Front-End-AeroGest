@@ -7,13 +7,18 @@
     <nav id="nav">
         <ul>
             <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/">Vuelos</a></li>
+            <li><a routerLink="/vuelos">Vuelos</a></li>
             <li><a routerLink="/">Destinos</a></li>
         </ul>
     </nav>
 
     <div id="buttons">
-        <button id="log" [routerLink]="['/login']">INICIAR SESION</button>
-        <button id="register" [routerLink]="['/register']">REGISTRAR</button>
+        @if (auth.usuarioAutenticado()) {
+            <button id="perfil" [routerLink]="['/perfil']">MI PERFIL</button>
+            <button id="cerrar" (click)="cerrarSesion()">CERRAR SESIÓN</button>
+        } @else {
+            <button id="log" [routerLink]="['/login']">INICIAR SESION</button>
+            <button id="register" [routerLink]="['/register']">REGISTRAR</button>
+        }
     </div>
 </header>

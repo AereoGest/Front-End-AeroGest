@@ -7,26 +7,39 @@ export interface Opcion<T extends string> {
   etiqueta: string;
 }
 
-/** Perfil tal como lo devuelve GET /api/auth/perfil. */
 export interface Perfil {
+  personaId: number;
   nombre: string;
   apellido: string;
   email: string;
   telefono: string;
-  identificador: TipoDocumento;
+  numeroIdentificador: string | null;
+  identificador: TipoDocumento | null;
+  fechaNacimiento: string | null;
+  sexo: Genero | null;
+  twoFactorEnabled: boolean;
+  isVerified: boolean;
+  role: Rol;
+}
+
+export interface DatosPerfil {
+  nombre: string;
+  apellido: string;
+  telefono: string;
+  identificador: TipoDocumento | '';
   numeroIdentificador: string;
   sexo: Genero | '';
   fechaNacimiento: string;
-  role: Rol;
-  isVerified: boolean;
-  twoFactorEnabled: boolean;
 }
 
-/** Campos que el usuario puede editar desde la vista de perfil. */
-export type DatosPerfil = Pick<
-  Perfil,
-  'nombre' | 'apellido' | 'telefono' | 'identificador' | 'numeroIdentificador' | 'sexo' | 'fechaNacimiento'
->;
+export interface AuthResponse {
+  token: string | null;
+  email: string;
+  userId: number;
+  perfilCompleto: boolean;
+  requires2fa: boolean;
+  role?: Rol;
+}
 
 export const TIPOS_DOCUMENTO: Opcion<TipoDocumento>[] = [
   { valor: 'DNI', etiqueta: 'DNI' },

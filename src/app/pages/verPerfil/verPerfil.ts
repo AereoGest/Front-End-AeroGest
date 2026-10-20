@@ -10,7 +10,9 @@ import {
   submit,
   validate,
 } from '@angular/forms/signals';
+import { HttpErrorResponse } from '@angular/common/http';
 import { DatosPerfil, GENEROS, Perfil, TIPOS_DOCUMENTO } from '../../Models/Perfil';
+import { Auth } from '../../services/auth';
 
 const SOLO_LETRAS = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/;
 const SOLO_DIGITOS = /^\d+$/;
@@ -19,7 +21,7 @@ const DATOS_VACIOS: DatosPerfil = {
   nombre: '',
   apellido: '',
   telefono: '',
-  identificador: TIPOS_DOCUMENTO[0].valor,
+  identificador: '',
   numeroIdentificador: '',
   sexo: '',
   fechaNacimiento: '',
@@ -36,8 +38,11 @@ export class VerPerfil {
   protected readonly generos = GENEROS;
   protected readonly fechaMaxima = new Date().toISOString().split('T')[0];
 
-  /** Lo va a completar el servicio de perfil cuando exista; mientras tanto la vista arranca vacía. */
   protected readonly perfil = signal<Perfil | null>(null);
+  protected readonly cargando = signal(true);
+  protected readonly guardando = signal(false);
+  protected readonly mensajeExito = signal('');
+  protected readonly mensajeError = signal('');
   protected readonly perfilIncompleto = computed(() => this.perfil()?.role === 'ROLE_INCOMPLETO');
   protected readonly cuentaSinVerificar = computed(() => this.perfil()?.isVerified === false);
 
@@ -63,12 +68,15 @@ export class VerPerfil {
     );
   });
 
+  constructor(private auth: Auth) {
+    this.cargarPerfil();
+  }
+
   protected errorVisible(campo: FieldTree<string>): boolean {
     const estado = campo();
     return estado.touched() && estado.invalid();
   }
 
-  /** Descarta lo que no sea dígito mientras se escribe, como hacía la versión anterior. */
   protected soloDigitos(campo: 'telefono' | 'numeroIdentificador', evento: Event): void {
     const input = evento.target as HTMLInputElement;
     const limpio = input.value.replace(/\D/g, '');
@@ -77,11 +85,66 @@ export class VerPerfil {
     }
   }
 
+  protected cargarPerfil(): void {
+    this.cargando.set(true);
+    this.auth.obtenerPerfil().subscribe({
+      next: (perfil) => {
+        this.perfil.set(perfil);
+        this.datos.set({
+          nombre: perfil.nombre ?? '',
+          apellido: perfil.apellido ?? '',
+          telefono: perfil.telefono ?? '',
+          identificador: perfil.identificador ?? '',
+          numeroIdentificador: perfil.numeroIdentificador ?? '',
+          sexo: perfil.sexo ?? '',
+          fechaNacimiento: perfil.fechaNacimiento ?? '',
+        });
+      },
+      error: (error: HttpErrorResponse) => {
+        this.mensajeError.set(error.error?.message || 'No se pudo cargar el perfil.');
+      }
+    }).add(() => this.cargando.set(false));
+  }
+
   protected guardar(evento: SubmitEvent): void {
     evento.preventDefault();
-    // `submit` marca todos los campos como tocados y solo ejecuta la acción si el formulario es válido.
+    this.mensajeExito.set('');
+    this.mensajeError.set('');
+
     submit(this.perfilForm, async () => {
-      // TODO: enviar `this.datos()` con el servicio de perfil cuando exista.
+      this.guardando.set(true);
+      await new Promise<void>((resolve) => {
+        this.auth
+          .actualizarPerfil(this.datos())
+          .subscribe({
+            next: () => {
+              this.mensajeExito.set('Perfil actualizado correctamente.');
+              this.cargarPerfil();
+            },
+            error: (error: HttpErrorResponse) => {
+              this.mensajeError.set(error.error?.message || 'No se pudo actualizar el perfil.');
+            }
+          })
+          .add(() => {
+            this.guardando.set(false);
+            resolve();
+          });
+      });
+      return null as any;
+    });
+  }
+
+  protected toggleDosFactores(): void {
+    this.mensajeExito.set('');
+    this.mensajeError.set('');
+    this.auth.toggle2fa().subscribe({
+      next: (mensaje) => {
+        this.mensajeExito.set(mensaje);
+        this.cargarPerfil();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.mensajeError.set(error.error?.message || 'No se pudo cambiar el 2FA.');
+      }
     });
   }
 }
