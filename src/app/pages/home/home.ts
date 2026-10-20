@@ -1,40 +1,35 @@
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { form, FormField, min, required } from '@angular/forms/signals';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Buscador } from '../../Models/Buscador';
 
-interface Destino {
-  ciudad: string;
-  pais: string;
-  desde: string;
-  icono: string;
-  opacidad: number;
-  gradiente: string;
-  destacado?: boolean;
-}
 
 @Component({
-  imports: [FormsModule, RouterLink],
+  imports: [FormField, RouterLink],
   selector: 'app-home',
   styleUrl: './home.css',
   templateUrl: './home.html',
 })
 
-export class Home {
-  // Buscador
-  origen = 'Buenos Aires (EZE)';
-  destino = '';
-  fechaIda = '';
-  pasajeros = '1 pasajero';
-  clase = 'Económica';
+export class Home implements OnInit{
 
-  opcionesPasajeros = ['1 pasajero', '2 pasajeros', '3 pasajeros', '4+ pasajeros'];
-  opcionesClase = ['Económica', 'Económica premium', 'Ejecutiva', 'Primera clase'];
+  private route = inject(ActivatedRoute)
+  private router = inject(Router)
 
-  stats = [
-    { valor: '150+', etiqueta: 'Destinos' },
-    { valor: '2M+', etiqueta: 'Pasajeros' },
-    { valor: '98%', etiqueta: 'Satisfacción' },
-  ];
+  private buscadorModel = signal<Buscador>({
+    origen: "",
+    destino: "",
+    fechaIda: "",
+    pasajeros: 0,
+    clase: ""
+  })
+
+  private buscadorForm = form (this.buscadorModel, (buscador) =>{
+    required(buscador.origen);
+    required(buscador.pasajeros);
+
+    min(buscador.pasajeros, 1)
+  })
 
   beneficios = [
     {
@@ -72,24 +67,22 @@ export class Home {
       gradiente: 'linear-gradient(160deg,#ad1457,#c2185b,#e91e63)' },
   ];
 
-  constructor(private router: Router) {}
-
-  swapAirports() {
-    [this.origen, this.destino] = [this.destino, this.origen];
+  ngOnInit(): void {
+  
   }
 
   buscarVuelos(event: Event) {
-    event.preventDefault();
-    this.router.navigate(['/vuelos'], {
-      queryParams: {
-        origen: this.origen,
-        destino: this.destino,
-        fecha: this.fechaIda,
-        pasajeros: this.pasajeros,
-        clase: this.clase,
-      },
+        event.preventDefault();
+        const { origen, destino, fechaIda } = this.buscadorModel();
+        this.router.navigate(['/vuelos'], {
+        queryParams: { origen, destino, fechaSalida: fechaIda || null },
     });
   }
+
+  swapAirports() {
+     this.buscadorModel.update(b => ({ ...b, origen: b.destino, destino: b.origen }));
+  }
+
 
   irADestino(ciudad: string) {
     this.router.navigate(['/vuelos'], { queryParams: { destino: ciudad } });
