@@ -1,33 +1,36 @@
-<section class="section">
+<section class="flight-search-bar">
+  <div class="container">
+    <form class="search-bar-form" (submit)="onBuscar($event)">
+      <div class="field">
+        <input id="v-origen" type="text" class="field-input" placeholder="Ciudad o código IATA"
+          [value]="origen()" (input)="origen.set($any($event.target).value)" />
+        <label class="field-label" for="v-origen">Origen</label>
+      </div>
+
+      <div class="field">
+        <input id="v-destino" type="text" class="field-input" placeholder="Ciudad o código IATA"
+          [value]="destino()" (input)="destino.set($any($event.target).value)" />
+        <label class="field-label" for="v-destino">Destino</label>
+      </div>
+
+      <div class="field">
+        <input id="v-fecha" type="date" class="field-input" placeholder=" "
+          [value]="fechaIda()" (input)="fechaIda.set($any($event.target).value)" />
+        <label class="field-label" for="v-fecha">Fecha de ida</label>
+      </div>
+
+      <button type="submit" class="btn btn-dark btn-lg">✈ Buscar vuelos</button>
+    </form>
+  </div>
+</section>
+
+<section class="section resultados">
   <div class="container">
     <div class="section-header">
       <span class="section-eyebrow">Búsqueda de vuelos</span>
       <h2 class="section-title">Encontrá tu vuelo</h2>
       <p class="section-subtitle">Filtrá por origen, destino y fecha de salida</p>
     </div>
-
-    <form class="search-card" style="max-width:720px;margin:0 auto 32px" (submit)="onBuscar($event)">
-      <div class="search-row">
-        <div class="form-group">
-          <label for="v-origen">Origen</label>
-          <input id="v-origen" type="text" class="form-control" placeholder="Ciudad"
-            [value]="origen()" (input)="origen.set($any($event.target).value)" />
-        </div>
-        <div class="form-group">
-          <label for="v-destino">Destino</label>
-          <input id="v-destino" type="text" class="form-control" placeholder="Ciudad"
-            [value]="destino()" (input)="destino.set($any($event.target).value)" />
-        </div>
-        <div class="form-group">
-          <label for="v-fecha">Fecha de ida</label>
-          <input id="v-fecha" type="date" class="form-control"
-            [value]="fechaIda()" (input)="fechaIda.set($any($event.target).value)" />
-        </div>
-      </div>
-      <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-top:6px">
-        ✈ Buscar vuelos
-      </button>
-    </form>
 
     @if (cargando()) {
       <p class="auth-subtitle" role="status">Buscando vuelos...</p>
@@ -42,7 +45,7 @@
     }
 
     <div class="destinations-grid">
-      @for (vuelo of vuelos(); track vuelo.id) {
+       @for (vuelo of vuelos(); track vuelo.id) {
         <div class="dest-card">
           <div class="dest-card-body" style="color:#0f172a">
             <div class="dest-card-city">
@@ -65,5 +68,6 @@
         </div>
       }
     </div>
+     
   </div>
 </section>
