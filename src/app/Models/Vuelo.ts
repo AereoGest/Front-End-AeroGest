@@ -1,3 +1,4 @@
+
 import { Aeropuerto } from "./Aeropuerto";
 import { Avion } from "./Avion";
 
@@ -9,7 +10,7 @@ export interface Vuelo {
   avion: Avion;
   fechaSalida: string;   
   fechaLlegada: string;
-  horaSalida: string;    
+  horaSalida: string;
   horaLlegada: string;
   estado: EstadoVuelo;
   precioVuelo: number;

@@ -11,55 +11,6 @@
 
     <form class="auth-form" (submit)="registrar($event)">
 
-      <!-- Nombre y apellido -->
-      <div class="checkout-grid-2">
-
-        <div class="form-group">
-          <label for="reg-name">Nombre</label>
-
-          <input
-            id="reg-name"
-            type="text"
-            class="form-control"
-            placeholder="Juan"
-            [formField]="registroForm.nombre"
-          />
-
-          @if (registroForm.nombre().touched() && registroForm.nombre().invalid()) {
-            @for (error of registroForm.nombre().errors(); track error.kind) {
-              <p class="mensaje-error">
-                @if (error.kind === 'required') {
-                  El nombre es obligatorio.
-                }
-              </p>
-            }
-          }
-        </div>
-
-        <div class="form-group">
-          <label for="reg-lastname">Apellido</label>
-
-          <input
-            id="reg-lastname"
-            type="text"
-            class="form-control"
-            placeholder="Pérez"
-            [formField]="registroForm.apellido"
-          />
-
-          @if (registroForm.apellido().touched() && registroForm.apellido().invalid()) {
-            @for (error of registroForm.apellido().errors(); track error.kind) {
-              <p class="mensaje-error">
-                @if (error.kind === 'required') {
-                  El apellido es obligatorio.
-                }
-              </p>
-            }
-          }
-        </div>
-
-      </div>
-
       <!-- Correo electrónico -->
       <div class="form-group">
         <label for="reg-email">Correo electrónico</label>
@@ -104,6 +55,8 @@
                 La contraseña es obligatoria.
               } @else if (error.kind === 'minLength') {
                 La contraseña debe tener al menos 8 caracteres.
+              } @else if (error.kind === 'pattern') {
+                Debe incluir mayúscula, minúscula y un carácter especial.
               }
             </p>
           }
@@ -139,7 +92,7 @@
 
       @if (errorRegistro()) {
         <p class="mensaje-error" role="alert">
-          No se pudo crear la cuenta. Intentá nuevamente.
+          {{ mensajeError() || 'No se pudo crear la cuenta. Intentá nuevamente.' }}
         </p>
       }
 

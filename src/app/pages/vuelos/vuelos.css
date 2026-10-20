@@ -1,0 +1,17 @@
+.search-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.search-row .form-group {
+  flex: 1 1 160px;
+}
+
+.dest-card {
+  cursor: default;
+}
+
+.dest-card-body {
+  padding: 20px;
+}

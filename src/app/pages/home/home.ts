@@ -82,8 +82,8 @@ export class Home {
     event.preventDefault();
     this.router.navigate(['/vuelos'], {
       queryParams: {
-        origen: this.origen,
-        destino: this.destino,
+        origen: this.limpiarCiudad(this.origen),
+        destino: this.limpiarCiudad(this.destino),
         fecha: this.fechaIda,
         pasajeros: this.pasajeros,
         clase: this.clase,
@@ -97,5 +97,12 @@ export class Home {
 
   irASeccion(id: string) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  private limpiarCiudad(valor: string): string {
+    return valor
+      .replace(/\(.*?\)/g, '')
+      .replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')
+      .trim();
   }
 }

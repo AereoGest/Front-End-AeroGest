@@ -4,7 +4,10 @@
     --burgundy: #921B25;
     --light-blue: #3CA5E3;
     --navy: #1D3557;
+    --dark-navy:#061831;
     --cream: #F7F4EA;
+    --white: #f0f0f0;
+    --white-difuse:#f0f0f083;
     --black: #010101; 
     --font-display: 'Barlow', arial, sans-serif;
     --font-body: 'DM Sans', sans-serif;
@@ -39,33 +42,36 @@ img { max-width: 100%; display: block; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
 
 /*Boton*/
-
 .btn {
-  background-color: var(--white);
+  background-color: var(--cream);
   display: inline-flex; align-items: center; gap: 8px;
   padding: 12px 28px; border-radius: var(--radius);
   font-family: var(--font-body); font-size: 14px; font-weight: 600;
   letter-spacing: 0.04em; text-transform: uppercase;
   cursor: pointer; border: none; transition: all var(--transition);
 }
-.btn:hover{background: var(--light-blue-1); transform: translateY(-1px); }
+.btn:hover{background: var(--light-blue); transform: translateY(-1px); }
+
 .btn-primary {
-  background: var(--white); color: var(--navy);
+  background: var(--cream); color: var(--navy);
 }
-.btn-primary:hover { background: var(--blue); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-primary:hover { background: var(--light-blue); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
 .btn-outline {
-  background: transparent; color: var(--white);
+  background: transparent; color: var(--cream);
   border: 1.5px solid rgba(255,255,255,0.5);
 }
-.btn-outline:hover { border-color: var(--light-blue-1); color: var(--navy); }
+.btn-outline:hover { border-color: var(--light-blue-1); color: var(--navy); transform: translateY(-1px);}
+
 .btn-dark {
-  background: var(--navy); color: var(--white);
+  background: var(--dark-navy); color: var(--cream);
 }
-.btn-dark:hover { background: var(--navy-light); transform: translateY(-1px); }
+.btn-dark:hover { background: var(--navy); transform: translateY(-1px); }
+
 .btn-lg { padding: 16px 36px; font-size: 15px; }
 
 .search-card {
-  background: var(--white);
+  background: var(--cream);
   border-radius: var(--radius-lg);
   padding: 32px;
   box-shadow: var(--shadow-lg);
@@ -77,16 +83,16 @@ img { max-width: 100%; display: block; }
 }
 .search-card-header {
   display: flex; gap: 0; margin-bottom: 24px;
-  border-bottom: 1.5px solid var(--light-blue-1);
+  border-bottom: 1.5px solid var(--light-blue);
 }
 .search-tab {
   flex: 1; padding: 10px; text-align: center;
   font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
-  text-transform: uppercase; color: var(--gray-500);
+  text-transform: uppercase; color: var(--white-difuse);
   cursor: pointer; border-bottom: 2px solid transparent;
   margin-bottom: -1.5px; transition: all var(--transition);
 }
-.search-tab.active { color: var(--navy); border-bottom-color: var(--blue); }
+.search-tab.active { color: var(--navy); border-bottom-color: var(--light-blue); }
 .search-row { display: grid; gap: 14px; margin-bottom: 14px; }
 .search-row-2 { grid-template-columns: 1fr 1fr; }
 .search-row-3 { grid-template-columns: 1fr 1fr 1fr; }
@@ -96,23 +102,23 @@ img { max-width: 100%; display: block; }
 }
 .search-swap {
   width: 34px; height: 34px; border-radius: 50%;
-  background: var(--navy); color: var(--white);
+  background: var(--navy); color: var(--cream);
   border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   font-size: 16px; transition: all var(--transition);
   position: absolute; z-index: 1;
 }
-.search-swap:hover { background: var(--blue); color: var(--navy); transform: rotate(180deg); }
+.search-swap:hover { background: var(--light-blue); color: var(--navy); transform: rotate(180deg); }
 
 /* ── Section commons ── */
 .section { padding: 100px 0; }
-.section-alt { background: var(--white); }
+.section-alt { background: var(--cream); }
 .section-dark { background: var(--navy); }
 .section-header { text-align: center; margin-bottom: 60px; }
 .section-eyebrow {
   display: inline-block;
   font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--blue);
+  text-transform: uppercase; color: var(--light-blue);
   margin-bottom: 14px;
 }
 .section-title {
@@ -120,9 +126,9 @@ img { max-width: 100%; display: block; }
   font-size: clamp(28px, 3.5vw, 44px);
   font-weight: 800; color: var(--navy); line-height: 1.15;
 }
-.section-dark .section-title { color: var(--white); }
+.section-dark .section-title { color: var(--cream); }
 .section-subtitle {
-  font-size: 16px; color: var(--gray-500);
+  font-size: 16px; color: var(--white-difuse);
   max-width: 520px; margin: 16px auto 0;
 }
 .section-dark .section-subtitle { color: rgba(255,255,255,0.55); }
@@ -158,11 +164,88 @@ img { max-width: 100%; display: block; }
 
 .toast {
   position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-  background: var(--navy); color: var(--white);
+  background: var(--navy); color: var(--cream);
   padding: 14px 20px; border-radius: var(--radius-md);
   font-size: 14px; box-shadow: var(--shadow-lg);
   border-left: 4px solid var(--blue);
   animation: slideInRight 0.3s ease;
   max-width: 320px;
 
+}
+
+/* ── Campos con etiqueta flotante ──
+   Uso: <div class="field"> <input class="field-input" placeholder=" "> <label class="field-label"> </div>
+   El input va antes del label para poder reaccionar con el selector "+".
+   El input necesita un placeholder (" " si no hay texto de ayuda): :placeholder-shown detecta si está vacío.
+   El texto del placeholder solo se ve con foco, cuando la etiqueta ya subió. */
+.field { position: relative; min-width: 0; }
+
+.field-input {
+  display: block;
+  width: 100%;
+  height: 52px;
+  padding: 0 16px;
+  border: 1px solid color-mix(in srgb, var(--navy) 30%, transparent);
+  border-radius: 12px;
+  background: white;
+  color: var(--navy);
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.22s, box-shadow 0.22s;
+}
+.field-input::placeholder { color: transparent; transition: color 0.22s; }
+.field-input:focus::placeholder { color: color-mix(in srgb, var(--navy) 55%, transparent); }
+select.field-input { cursor: pointer; }
+.field-input[readonly] { color: color-mix(in srgb, var(--navy) 60%, transparent); cursor: default; }
+
+.field-label {
+  position: absolute;
+  top: 26px;
+  left: 12px;
+  max-width: calc(100% - 32px);
+  padding: 0 4px;
+  overflow: hidden;
+  background: white;
+  color: color-mix(in srgb, var(--navy) 60%, transparent);
+  font-size: 16px;
+  line-height: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transform: translateY(-50%);
+  transform-origin: left center;
+  pointer-events: none;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), color 0.22s;
+}
+
+/* Con foco, con valor, o en campos que siempre muestran algo (select, fecha), la etiqueta sube al borde. */
+.field-input:focus + .field-label,
+.field-input:not(:placeholder-shown) + .field-label,
+.field-input:autofill + .field-label,
+select.field-input + .field-label,
+.field-input[type="date"] + .field-label {
+  transform: translateY(calc(-50% - 26px)) scale(0.78);
+}
+
+.field-input:hover:not(:focus, [readonly]) { border-color: color-mix(in srgb, var(--navy) 60%, transparent); }
+.field-input:focus {
+  border-color: var(--light-blue);
+  box-shadow: 0 0 0 1px var(--light-blue);
+}
+.field-input:focus + .field-label { color: var(--navy); }
+
+.field-input[aria-invalid="true"] { border-color: var(--burgundy); }
+.field-input[aria-invalid="true"]:focus { box-shadow: 0 0 0 1px var(--burgundy); }
+.field-input[aria-invalid="true"] + .field-label { color: var(--burgundy); }
+
+.field-error {
+  margin-top: 6px;
+  padding-left: 16px;
+  color: var(--burgundy);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field-input, .field-label { transition-duration: 0.01ms; }
 }
