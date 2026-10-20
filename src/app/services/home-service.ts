@@ -20,6 +20,5 @@ export class HomeService {
 
     return this.http.get<Vuelo[]>(`${this.url}/disponibles/filtrar`, { params });
   }
-    }
-
 }
+

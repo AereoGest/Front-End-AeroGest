@@ -5,6 +5,7 @@ import { Avion } from "./Avion";
 export type EstadoVuelo =  'PROGRAMADO' | 'BOARDING' | 'ACTIVO' | 'CANCELADO' | 'REPROGRAMADO';
 
 export interface Vuelo {
+  id?: string,
   aeropuertoOrigenId: Aeropuerto;
   aeropuertoDestinoId: Aeropuerto;
   avion: Avion;

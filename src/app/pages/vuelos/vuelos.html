@@ -46,9 +46,9 @@
         <div class="dest-card">
           <div class="dest-card-body" style="color:#0f172a">
             <div class="dest-card-city">
-              {{ vuelo.aeropuertoOrigen?.ciudad }} ({{ vuelo.aeropuertoOrigen?.codigoIata }})
+              {{ vuelo.aeropuertoOrigenId?.ciudad }} ({{ vuelo.aeropuertoOrigenId?.codigoIata }})
               →
-              {{ vuelo.aeropuertoDestino?.ciudad }} ({{ vuelo.aeropuertoDestino?.codigoIata }})
+              {{ vuelo.aeropuertoDestinoId?.ciudad }} ({{ vuelo.aeropuertoDestinoId?.codigoIata }})
             </div>
             <div class="dest-card-country">
               {{ vuelo.fechaSalida }} · {{ formatearHora(vuelo.horaSalida) }} -
