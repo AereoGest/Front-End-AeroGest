@@ -11,6 +11,8 @@
   margin: 0 auto;
 }
 
+/* Tarjeta */
+
 .auth-card {
   width: 100%;
   max-width: 520px;
@@ -43,7 +45,7 @@
 
 .auth-title em {
   font-style: italic;
-  color: var(--blue);
+  color: var(--light-blue);
 }
 
 .auth-subtitle {
@@ -65,6 +67,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 
 .form-group label {
@@ -73,33 +76,35 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gray-500);
+  color: var(--navy);
 }
 
 .form-control {
   width: 100%;
   padding: 12px 14px;
-  border: 1.5px solid var(--pink);
+  border: 1.5px solid var(--navy);
   border-radius: var(--radius);
   font-family: var(--font-body);
   font-size: 15px;
   color: var(--navy);
-  background: var(--white);
+  background: var(--cream);
+  transition: border-color var(--transition);
   outline: none;
-  transition: border-color var(--transition), box-shadow var(--transition);
-}
-
-.form-control::placeholder {
-  color: var(--pink);
-  opacity: 0.8;
 }
 
 .form-control:focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(60, 165, 227, 0.12);
+  border-color: var(--light-blue);
 }
 
-/* Enlace y botones */
+.form-control::placeholder {
+  color: var(--light-blue);
+}
+
+select.form-control {
+  cursor: pointer;
+}
+
+/* Enlaces y botones */
 
 .auth-actions {
   display: flex;
@@ -121,6 +126,8 @@
   color: var(--blue);
   text-decoration: underline;
 }
+
+/* Botones generales */
 
 .btn {
   display: inline-flex;
@@ -153,6 +160,8 @@
   width: 100%;
   justify-content: center;
 }
+
+/* Botón principal de autenticación */
 
 .auth-btn-accent {
   background: var(--navy);
@@ -223,7 +232,7 @@
   }
 }
 
-/* Responsive */
+/* Diseño responsive */
 
 @media (max-width: 600px) {
   .auth-container-log {
@@ -250,4 +259,16 @@
   .btn-lg {
     padding: 14px 20px;
   }
+}
+
+.form-control:focus {
+  border-color: var(--light-blue);
+}
+
+.form-control::placeholder {
+  color: var(--light-blue);
+}
+
+select.form-control {
+  cursor: pointer;
 }
