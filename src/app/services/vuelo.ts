@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Vuelo, VueloFiltros } from '../Models/Vuelo';
+import { Vuelo } from '../Models/Vuelo';
+import { FiltroVuelos } from '../Models/FiltroVuelos';
 
 @Injectable({
   providedIn: 'root'
@@ -24,13 +25,13 @@ export class VueloService {
     return this.http.get<Vuelo>(`${this.baseUrl}/${id}`);
   }
 
-  buscarDisponibles(filtros: VueloFiltros): Observable<Vuelo[]> {
+  buscarDisponibles(filtros: FiltroVuelos): Observable<Vuelo[]> {
     return this.http.get<Vuelo[]>(`${this.baseUrl}/disponibles/filtrar`, {
       params: this.aParams(filtros)
     });
   }
 
-  buscarConFiltros(filtros: VueloFiltros & { estado?: string }): Observable<Vuelo[]> {
+  buscarConFiltros(filtros: FiltroVuelos & { estado?: string }): Observable<Vuelo[]> {
     return this.http.get<Vuelo[]>(`${this.baseUrl}/filtrar`, {
       params: this.aParams(filtros)
     });
