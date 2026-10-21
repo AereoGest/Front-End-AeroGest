@@ -4,6 +4,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { VueloService } from '../../services/vuelo';
 import { Vuelo } from '../../Models/Vuelo';
+import { CarritoService } from '../../services/carritoService';
+import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-vuelos',
@@ -17,6 +19,8 @@ export class Vuelos implements OnInit {
   protected readonly cargando = signal(false);
   protected readonly error = signal('');
   protected readonly busquedaRealizada = signal(false);
+  protected readonly mensajeExito = signal('');
+  protected readonly mensajeError = signal('');
 
   protected readonly origen = signal('');
   protected readonly destino = signal('');
@@ -25,7 +29,9 @@ export class Vuelos implements OnInit {
   constructor(
     private vueloService: VueloService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private carritoService: CarritoService,
+    private auth: Auth
   ) {}
 
   ngOnInit(): void {
@@ -72,6 +78,36 @@ export class Vuelos implements OnInit {
     });
   }
 
+  // Agrega 1 pasaje en clase económica y se queda en la página de vuelos.
+  protected agregarAlCarrito(vuelo: Vuelo): void {
+    if (!this.auth.estaAutenticado()) {
+      this.mostrarMensaje(this.mensajeError, 'Iniciá sesión para agregar al carrito.');
+      return;
+    }
+
+    this.carritoService.agregarItem(Number(vuelo.id), 1, 'ECONOMICA').subscribe({
+      next: () => this.mostrarMensaje(this.mensajeExito, 'Vuelo agregado al carrito.'),
+      error: (error: HttpErrorResponse) => {
+        this.mostrarMensaje(this.mensajeError, error.error?.message || 'No se pudo agregar al carrito.');
+      }
+    });
+  }
+
+  // Agrega 1 pasaje en clase económica y lleva al carrito.
+  protected elegirVuelo(vuelo: Vuelo): void {
+    if (!this.auth.estaAutenticado()) {
+      this.mostrarMensaje(this.mensajeError, 'Iniciá sesión para comprar.');
+      return;
+    }
+
+    this.carritoService.agregarItem(Number(vuelo.id), 1, 'ECONOMICA').subscribe({
+      next: () => this.router.navigate(['/carrito']),
+      error: (error: HttpErrorResponse) => {
+        this.mostrarMensaje(this.mensajeError, error.error?.message || 'No se pudo agregar al carrito.');
+      }
+    });
+  }
+
   protected formatearHora(hora: string): string {
     return hora ? hora.substring(0, 5) : '';
   }
@@ -83,6 +119,14 @@ export class Vuelos implements OnInit {
     const horas = Math.floor(minutos / 60);
     const resto = minutos % 60;
     return `${horas}h ${resto.toString().padStart(2, '0')}m`;
+  }
+
+  // Los mensajes se muestran como toast y se ocultan solos a los 4 segundos.
+  private mostrarMensaje(mensaje: typeof this.mensajeExito, texto: string): void {
+    this.mensajeExito.set('');
+    this.mensajeError.set('');
+    mensaje.set(texto);
+    setTimeout(() => mensaje.set(''), 4000);
   }
 
   private limpiarCiudad(valor: string): string {

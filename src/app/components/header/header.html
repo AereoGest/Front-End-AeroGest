@@ -15,6 +15,7 @@
     <div id="buttons">
         @if (auth.usuarioAutenticado()) {
             <button id="perfil" [routerLink]="['/perfil']">MI PERFIL</button>
+            <button id="carrito" [routerLink]="['/carrito']">CARRITO</button>
             <button id="cerrar" (click)="cerrarSesion()">CERRAR SESIÓN</button>
         } @else {
             <button id="log" [routerLink]="['/login']">INICIAR SESION</button>

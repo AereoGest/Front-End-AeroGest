@@ -1,0 +1,77 @@
+<section class="carrito" aria-labelledby="carrito-titulo">
+  <div class="container">
+    <header class="carrito-header">
+      <div>
+        <h1 class="section-title" id="carrito-titulo">Mi Carrito</h1>
+        <p class="carrito-subtitulo">Revisá los vuelos que seleccionaste antes de confirmar</p>
+      </div>
+      @if (items().length > 0) {
+        <button type="button" class="btn btn-dark" (click)="vaciarCarrito()">Vaciar carrito</button>
+      }
+    </header>
+
+    <div class="carrito-layout">
+      <div>
+        @if (cargando()) {
+          <p class="estado-lista" role="status">Cargando carrito...</p>
+        } @else if (error()) {
+          <p class="estado-lista error" role="alert">{{ error() }}</p>
+        } @else if (items().length === 0) {
+          <div class="estado-lista">
+            <p class="estado-titulo">Tu carrito está vacío</p>
+            <p>Buscá vuelos y agregalos al carrito</p>
+            <a routerLink="/vuelos" class="btn btn-dark">Buscar vuelos</a>
+          </div>
+        } @else {
+          <ul class="carrito-lista">
+            @for (item of items(); track item.id) {
+              <li class="carrito-item">
+                <div class="item-info">
+                  <h2 class="item-ruta">
+                    {{ item.vuelo?.aeropuertoOrigen?.ciudad ?? '—' }} → {{ item.vuelo?.aeropuertoDestino?.ciudad ?? '—' }}
+                  </h2>
+                  <p class="item-detalle">Clase: {{ etiquetaClase(item.claseVuelo) }}</p>
+                  <p class="item-detalle">Vuelo #{{ item.vueloId }}</p>
+                </div>
+
+                <div class="item-cantidad">
+                  <button type="button" class="btn btn-dark" aria-label="Quitar un pasaje"
+                    [disabled]="item.cantidad <= 1" (click)="cambiarCantidad(item, -1)">−</button>
+                  <span aria-live="polite">{{ item.cantidad }}</span>
+                  <button type="button" class="btn btn-dark" aria-label="Agregar un pasaje"
+                    (click)="cambiarCantidad(item, 1)">+</button>
+                </div>
+
+                <p class="item-precio">{{ formatearPrecio(subtotalItem(item)) }}</p>
+
+                <button type="button" class="btn btn-primary item-quitar" (click)="eliminarItem(item)">✕ Quitar</button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <aside class="resumen" aria-labelledby="resumen-titulo">
+        <h2 id="resumen-titulo">Resumen</h2>
+        <dl>
+          <div class="resumen-fila">
+            <dt>Subtotal</dt>
+            <dd>{{ formatearPrecio(total()) }}</dd>
+          </div>
+          <div class="resumen-fila resumen-total">
+            <dt>Total</dt>
+            <dd>{{ formatearPrecio(total()) }}</dd>
+          </div>
+        </dl>
+      </aside>
+    </div>
+  </div>
+</section>
+
+@if (mensajeExito()) {
+  <p class="toast" role="status">{{ mensajeExito() }}</p>
+}
+
+@if (mensajeError()) {
+  <p class="toast error" role="alert">{{ mensajeError() }}</p>
+}

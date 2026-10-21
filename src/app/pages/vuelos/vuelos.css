@@ -35,3 +35,14 @@
 .field{
   border: none;
 }
+/* ── Botones de carrito ── */
+.carrito-acciones {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+.carrito-acciones .btn { padding: 8px 16px; font-size: 12px; }
+.carrito-acciones .btn-dark { flex: 1; justify-content: center; }
+
+/* ── Avisos: reutilizan .toast global ── */
+.toast.error { border-left-color: var(--burgundy); }
