@@ -1,23 +1,23 @@
 <section class="flight-search-bar">
   <div class="container">
     <form class="search-bar-form" (submit)="onBuscar($event)">
-      <div class="field">
+      <fieldset class="field">
         <input id="v-origen" type="text" class="field-input" placeholder="Ciudad o código IATA"
           [value]="origen()" (input)="origen.set($any($event.target).value)" />
         <label class="field-label" for="v-origen">Origen</label>
-      </div>
+      </fieldset>
 
-      <div class="field">
+      <fieldset class="field">
         <input id="v-destino" type="text" class="field-input" placeholder="Ciudad o código IATA"
           [value]="destino()" (input)="destino.set($any($event.target).value)" />
         <label class="field-label" for="v-destino">Destino</label>
-      </div>
+      </fieldset>
 
-      <div class="field">
+      <fieldset class="field">
         <input id="v-fecha" type="date" class="field-input" placeholder=" "
           [value]="fechaIda()" (input)="fechaIda.set($any($event.target).value)" />
         <label class="field-label" for="v-fecha">Fecha de ida</label>
-      </div>
+      </fieldset>
 
       <button type="submit" class="btn btn-dark btn-lg">✈ Buscar vuelos</button>
     </form>
