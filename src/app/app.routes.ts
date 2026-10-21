@@ -6,6 +6,7 @@ import { LoginForm } from './pages/login-form/login-form';
 import { Vuelos } from './pages/vuelos/vuelos';
 import { Verify } from './pages/verify/verify';
 import { Reservas } from './pages/reservas/reservas';
+import { MiCarrito } from './pages/carrito/carrito';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -16,5 +17,6 @@ export const routes: Routes = [
     { path: "vuelos", component: Vuelos },
     { path: "verify", component: Verify },
     { path: "reservas", component: Reservas, canActivate: [authGuard] },
+    { path: "carrito", component: MiCarrito, canActivate: [authGuard] },
     { path: "**", redirectTo: "" }
 ];
