@@ -206,10 +206,9 @@ select.field-input { cursor: pointer; }
   max-width: calc(100% - 32px);
   padding: 0 4px;
   overflow: hidden;
-  background: white;
   color: color-mix(in srgb, var(--navy) 60%, transparent);
   font-size: 16px;
-  line-height: 1;
+  line-height: 1.4;
   white-space: nowrap;
   text-overflow: ellipsis;
   transform: translateY(-50%);
@@ -224,13 +223,14 @@ select.field-input { cursor: pointer; }
 .field-input:autofill + .field-label,
 select.field-input + .field-label,
 .field-input[type="date"] + .field-label {
-  transform: translateY(calc(-50% - 26px)) scale(0.78);
+  transform: translateY(calc(-50% - 36px)) scale(0.78);
+  font-weight: 500;
 }
 
 .field-input:hover:not(:focus, [readonly]) { border-color: color-mix(in srgb, var(--navy) 60%, transparent); }
 .field-input:focus {
-  border-color: var(--light-blue);
-  box-shadow: 0 0 0 1px var(--light-blue);
+  border-color: var(--navy);
+  box-shadow: 0 0 0 1px var(--navy);
 }
 .field-input:focus + .field-label { color: var(--navy); }
 
