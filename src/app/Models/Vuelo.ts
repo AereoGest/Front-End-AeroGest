@@ -6,8 +6,8 @@ export type EstadoVuelo =  'PROGRAMADO' | 'BOARDING' | 'ACTIVO' | 'CANCELADO' | 
 
 export interface Vuelo {
   id?: string,
-  aeropuertoOrigenId: Aeropuerto;
-  aeropuertoDestinoId: Aeropuerto;
+  aeropuertoOrigen: Aeropuerto;
+  aeropuertoDestino: Aeropuerto;
   avion: Avion;
   fechaSalida: string;   
   fechaLlegada: string;
