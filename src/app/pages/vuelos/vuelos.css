@@ -1,6 +1,8 @@
 .flight-search-bar {
-  background: var(--cream);
-  padding: 96px 0 28px;          
+  display: flex;
+  flex-direction: column;
+  padding: 40px 0 28px;   
+  background: var(--cream);       
   box-shadow: var(--shadow-sm);
 }
 
@@ -28,4 +30,8 @@
 }
 @media (max-width: 600px) {
   .search-bar-form { grid-template-columns: 1fr; }
+}
+
+.field{
+  border: none;
 }
