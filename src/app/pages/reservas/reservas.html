@@ -1,0 +1,138 @@
+<section class="booking-dashboard" aria-labelledby="reservas-titulo">
+  <div class="container">
+    <header class="dashboard-header">
+      <div>
+        <h1 class="section-title" id="reservas-titulo">Mis reservas</h1>
+        <p class="dashboard-subtitle">Gestioná tus vuelos, descargá documentos y hacé el check-in online</p>
+      </div>
+      <a routerLink="/vuelos" class="btn btn-dark">+ Nueva reserva</a>
+    </header>
+
+    <dl class="stats">
+      <div class="stat animate">
+        <dt>Reservas activas</dt>
+        <dd>{{ cantidadActivas() }}</dd>
+      </div>
+      <!-- Vuelos realizados, millas y nivel no tienen fuente de datos todavía: quedan vacíos. -->
+      <div class="stat animate delay-1">
+        <dt>Vuelos realizados</dt>
+        <dd></dd>
+      </div>
+      <div class="stat animate delay-2">
+        <dt>Millas acumuladas</dt>
+        <dd></dd>
+      </div>
+      <div class="stat animate delay-3">
+        <dt>Nivel viajero</dt>
+        <dd></dd>
+      </div>
+    </dl>
+
+    <nav class="search-card-header" aria-label="Tipo de reservas">
+      <button type="button" class="search-tab" [class.active]="pestania() === 'activas'"
+        [attr.aria-pressed]="pestania() === 'activas'" (click)="pestania.set('activas')">
+        Próximos vuelos
+      </button>
+      <button type="button" class="search-tab" [class.active]="pestania() === 'historial'"
+        [attr.aria-pressed]="pestania() === 'historial'" (click)="pestania.set('historial')">
+        Historial
+      </button>
+    </nav>
+
+    <div class="field buscador">
+      <input id="buscar-reserva" type="search" class="field-input" placeholder="Número de reserva o estado"
+        [value]="busqueda()" (input)="busqueda.set($any($event.target).value)" />
+      <label class="field-label" for="buscar-reserva">Buscar reserva</label>
+    </div>
+
+    @if (cargando()) {
+      <p class="estado-lista" role="status">Cargando reservas...</p>
+    } @else if (error()) {
+      <p class="estado-lista error" role="alert">{{ error() }}</p>
+    } @else if (reservasVisibles().length === 0) {
+      @if (pestania() === 'activas') {
+        <div class="estado-lista">
+          <p class="estado-titulo">No tenés reservas activas</p>
+          <p>¡Empezá a planificar tu próximo viaje!</p>
+          <a routerLink="/vuelos" class="btn btn-dark">Buscar vuelos</a>
+        </div>
+      } @else {
+        <p class="estado-lista">Sin historial de reservas canceladas.</p>
+      }
+    } @else {
+      <ul class="booking-list">
+        @for (reserva of reservasVisibles(); track reserva.id) {
+          <li class="booking-card" [attr.data-estado]="reserva.estadoReserva">
+            <div class="booking-info">
+              <h2 class="booking-route">Reserva #{{ reserva.id }}</h2>
+              <p class="booking-details">{{ reserva.cantidadPasajes }} pasaje(s) · {{ formatearPrecio(reserva.valor) }}</p>
+              <span class="estado-badge" [attr.data-estado]="reserva.estadoReserva">{{ etiquetaEstado(reserva.estadoReserva) }}</span>
+            </div>
+            <time class="booking-date" [attr.datetime]="reserva.fechaReserva">
+              <span class="booking-date-day">{{ formatearDia(reserva.fechaReserva) }}</span>
+              <span class="booking-date-month">{{ formatearMesAnio(reserva.fechaReserva) }}</span>
+            </time>
+            @if (reserva.estadoReserva !== 'CANCELADA') {
+              <div class="booking-actions">
+                <button type="button" class="btn btn-dark" (click)="proximamente('Check-in')">Check-in</button>
+                <button type="button" class="btn btn-dark" (click)="abrirDetalle(reserva)">Ver</button>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>
+
+<dialog #detalle class="detalle" aria-labelledby="detalle-titulo" (close)="seleccionada.set(null)">
+  @if (seleccionada(); as reserva) {
+    <header class="detalle-header">
+      <h2 id="detalle-titulo">Reserva #{{ reserva.id }}</h2>
+      <button type="button" class="detalle-cerrar" aria-label="Cerrar" (click)="cerrarDetalle()">×</button>
+    </header>
+
+    <p class="detalle-codigo">
+      <span>Código de reserva</span>
+      <strong>#{{ reserva.id }}</strong>
+    </p>
+
+    <dl class="detalle-datos">
+      <div>
+        <dt>Pasajero</dt>
+        <dd>{{ reserva.persona.nombre }} {{ reserva.persona.apellido }}</dd>
+      </div>
+      <div>
+        <dt>Fecha reserva</dt>
+        <dd>{{ formatearFecha(reserva.fechaReserva) }}</dd>
+      </div>
+      <div>
+        <dt>Pasajes</dt>
+        <dd>{{ reserva.cantidadPasajes }}</dd>
+      </div>
+      <div>
+        <dt>Total</dt>
+        <dd>{{ formatearPrecio(reserva.valor) }}</dd>
+      </div>
+      <div class="completo">
+        <dt>Estado</dt>
+        <dd><span class="estado-badge" [attr.data-estado]="reserva.estadoReserva">{{ etiquetaEstado(reserva.estadoReserva) }}</span></dd>
+      </div>
+    </dl>
+
+    <div class="detalle-acciones">
+      <button type="button" class="btn btn-primary" (click)="proximamente('Boarding pass')">Boarding pass</button>
+      @if (reserva.estadoReserva !== 'CANCELADA') {
+        <button type="button" class="btn btn-dark" (click)="cancelarReserva(reserva)">Cancelar reserva</button>
+      }
+    </div>
+  }
+</dialog>
+
+@if (mensajeExito()) {
+  <p class="toast" role="status">{{ mensajeExito() }}</p>
+}
+
+@if (mensajeError()) {
+  <p class="toast error" role="alert">{{ mensajeError() }}</p>
+}
