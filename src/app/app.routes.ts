@@ -8,6 +8,7 @@ import { Verify } from './pages/verify/verify';
 import { Reservas } from './pages/reservas/reservas';
 import { MiCarrito } from './pages/carrito/carrito';
 import { authGuard } from './guards/auth.guard';
+import { ForgotPassword } from './pages/forgot-password/forgot-password';
 
 export const routes: Routes = [
     { path: "", component: Home },
@@ -18,5 +19,6 @@ export const routes: Routes = [
     { path: "verify", component: Verify },
     { path: "reservas", component: Reservas, canActivate: [authGuard] },
     { path: "carrito", component: MiCarrito, canActivate: [authGuard] },
+    {path: "forgot-password", component: ForgotPassword},
     { path: "**", redirectTo: "" }
 ];
