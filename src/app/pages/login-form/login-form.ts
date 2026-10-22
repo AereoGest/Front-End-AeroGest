@@ -8,7 +8,7 @@ import {
 } from '@angular/forms/signals';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Auth } from '../../services/auth';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Login } from '../../Models/Login';
 import { AuthResponse } from '../../Models/Perfil';
 
@@ -19,7 +19,7 @@ interface TwoFactorData {
 @Component({
   selector: 'app-login-form',
   standalone: true,
-  imports: [FormField],
+  imports: [FormField, RouterLink],
   templateUrl: './login-form.html',
   styleUrl: './login-form.css'
 })
