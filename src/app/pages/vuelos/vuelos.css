@@ -38,11 +38,13 @@
 /* ── Botones de carrito ── */
 .carrito-acciones {
   display: flex;
+  justify-content: center;
   gap: 8px;
   margin-top: 16px;
 }
 .carrito-acciones .btn { padding: 8px 16px; font-size: 12px; }
-.carrito-acciones .btn-dark { flex: 1; justify-content: center; }
+
+.carrito-acciones .btn-dark { flex: 0.5; justify-content: center; }
 
 /* ── Avisos: reutilizan .toast global ── */
 .toast.error { border-left-color: var(--burgundy); }
@@ -63,7 +65,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: var(--pink);
+  color: var(--light-blue);
   margin-bottom: 10px;
 }
 
@@ -73,7 +75,7 @@
 }
 
 .resultados .section-subtitle {
-  color: var(--gray-500);
+  color: var(--dark-navy);
   font-size: 15px;
 }
 
@@ -90,7 +92,7 @@
 
 .resultados .dest-card {
   background: var(--cream);
-  border: 1px solid var(--light-blue);
+  box-shadow: var(--shadow-sm);
   border-radius: var(--radius-md);
   overflow: hidden;
   transition: border-color var(--transition),
@@ -156,46 +158,54 @@
   white-space: nowrap;
 }
 
-/* ── Botones de acción ── */
 
+/* ── Botones debajo de la información ── */
 .resultados .carrito-acciones {
   grid-column: 1 / -1;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 12px;
+  margin-top: 12px;
   padding-top: 16px;
-  margin-top: 4px;
   border-top: 1px solid var(--light-blue);
 }
 
-.resultados .carrito-acciones .btn {
-  min-height: 42px;
-  border-radius: var(--radius);
+
+.resultados .carrito-acciones .btn-primary {
+  grid-column: 4;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 42px;
+  padding: 0;
+  font-size: 18px;
+}
+
+
+.resultados .carrito-acciones .btn-dark {
+  grid-column: 2;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  height: 42px;
   padding: 10px 18px;
-  font-family: var(--font-body);
   font-size: 14px;
+}
+
+/* Espaciado y efecto hover */
+.resultados .carrito-acciones .btn {
+  border-radius: var(--radius);
+  font-family: var(--font-body);
   font-weight: 600;
   cursor: pointer;
-  transition: background var(--transition),
-              box-shadow var(--transition),
-              transform var(--transition);
+  transition: transform var(--transition),
+              box-shadow var(--transition);
 }
 
 .resultados .carrito-acciones .btn:hover {
   transform: translateY(-1px);
-}
-
-.resultados .carrito-acciones .btn-primary {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  min-width: 44px;
-  padding: 10px 14px;
-}
-
-.resultados .carrito-acciones .btn-dark {
-  min-width: 120px;
 }
 
 /* ── Mensajes de estado ── */

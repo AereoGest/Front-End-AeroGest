@@ -46,7 +46,7 @@ img { max-width: 100%; display: block; }
 .btn {
   background-color: var(--cream);
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 28px; border-radius: var(--radius);
+  padding: 12px 28px; border-radius: var(--radius-lg);
   font-family: var(--font-body); font-size: 14px; font-weight: 600;
   letter-spacing: 0.04em; text-transform: uppercase;
   cursor: pointer; border: none; transition: all var(--transition);

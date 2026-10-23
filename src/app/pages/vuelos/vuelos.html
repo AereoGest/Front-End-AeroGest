@@ -64,10 +64,12 @@
               <span class="dest-price-from">Desde</span>
               <span class="dest-price-amount">${{ vuelo.precioVuelo }}</span>
             </div>
+
             <div class="carrito-acciones">
+              <button type="button" class="btn btn-dark" (click)="elegirVuelo(vuelo)">Elegir →</button>
               <button type="button" class="btn btn-primary" title="Agregar al carrito" aria-label="Agregar al carrito"
                 (click)="agregarAlCarrito(vuelo)">🛒</button>
-              <button type="button" class="btn btn-dark" (click)="elegirVuelo(vuelo)">Elegir →</button>
+            
             </div>
           </div>
         </div>
