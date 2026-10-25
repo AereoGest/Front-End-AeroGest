@@ -35,14 +35,250 @@
 .field{
   border: none;
 }
+
+
 /* ── Botones de carrito ── */
 .carrito-acciones {
   display: flex;
+  justify-content: center;
   gap: 8px;
   margin-top: 16px;
 }
-.carrito-acciones .btn { padding: 8px 16px; font-size: 12px; }
-.carrito-acciones .btn-dark { flex: 1; justify-content: center; }
+
 
 /* ── Avisos: reutilizan .toast global ── */
 .toast.error { border-left-color: var(--burgundy); }
+
+
+/*----------------------------------------------------------------------------------*/
+.resultados {
+  padding: 40px 0 80px;
+}
+
+.resultados .section-header {
+  margin-bottom: 32px;
+}
+
+.resultados .section-eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--light-blue);
+  margin-bottom: 10px;
+}
+
+.resultados .section-title {
+  color: var(--navy);
+  margin-bottom: 10px;
+}
+
+.resultados .section-subtitle {
+  color: var(--dark-navy);
+  font-size: 15px;
+}
+
+/* ── Grilla de vuelos ── */
+
+.resultados .destinations-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+/* ── Tarjeta de vuelo ── */
+
+.resultados .dest-card {
+  background: var(--cream);
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color var(--transition),
+              box-shadow var(--transition),
+              transform var(--transition);
+}
+
+.resultados .dest-card:hover {
+  border-color: var(--navy);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.resultados .dest-card-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 28px;
+  padding: 24px 28px;
+}
+
+/* ── Ruta: origen y destino ── */
+
+.resultados .dest-card-city {
+  grid-column: 1;
+  color: var(--navy);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* ── Horarios y duración ── */
+
+.resultados .dest-card-country {
+  grid-column: 1;
+  color: var(--navy);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ── Precio ── */
+
+.resultados .dest-card-price {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+}
+
+.resultados .dest-price-from {
+  color: var(--light-blue);
+  font-size: 12px;
+}
+
+.resultados .dest-price-amount {
+  color: var(--navy);
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+
+/* ── Botones debajo de la información ── */
+.resultados .carrito-acciones {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--light-blue);
+}
+
+
+.resultados .carrito-acciones .btn-primary {
+  grid-column: 4;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 42px;
+  padding: 0;
+  font-size: 18px;
+}
+
+
+.resultados .carrito-acciones .btn-dark {
+  grid-column: 2;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  height: 42px;
+  padding: 10px 18px;
+  font-size: 14px;
+}
+
+/* Espaciado y efecto hover */
+.resultados .carrito-acciones .btn {
+ 
+  font-family: var(--font-body);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--transition),
+              box-shadow var(--transition);
+}
+
+.resultados .carrito-acciones .btn:hover {
+  transform: translateY(-1px);
+}
+
+/* ── Mensajes de estado ── */
+
+.resultados .auth-subtitle {
+  margin: 20px 0;
+  color: var(--navy);
+  font-size: 14px;
+}
+
+.resultados .mensaje-error {
+  padding: 14px 18px;
+  margin: 20px 0;
+  border: 1px solid var(--cream);
+  border-radius: var(--radius);
+  background: var(--cream);
+  color: var(--burgundy);
+  font-size: 14px;
+}
+
+/* ── Responsive: tablets y celulares ── */
+
+@media (max-width: 768px) {
+  .resultados {
+    padding: 28px 0 56px;
+  }
+
+  .resultados .dest-card-body {
+    grid-template-columns: 1fr;
+    padding: 20px;
+    gap: 12px;
+  }
+
+  .resultados .dest-card-city {
+    font-size: 18px;
+  }
+
+  .resultados .dest-card-price {
+    grid-column: 1;
+    grid-row: auto;
+    align-items: flex-start;
+    margin-top: 8px;
+  }
+
+  .resultados .dest-price-amount {
+    font-size: 25px;
+  }
+
+  .resultados .carrito-acciones {
+    grid-column: 1;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 420px) {
+  .resultados .dest-card-body {
+    padding: 16px;
+  }
+
+  .resultados .dest-card-city {
+    font-size: 16px;
+  }
+
+  .resultados .carrito-acciones {
+    gap: 8px;
+  }
+
+  .resultados .carrito-acciones .btn {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .resultados .carrito-acciones .btn-dark {
+    min-width: 100px;
+  }
+}

@@ -47,27 +47,33 @@
     <div class="destinations-grid">
        @for (vuelo of vuelos(); track vuelo.id) {
         <div class="dest-card">
-          <div class="dest-card-body" style="color:#0f172a">
+          <div class="dest-card-body">
+
             <div class="dest-card-city">
               {{ vuelo.aeropuertoOrigen?.ciudad }} ({{ vuelo.aeropuertoOrigen?.codigoIata }})
               →
               {{ vuelo.aeropuertoDestino?.ciudad }} ({{ vuelo.aeropuertoDestino?.codigoIata }})
             </div>
+
             <div class="dest-card-country">
               {{ vuelo.fechaSalida }} · {{ formatearHora(vuelo.horaSalida) }} -
               {{ formatearHora(vuelo.horaLlegada) }} · {{ duracion(vuelo) }}
             </div>
+
             <div class="dest-card-country">
               {{ vuelo.escala ? 'Con escala' : 'Vuelo directo' }} · Estado: {{ vuelo.estado }}
             </div>
+            
             <div class="dest-card-price">
               <span class="dest-price-from">Desde</span>
               <span class="dest-price-amount">${{ vuelo.precioVuelo }}</span>
             </div>
+
             <div class="carrito-acciones">
+              <button type="button" class="btn btn-dark" id="boton-elegir" (click)="elegirVuelo(vuelo)">Elegir →</button>
               <button type="button" class="btn btn-primary" title="Agregar al carrito" aria-label="Agregar al carrito"
                 (click)="agregarAlCarrito(vuelo)">🛒</button>
-              <button type="button" class="btn btn-dark" (click)="elegirVuelo(vuelo)">Elegir →</button>
+            
             </div>
           </div>
         </div>
