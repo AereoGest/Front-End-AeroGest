@@ -18,6 +18,7 @@
     --radius: 4px;
     --radius-md: 8px;
     --radius-lg: 16px;
+    --radius-xlg: 50px;
     --transition: 0.25s ease;
 }
 
@@ -46,7 +47,7 @@ img { max-width: 100%; display: block; }
 .btn {
   background-color: var(--cream);
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 28px; border-radius: var(--radius-lg);
+  padding: 12px 28px; border-radius: var(--radius-xlg);
   font-family: var(--font-body); font-size: 14px; font-weight: 600;
   letter-spacing: 0.04em; text-transform: uppercase;
   cursor: pointer; border: none; transition: all var(--transition);

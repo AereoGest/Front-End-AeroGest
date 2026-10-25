@@ -35,6 +35,8 @@
 .field{
   border: none;
 }
+
+
 /* ── Botones de carrito ── */
 .carrito-acciones {
   display: flex;
@@ -42,9 +44,7 @@
   gap: 8px;
   margin-top: 16px;
 }
-.carrito-acciones .btn { padding: 8px 16px; font-size: 12px; }
 
-.carrito-acciones .btn-dark { flex: 0.5; justify-content: center; }
 
 /* ── Avisos: reutilizan .toast global ── */
 .toast.error { border-left-color: var(--burgundy); }
@@ -196,7 +196,7 @@
 
 /* Espaciado y efecto hover */
 .resultados .carrito-acciones .btn {
-  border-radius: var(--radius);
+ 
   font-family: var(--font-body);
   font-weight: 600;
   cursor: pointer;
