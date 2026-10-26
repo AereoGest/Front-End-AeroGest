@@ -178,10 +178,15 @@
   grid-column: 4;
   align-items: center;
   justify-content: center;
+  background-color: var(--light-blue-difuse);
   width: 46px;
   height: 42px;
   padding: 0;
   font-size: 18px;
+}
+
+.resultados .carrito-acciones .btn-primary:hover{
+  background-color: var(--light-blue);
 }
 
 
@@ -380,7 +385,7 @@
 
 .modal-acciones .btn-dark{ grid-column: 1; }
 
-.modal-acciones .btn-primary{ grid-column: 3; }
+.modal-acciones .btn-primary{ grid-column: 3; background-color: var(--light-blue-difuse);}
 
 @media (max-width: 480px) {
   .modal-vuelo { padding: 24px 20px; }
