@@ -293,6 +293,7 @@
     justify-content: center;
     padding: 20px;
     background: rgba(6, 24, 49, 0.6);
+    animation: overlay-in 0.4s ease;
   }
 
 .modal-vuelo {
@@ -305,6 +306,7 @@
   background: var(--cream);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
+  animation: modal-in 0.45s ease;
 }
 
 .modal-cerrar {
@@ -371,14 +373,45 @@
 }
 
 .modal-acciones {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
   margin-top: 20px;
 }
+
+.modal-acciones .btn-dark{ grid-column: 1; }
+
+.modal-acciones .btn-primary{ grid-column: 3; }
 
 @media (max-width: 480px) {
   .modal-vuelo { padding: 24px 20px; }
   .modal-datos { grid-template-columns: 1fr; }
   .modal-acciones { flex-direction: column; }
+}
+
+.modal-overlay.cerrando {
+  animation: overlay-out 0.4s ease forwards;
+}
+.modal-overlay.cerrando .modal-vuelo {
+  animation: modal-out 0.4s ease forwards;
+}
+
+@keyframes overlay-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes overlay-out { from { opacity: 1; } to { opacity: 0; } }
+
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes modal-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(16px) scale(0.97); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-vuelo,
+  .modal-overlay.cerrando,
+  .modal-overlay.cerrando .modal-vuelo {
+    animation-duration: 0.01s;
+  }
 }

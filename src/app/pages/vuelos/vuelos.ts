@@ -22,7 +22,7 @@ export class Vuelos implements OnInit {
   protected readonly busquedaRealizada = signal(false);
   protected readonly mensajeExito = signal('');
   protected readonly mensajeError = signal('');
-
+  protected readonly cerrando = signal (false)
   protected readonly origen = signal('');
   protected readonly destino = signal('');
   protected readonly fechaIda = signal('');
@@ -138,12 +138,17 @@ export class Vuelos implements OnInit {
   }
 
   protected abrirDetalle (vuelo: Vuelo) {
-    console.log('abrir detalle', vuelo)
+    this.cerrando.set(false);
     this.vueloDetalle.set(vuelo);
   }
 
   protected cerrarDetalle() {
-    this.vueloDetalle.set(null);
+    if (!this.vueloDetalle() || this.cerrando()) return;
+    this.cerrando.set(true);
+    setTimeout(() => {
+      this.vueloDetalle.set(null);
+      this.cerrando.set(false);
+    }, 400);
   }
 
   protected elegirDesdeDetalle(vuelo: Vuelo) {

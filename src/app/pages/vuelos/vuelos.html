@@ -92,7 +92,7 @@
 }
 
 @if (vueloDetalle(); as v) {
-  <div class="modal-overlay" (click)="cerrarDetalle()">
+  <div class="modal-overlay" [class.cerrando]="cerrando()" (click)="cerrarDetalle()">
     <div class="modal-vuelo" role="dialog" aria-modal="true" aria-labelledby="modal-titulo"
       (click)="$event.stopPropagation()">
 
