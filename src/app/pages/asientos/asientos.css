@@ -1,5 +1,6 @@
 
-/* Página de selección de asientos */
+/* ── Página de selección de asientos ── */
+
 .seat-page {
   padding: 40px 0 108px;
   box-shadow: inset 0 2px 4px var(--light-blue-1);
@@ -17,13 +18,18 @@
   margin-bottom: 32px;
 }
 
+/* ── Barra de progreso ── */
+
 .progress-bar {
   background: var(--white);
   border-bottom: 1px solid var(--gray-500);
   padding: 16px 0;
-  margin-top: 88px;
-  box-shadow: inset 0 2px 4px var(--light-blue-1);
+  margin-top: 0;
+  box-shadow:
+    inset 0 5px 10px rgba(0, 0, 0, 0.08),
+    0 4px 10px rgba(0, 0, 0, 0.12);
 }
+
 
 .progress-steps {
   display: flex;
@@ -85,6 +91,8 @@
   background: var(--success);
 }
 
+/* ── Distribución principal ── */
+
 .seat-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 300px;
@@ -92,91 +100,14 @@
   align-items: start;
 }
 
-.seat-summary-card {
-  order: 2;
-  background: var(--white);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--light-blue-1);
-  padding: 28px;
-  position: sticky;
-  top: 100px;
-  box-shadow: 0 0.5px 4px var(--light-blue-1);
-}
-
-.summary-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-
-.selected-seat-display {
-  background: var(--navy);
-  border-radius: var(--radius);
-  padding: 20px;
-  text-align: center;
-  color: var(--white);
-  margin-bottom: 20px;
-}
-
-.asientos-progress {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 8px;
-}
-
-.asientos-seleccionados {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.9);
-  margin-top: 8px;
-  overflow-wrap: anywhere;
-}
-
-.seat-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 20px 0;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-}
-
-.legend-dot {
-  width: 20px;
-  height: 20px;
-  border-radius: var(--radius);
-}
-
-.dot-available {
-  background: var(--light-blue-1);
-  border: 1.5px solid var(--black);
-}
-
-.dot-selected {
-  background: var(--pink);
-}
-
-.dot-taken {
-  background: var(--navy-light);
-}
-
-.dot-first {
-  background: var(--cream);
-  border: 1.5px solid var(--black);
-}
-
 .cabin-map {
   order: 1;
   min-width: 0;
   overflow-x: auto;
   background: var(--white);
+  border: 1px solid var(--light-blue-1);
   border-radius: var(--radius-md);
   padding: 24px;
-  border: 1px solid var(--light-blue-1);
   box-shadow: 0 0.5px 4px var(--light-blue-1);
 }
 
@@ -198,6 +129,8 @@
   border-bottom: 1px solid var(--blue-pale);
 }
 
+/* ── Filas de asientos ── */
+
 .seat-row {
   display: flex;
   align-items: center;
@@ -208,10 +141,10 @@
 
 .seat-row-num {
   width: 24px;
+  flex-shrink: 0;
   font-size: 11px;
   color: var(--navy);
   text-align: center;
-  flex-shrink: 0;
 }
 
 .seat-aisle {
@@ -219,54 +152,150 @@
   flex-shrink: 0;
 }
 
+/* ── Asientos disponibles ── */
+
+
+/* Asientos disponibles */
 .seat {
   width: 34px;
   height: 34px;
   flex-shrink: 0;
-  border-radius: 6px 6px 4px 4px;
-  border: 1.5px solid var(--navy-light);
-  background: var(--light-blue-1);
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--navy-mid);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s;
+
+  background-color: var(--white);
+  border: 2px solid var(--navy);
+  border-radius: 7px;
+  color: var(--navy);
+
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: background-color 0.2s ease,
+              border-color 0.2s ease,
+              color 0.2s ease;
 }
 
-.seat:hover:not(:disabled):not(.selected) {
-  background: var(--blue-pale);
-  border-color: var(--blue);
-}
-
-.seat.selected {
-  background: var(--pink);
-  border-color: var(--navy-mid);
+/* Primera clase disponible */
+.seat.first-class {
+  background-color: var(--white);
+  border-color: var(--navy);
   color: var(--navy);
 }
 
+/* Hover */
+.seat:hover:not(:disabled):not(.selected) {
+  background-color: var(--blue-pale);
+}
+
+/* Seleccionado: celeste */
+.seat.selected,
+.seat.first-class.selected {
+  background-color: #3CA5E3;
+  border: 2px solid #3CA5E3;
+  color: #FFFFFF;
+  box-shadow: 0 0 0 2px rgba(60, 165, 227, 0.25);
+}
+
+/* Ocupado: bordó */
 .seat.taken,
 .seat:disabled {
-  background: var(--navy-light);
-  border-color: var(--navy-light);
-  color: rgba(255, 255, 255, 0.3);
+  background-color: #921B25;
+  border: 2px solid #921B25;
+  color: #FFFFFF;
   cursor: not-allowed;
+  opacity: 1;
+  box-shadow: none;
 }
 
-.seat.first-class {
-  background: var(--blue-pale);
-  border-color: var(--blue);
+
+/* ── Resumen de selección ── */
+
+.seat-summary-card {
+  order: 2;
+  position: sticky;
+  top: 100px;
+  background: var(--white);
+  border: 1px solid var(--light-blue-1);
+  border-radius: var(--radius-md);
+  padding: 28px;
+  box-shadow: 0 0.5px 4px var(--light-blue-1);
 }
 
-.seat.first-class:hover:not(:disabled):not(.selected) {
+.summary-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.selected-seat-display {
+  background: var(--navy);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: var(--white);
+}
+
+.asientos-progress {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 8px;
+}
+
+.asientos-seleccionados {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+
+/* ── Leyenda ── */
+
+.seat-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.legend-dot {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: var(--radius);
+}
+
+.dot-available {
+  background: var(--white);
+  border: 2px solid var(--navy);
+}
+
+.dot-selected {
+  background: var(--light-blue);
+ 
+}
+
+.dot-taken {
+  background: var(--burgundy);
+}
+
+
+.dot-first {
   background: var(--cream);
+  border: 2px solid var(--burgundy);
 }
 
-.seat.first-class.selected {
-  background: var(--pink);
-}
+/* ── Precios ── */
 
 .price-summary {
   border-top: 1px solid var(--navy-mid);
@@ -287,16 +316,18 @@
 }
 
 .price-total {
-  border-top: 1px solid var(--navy);
-  padding-top: 12px;
-  margin-top: 8px;
   display: flex;
   justify-content: space-between;
   gap: 12px;
+  border-top: 1px solid var(--navy);
+  padding-top: 12px;
+  margin-top: 8px;
   font-family: var(--font-display);
   font-size: 20px;
   font-weight: 700;
 }
+
+/* ── Botón de continuar ── */
 
 .btn-continue {
   width: 100%;
@@ -308,6 +339,7 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  transition: opacity 0.2s ease;
 }
 
 .btn-continue:hover:not(:disabled) {
@@ -319,19 +351,8 @@
   cursor: not-allowed;
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
+/* ── Mensajes ── */
 
-/* ── Mensajes de selección de asientos ── */
 .mensaje {
   margin: 20px 0;
   padding: 14px 18px;
@@ -365,20 +386,21 @@
   border-left: 4px solid var(--navy);
 }
 
-@media (max-width: 600px) {
-  .mensaje {
-    margin: 14px 0;
-    padding: 12px 14px;
-    font-size: 13px;
-  }
+/* ── Accesibilidad ── */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .mensaje {
-    animation: none;
-  }
-}
-
+/* ── Diseño responsive ── */
 
 @media (max-width: 850px) {
   .seat-layout {
@@ -393,6 +415,14 @@
   .seat-summary-card {
     order: 2;
     position: static;
+  }
+}
+
+@media (max-width: 600px) {
+  .mensaje {
+    margin: 14px 0;
+    padding: 12px 14px;
+    font-size: 13px;
   }
 }
 
@@ -421,5 +451,14 @@
 
   .seat-aisle {
     width: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seat,
+  .btn-continue,
+  .mensaje {
+    animation: none;
+    transition: none;
   }
 }

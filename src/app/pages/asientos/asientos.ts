@@ -1,27 +1,11 @@
 
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-
-interface Asiento {
-  id: string;
-  clase: string;
-  precio: number;
-}
-
-interface AsientoVista {
-  id: string;
-  clase: string;
-  zona: string;
-  ocupado: boolean;
-}
-
-interface FilaAsientos {
-  numero: number;
-  asientosIzquierda: AsientoVista[];
-  asientosDerecha: AsientoVista[];
-}
+import FilaAsientos from '../../Models/FilaAsientos';
+import AsientoVista from '../../Models/AsientoVista';
+import AsientoModel from '../../Models/AsientoModel';
 
 @Component({
   selector: 'app-asientos',
@@ -34,10 +18,12 @@ export class Asientos implements OnInit {
 
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
+  
 
   basePrice = 689;
   seatsNeeded = 1;
-  selectedSeats: Asiento[] = [];
+  selectedSeats: AsientoModel[] = [];
 
   origen = '—';
   destino = '—';
@@ -132,41 +118,50 @@ export class Asientos implements OnInit {
     return filas;
   }
 
-  toggleSeat(asiento: AsientoVista): void {
-    if (asiento.ocupado) {
+  
+
+toggleSeat(asiento: AsientoVista): void {
+  if (asiento.ocupado) {
+    alert('No se puede seleccionar: asiento ocupado');
+    return;
+  }
+
+  const yaSeleccionado = this.estaSeleccionado(asiento.id);
+
+  if (yaSeleccionado) {
+    this.selectedSeats = this.selectedSeats.filter(
+      (seleccionado) => seleccionado.id !== asiento.id
+    );
+  } else {
+    if (this.selectedSeats.length >= this.seatsNeeded) {
+      alert('No se puede seleccionar: se alcanzó el límite');
       return;
     }
 
-    const indice = this.selectedSeats.findIndex(
-      (seleccionado) => seleccionado.id === asiento.id
-    );
-
-    if (indice >= 0) {
-      this.selectedSeats.splice(indice, 1);
-    } else {
-      if (this.selectedSeats.length >= this.seatsNeeded) {
-        alert(`Ya seleccionaste ${this.seatsNeeded} asiento(s)`);
-        return;
-      }
-
-      this.selectedSeats.push({
+    this.selectedSeats = [
+      ...this.selectedSeats,
+      {
         id: asiento.id,
         clase: asiento.clase,
         precio: this.seatPrices[asiento.clase] ?? 0
-      });
-    }
-
-    this.selectedSeats = [...this.selectedSeats];
-
-    sessionStorage.setItem(
-      'asientos_seleccionados',
-      JSON.stringify(this.selectedSeats)
-    );
+      }
+    ];
   }
 
-  estaSeleccionado(id: string): boolean {
-    return this.selectedSeats.some((asiento) => asiento.id === id);
-  }
+  sessionStorage.setItem(
+    'asientos_seleccionados',
+    JSON.stringify(this.selectedSeats)
+  );
+
+  this.cdr.detectChanges();
+}
+
+
+estaSeleccionado(id: string): boolean {
+  return this.selectedSeats.some(
+    (asiento) => asiento.id === id
+  );
+}
 
   get totalExtra(): number {
     return this.selectedSeats.reduce(
