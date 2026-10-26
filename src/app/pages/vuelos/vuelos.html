@@ -46,7 +46,7 @@
 
     <div class="destinations-grid">
        @for (vuelo of vuelos(); track vuelo.id) {
-        <div class="dest-card">
+        <div class="dest-card"role="button" tabindex="0" (click)="abrirDetalle(vuelo)" (keydown.enter)="abrirDetalle(vuelo)">
           <div class="dest-card-body">
 
             <div class="dest-card-city">
@@ -69,7 +69,7 @@
               <span class="dest-price-amount">${{ vuelo.precioVuelo }}</span>
             </div>
 
-            <div class="carrito-acciones">
+            <div class="carrito-acciones" (click)="$event.stopPropagation()">
               <button type="button" class="btn btn-dark" id="boton-elegir" (click)="elegirVuelo(vuelo)">Elegir →</button>
               <button type="button" class="btn btn-primary" title="Agregar al carrito" aria-label="Agregar al carrito"
                 (click)="agregarAlCarrito(vuelo)">🛒</button>
@@ -89,4 +89,40 @@
 
 @if (mensajeError()) {
   <p class="toast error" role="alert">{{ mensajeError() }}</p>
+}
+
+@if (vueloDetalle(); as v) {
+  <div class="modal-overlay" (click)="cerrarDetalle()">
+    <div class="modal-vuelo" role="dialog" aria-modal="true" aria-labelledby="modal-titulo"
+      (click)="$event.stopPropagation()">
+
+      <button type="button" class="modal-cerrar" aria-label="Cerrar" (click)="cerrarDetalle()">✕</button>
+
+      <span class="section-eyebrow">Detalle del vuelo</span>
+      <h3 id="modal-titulo" class="modal-ruta">
+        {{ v.aeropuertoOrigen?.ciudad }} ({{ v.aeropuertoOrigen?.codigoIata }})
+        →
+        {{ v.aeropuertoDestino?.ciudad }} ({{ v.aeropuertoDestino?.codigoIata }})
+      </h3>
+
+      <dl class="modal-datos">
+        <div><dt>Fecha</dt><dd>{{ v.fechaSalida }}</dd></div>
+        <div><dt>Tipo</dt><dd>{{ v.escala ? 'Con escala' : 'Vuelo directo' }}</dd></div>
+        <div><dt>Salida</dt><dd>{{ formatearHora(v.horaSalida) }}</dd></div>
+        <div><dt>Llegada</dt><dd>{{ formatearHora(v.horaLlegada) }}</dd></div>
+        <div><dt>Duración</dt><dd>{{ duracion(v) }}</dd></div>
+        <div><dt>Estado</dt><dd>{{ v.estado }}</dd></div>
+      </dl>
+
+      <div class="modal-precio">
+        <span class="dest-price-from">Desde</span>
+        <span class="dest-price-amount">${{ v.precioVuelo }}</span>
+      </div>
+
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-dark" (click)="elegirDesdeDetalle(v)">Elegir →</button>
+        <button type="button" class="btn btn-primary" (click)="agregarDesdeDetalle(v)">🛒 Agregar al carrito</button>
+      </div>
+    </div>
+  </div>
 }

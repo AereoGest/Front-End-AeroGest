@@ -21,7 +21,8 @@
 
 .resultados { padding-top: 48px; }
 
-.dest-card { cursor: default; }
+.dest-card { cursor: pointer; } 
+
 .dest-card-body { padding: 20px; }
 
 @media (max-width: 900px) {
@@ -36,7 +37,6 @@
   border: none;
 }
 
-
 /* ── Botones de carrito ── */
 .carrito-acciones {
   display: flex;
@@ -44,7 +44,8 @@
   gap: 8px;
   margin-top: 16px;
 }
-
+.carrito-acciones .btn { padding: 8px 16px; font-size: 12px; }
+.carrito-acciones .btn-dark { flex: 1; justify-content: center; }
 
 /* ── Avisos: reutilizan .toast global ── */
 .toast.error { border-left-color: var(--burgundy); }
@@ -281,4 +282,103 @@
   .resultados .carrito-acciones .btn-dark {
     min-width: 100px;
   }
+}
+  
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(6, 24, 49, 0.6);
+  }
+
+.modal-vuelo {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px;
+  background: var(--cream);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-cerrar {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--navy);
+  font-size: 18px;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.modal-cerrar:hover { background: var(--light-blue); }
+
+.modal-vuelo .section-eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--light-blue);
+  margin-bottom: 8px;
+}
+
+.modal-ruta {
+  color: var(--navy);
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.3;
+  margin: 0 0 20px;
+}
+
+.modal-datos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 0 0 20px;
+}
+.modal-datos dt {
+  color: var(--light-blue);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.modal-datos dd {
+  margin: 2px 0 0;
+  color: var(--navy);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.modal-precio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--light-blue);
+}
+
+.modal-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+@media (max-width: 480px) {
+  .modal-vuelo { padding: 24px 20px; }
+  .modal-datos { grid-template-columns: 1fr; }
+  .modal-acciones { flex-direction: column; }
 }

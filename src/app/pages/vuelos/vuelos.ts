@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, HostListener, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -16,6 +16,7 @@ import { Auth } from '../../services/auth';
 })
 export class Vuelos implements OnInit {
   protected readonly vuelos = signal<Vuelo[]>([]);
+  protected readonly vueloDetalle = signal<Vuelo | null>(null);
   protected readonly cargando = signal(false);
   protected readonly error = signal('');
   protected readonly busquedaRealizada = signal(false);
@@ -134,5 +135,29 @@ export class Vuelos implements OnInit {
       .replace(/\(.*?\)/g, '')
       .replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '')
       .trim();
+  }
+
+  protected abrirDetalle (vuelo: Vuelo) {
+    console.log('abrir detalle', vuelo)
+    this.vueloDetalle.set(vuelo);
+  }
+
+  protected cerrarDetalle() {
+    this.vueloDetalle.set(null);
+  }
+
+  protected elegirDesdeDetalle(vuelo: Vuelo) {
+    this.cerrarDetalle();
+    this.elegirVuelo(vuelo);
+  }
+
+  protected agregarDesdeDetalle(vuelo: Vuelo) {
+    this.agregarAlCarrito(vuelo);
+    this.cerrarDetalle();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    this.cerrarDetalle();
   }
 }
