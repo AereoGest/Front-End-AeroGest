@@ -1,9 +1,32 @@
-<nav class="stepper" aria-label="Progreso de la reserva">
-  <ol>
-    <li class="step done"><span class="step-dot" aria-hidden="true">✓</span>Vuelo</li>
-    <li class="step done"><span class="step-dot" aria-hidden="true">✓</span>Asiento</li>
-    <li class="step current" aria-current="step"><span class="step-dot" aria-hidden="true">3</span>Pago</li>
-  </ol>
+<nav class="progress-bar" aria-label="Progreso de la reserva">
+  <div class="progress-steps">
+    <div class="progress-step">
+      <span class="step-circle completed" aria-hidden="true">✓</span>
+      Vuelo
+    </div>
+    <div class="step-line completed-line"></div>
+
+    <div class="progress-step">
+      <span class="step-circle completed" aria-hidden="true">✓</span>
+      Asiento
+    </div>
+    <div class="step-line completed-line"></div>
+
+    <div class="progress-step" [class.current-label]="!mostrarPago()"
+      [attr.aria-current]="mostrarPago() ? null : 'step'">
+      <span class="step-circle" [class.current]="!mostrarPago()" [class.completed]="mostrarPago()"
+        aria-hidden="true">{{ mostrarPago() ? '✓' : '3' }}</span>
+      Pasajeros
+    </div>
+    <div class="step-line" [class.completed-line]="mostrarPago()"></div>
+
+    <div class="progress-step" [class.current-label]="mostrarPago()"
+      [attr.aria-current]="mostrarPago() ? 'step' : null">
+      <span class="step-circle" [class.current]="mostrarPago()" [class.pending]="!mostrarPago()"
+        aria-hidden="true">4</span>
+      Pago
+    </div>
+  </div>
 </nav>
 
 <main class="checkout">

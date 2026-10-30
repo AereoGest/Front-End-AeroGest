@@ -17,43 +17,32 @@
   color: var(--burgundy);
   font-size: 14px;
 }
-
-/* ── Stepper ── */
-.stepper {
-  margin-top: 88px;
+/* ── Barra de progreso ── */
+.progress-bar {
+  margin-top: 0;
   padding: 16px 0;
   background: var(--white);
   border-bottom: 1px solid var(--borde-suave);
 }
-.stepper ol {
+
+.progress-steps {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   max-width: 500px;
   margin: 0 auto;
-  padding: 0;
-  list-style: none;
+  padding: 0 24px;
 }
-.step {
-  position: relative;
-  flex: 1;
+
+.progress-step {
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   font-size: 11px;
   color: var(--texto-suave);
 }
-.step + .step::before {
-  content: "";
-  position: absolute;
-  top: 14px;
-  right: 50%;
-  width: 100%;
-  height: 2px;
-  background: var(--light-blue);
-}
-.step-dot {
-  position: relative;
-  z-index: 1;
+
+.step-circle {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -61,14 +50,41 @@
   height: 28px;
   margin-bottom: 4px;
   border-radius: 50%;
-  background: var(--light-blue);
-  color: var(--navy);
   font-size: 12px;
   font-weight: 700;
 }
-.step.current { font-weight: 600; color: var(--navy); }
-.step.current .step-dot { background: var(--navy); color: var(--white); }
 
+.step-circle.completed {
+  background: var(--light-blue);
+  color: var(--navy);
+}
+
+.step-circle.current {
+  background: var(--navy);
+  color: var(--white);
+}
+
+.step-circle.pending {
+  background: var(--borde-suave);
+  color: var(--texto-suave);
+}
+
+.current-label {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+/* La línea queda centrada a la altura de los círculos (28px / 2 = 14px) */
+.step-line {
+  flex: 1;
+  height: 2px;
+  margin-top: 13px;
+  background: var(--borde-suave);
+}
+
+.completed-line {
+  background: var(--light-blue);
+}
 /* ── Página ── */
 .checkout {
   max-width: 1200px;
