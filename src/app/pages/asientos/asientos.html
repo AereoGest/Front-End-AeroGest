@@ -1,27 +1,31 @@
 
 <!-- Progreso -->
-<div class="progress-bar">
-  <div class="container progress-steps">
+<nav class="progress-bar" aria-label="Progreso de la reserva">
+  <div class="progress-steps">
     <div class="progress-step">
-      <div class="step-circle completed">✓</div>
-      <span>Vuelo</span>
+      <span class="step-circle completed" aria-hidden="true">✓</span>
+      Vuelo
     </div>
-
     <div class="step-line completed-line"></div>
 
-    <div class="progress-step">
-      <div class="step-circle current">2</div>
-      <span class="current-label">Asientos</span>
+    <div class="progress-step current-label" aria-current="step">
+      <span class="step-circle current" aria-hidden="true">2</span>
+      Asiento
     </div>
-
     <div class="step-line"></div>
 
     <div class="progress-step">
-      <div class="step-circle pending">3</div>
-      <span>Pago</span>
+      <span class="step-circle pending" aria-hidden="true">3</span>
+      Pasajeros
+    </div>
+    <div class="step-line"></div>
+
+    <div class="progress-step">
+      <span class="step-circle pending" aria-hidden="true">4</span>
+      Pago
     </div>
   </div>
-</div>
+</nav>
 
 <section class="seat-page">
   <div class="container">
