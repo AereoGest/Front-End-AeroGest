@@ -11,6 +11,7 @@ import { authGuard } from './guards/auth.guard';
 import { ForgotPassword } from './pages/forgot-password/forgot-password';
 import { ResetPassword } from './pages/reset-password/reset-password';
 import { Reserva } from './pages/reserva/reserva';
+import { Asientos } from './pages/asientos/asientos';
 
 export const routes: Routes = [
     { path: "", component: Home },
@@ -24,5 +25,6 @@ export const routes: Routes = [
     { path: "carrito", component: MiCarrito, canActivate: [authGuard] },
     {path: "forgot-password", component: ForgotPassword},
     {path: "reset-password", component: ResetPassword},
+    {path: "asientos", component: Asientos},
     { path: "**", redirectTo: "" }
 ];
