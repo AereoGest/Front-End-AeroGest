@@ -1,0 +1,222 @@
+
+<!-- Progreso -->
+<div class="progress-bar">
+  <div class="container progress-steps">
+    <div class="progress-step">
+      <div class="step-circle completed">✓</div>
+      <span>Vuelo</span>
+    </div>
+
+    <div class="step-line completed-line"></div>
+
+    <div class="progress-step">
+      <div class="step-circle current">2</div>
+      <span class="current-label">Asientos</span>
+    </div>
+
+    <div class="step-line"></div>
+
+    <div class="progress-step">
+      <div class="step-circle pending">3</div>
+      <span>Pago</span>
+    </div>
+  </div>
+</div>
+
+<section class="seat-page">
+  <div class="container">
+    <h1 class="page-title">Elegí tu asiento</h1>
+
+    <p class="flight-info">
+      {{ origen }} → {{ destino }} · {{ seatsNeeded }} pasaje(s)
+    </p>
+
+    <div class="seat-layout">
+
+      <!-- Mapa de asientos -->
+      <div class="cabin-map">
+        <h2 class="sr-only">Mapa de asientos del avión</h2>
+
+        <div class="cabin-plane-nose">✈</div>
+
+        <div class="cabin-section-label">
+          Primera clase
+        </div>
+
+        @for (fila of filasPrimera; track fila.numero) {
+          <div class="seat-row">
+            <span class="seat-row-num">{{ fila.numero }}</span>
+
+            @for (asiento of fila.asientosIzquierda; track asiento.id) {
+              <button
+                type="button"
+                class="seat"
+                [class.first-class]="true"
+                [class.taken]="asiento.ocupado"
+                [class.selected]="estaSeleccionado(asiento.id)"
+                [disabled]="asiento.ocupado"
+                [title]="asiento.ocupado ? 'Ocupado' : asiento.id + ' · ' + asiento.clase"
+                (click)="toggleSeat(asiento)">
+                {{ asiento.ocupado ? '' : asiento.id }}
+              </button>
+            }
+
+            <div class="seat-aisle"></div>
+
+            @for (asiento of fila.asientosDerecha; track asiento.id) {
+              <button
+                type="button"
+                class="seat"
+                [class.first-class]="true"
+                [class.taken]="asiento.ocupado"
+                [class.selected]="estaSeleccionado(asiento.id)"
+                [disabled]="asiento.ocupado"
+                [title]="asiento.ocupado ? 'Ocupado' : asiento.id + ' · ' + asiento.clase"
+                (click)="toggleSeat(asiento)">
+                {{ asiento.ocupado ? '' : asiento.id }}
+              </button>
+            }
+          </div>
+        }
+
+        <div class="cabin-section-label">Clase ejecutiva</div>
+
+        @for (fila of filasEjecutiva; track fila.numero) {
+          <div class="seat-row">
+            <span class="seat-row-num">{{ fila.numero }}</span>
+
+            @for (asiento of fila.asientosIzquierda; track asiento.id) {
+              <button
+                type="button"
+                class="seat"
+                [class.taken]="asiento.ocupado"
+                [class.selected]="estaSeleccionado(asiento.id)"
+                [disabled]="asiento.ocupado"
+                [title]="asiento.ocupado ? 'Ocupado' : asiento.id + ' · ' + asiento.clase"
+                (click)="toggleSeat(asiento)">
+                {{ asiento.ocupado ? '' : asiento.id }}
+              </button>
+            }
+
+            <div class="seat-aisle"></div>
+
+            @for (asiento of fila.asientosDerecha; track asiento.id) {
+              <button
+                type="button"
+                class="seat"
+                [class.taken]="asiento.ocupado"
+                [class.selected]="estaSeleccionado(asiento.id)"
+                [disabled]="asiento.ocupado"
+                [title]="asiento.ocupado ? 'Ocupado' : asiento.id + ' · ' + asiento.clase"
+                (click)="toggleSeat(asiento)">
+                {{ asiento.ocupado ? '' : asiento.id }}
+              </button>
+            }
+          </div>
+        }
+
+        <div class="cabin-section-label">Clase económica</div>
+
+        @for (fila of filasEconomica; track fila.numero) {
+          <div class="seat-row">
+            <span class="seat-row-num">{{ fila.numero }}</span>
+
+            @for (asiento of fila.asientosIzquierda; track asiento.id) {
+              <button
+                type="button"
+                class="seat"
+                [class.taken]="asiento.ocupado"
+                [class.selected]="estaSeleccionado(asiento.id)"
+                [disabled]="asiento.ocupado"
+                [title]="asiento.ocupado ? 'Ocupado' : asiento.id + ' · ' + asiento.clase"
+                (click)="toggleSeat(asiento)">
+                {{ asiento.ocupado ? '' : asiento.id }}
+              </button>
+            }
+
+            <div class="seat-aisle"></div>
+
+            @for (asiento of fila.asientosDerecha; track asiento.id) {
+              <button
+                type="button"
+                class="seat"
+                [class.taken]="asiento.ocupado"
+                [class.selected]="estaSeleccionado(asiento.id)"
+                [disabled]="asiento.ocupado"
+                [title]="asiento.ocupado ? 'Ocupado' : asiento.id + ' · ' + asiento.clase"
+                (click)="toggleSeat(asiento)">
+                {{ asiento.ocupado ? '' : asiento.id }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Resumen de la selección -->
+      <aside class="seat-summary-card">
+        <h2 class="summary-title">Tu selección</h2>
+
+        <div class="selected-seat-display">
+          <div class="asientos-progress">
+            Seleccionaste {{ selectedSeats.length }} de
+            {{ seatsNeeded }} asientos
+          </div>
+
+          <div class="asientos-seleccionados">
+            {{ asientosTexto }}
+          </div>
+        </div>
+
+        <div class="seat-legend">
+
+
+          <div class="legend-item">
+            <div class="legend-dot dot-available"></div>
+            <span>Disponible</span>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-dot dot-selected"></div>
+            <span>Tu elección</span>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-dot dot-taken"></div>
+            <span>Ocupado</span>
+          </div>
+        </div>
+
+        <div class="price-summary">
+          <div class="price-row">
+            <span>Vuelo base</span>
+            <span>{{ basePrice | currency:'ARS':'symbol':'1.0-0':'es-AR' }}</span>
+          </div>
+
+          <div class="price-row">
+            <span>Asientos</span>
+            <span>
+              {{ totalExtra > 0
+                ? (totalExtra | currency:'ARS':'symbol':'1.0-0':'es-AR')
+                : 'Sin costo' }}
+            </span>
+          </div>
+
+          <div class="price-total">
+            <span>Total</span>
+            <span>{{ total | currency:'ARS':'symbol':'1.0-0':'es-AR' }}</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="btn-continue"
+          [disabled]="!puedeContinuar"
+          (click)="continuarPago()">
+          Continuar con el pago →
+        </button>
+      </aside>
+
+    </div>
+  </div>
+</section>
+
