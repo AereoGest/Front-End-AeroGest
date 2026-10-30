@@ -1,0 +1,124 @@
+.muted { color: var(--gray-500); font-size: 14px; }
+.btn-block { width: 100%; margin-top: 20px; padding: 14px; font-size: 16px; justify-content: center; }
+.form-error {
+  padding: 12px;
+  background: #fdf0ee;
+  color: #c0392b;
+  border-radius: var(--radius);
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+/* Stepper */
+.stepper {
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-500);
+  padding: 16px 0;
+  margin-top: 88px;
+  box-shadow: inset 0 2px 4px var(--light-blue-1);
+}
+.stepper ol {
+  display: flex;
+  align-items: center;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+.step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 11px;
+  color: var(--gray-500);
+  position: relative;
+}
+.step + .step::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  right: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--success);
+}
+.step-dot {
+  position: relative;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--success);
+  color: var(--navy);
+}
+.step.current { font-weight: 600; color: var(--navy); }
+.step.current .step-dot { background: var(--navy); color: var(--white); }
+
+/* Página */
+.checkout { padding: 40px 0 80px; box-shadow: inset 0 2px 4px var(--light-blue-1); }
+.checkout h1 { font-family: var(--font-display); font-size: 28px; font-weight: 800; margin-bottom: 28px; }
+.flight-summary {
+  background: var(--navy);
+  color: var(--white);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+/* Campos */
+.checkout-section { border: 0; padding: 0; margin: 0 0 32px; }
+.checkout-section .form-group,
+.passenger .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.passenger {
+  border: 1px solid var(--gray-500);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.passenger legend { font-weight: 600; padding: 0 8px; }
+
+/* Resumen */
+.summary-line-list { margin: 0; }
+.summary-line { display: flex; justify-content: space-between; }
+.summary-line dd { margin: 0; }
+.summary-total { display: flex; justify-content: space-between; }
+
+/* Modal de confirmación */
+.confirm-modal {
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 48px;
+  text-align: center;
+  max-width: 440px;
+  animation: fadeInUp 0.4s ease;
+}
+.confirm-modal::backdrop { background: rgba(10, 22, 40, 0.7); }
+.confirm-emoji { display: block; font-size: 56px; margin-bottom: 16px; }
+.confirm-modal h2 { font-family: var(--font-display); font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+.booking-code { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--pink); margin-bottom: 20px; }
+.confirm-modal footer { display: flex; gap: 12px; justify-content: center; margin-top: 28px; }
+.confirm-modal .btn-outline { border-color: var(--navy); color: var(--navy); }
+
+/* Extras por pasajero */
+.extra-opcion {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  margin-bottom: 8px;
+  border: 1px solid var(--light-blue);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.extra-opcion:hover { border-color: var(--navy); }
+.extra-nombre { flex: 1; display: flex; flex-direction: column; gap: 2px; font-weight: 600; }
+.extra-nombre small { font-weight: 400; }
+.extra-precio { font-weight: 600; color: var(--navy); }

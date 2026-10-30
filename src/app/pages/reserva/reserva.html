@@ -1,1 +1,254 @@
-<p>reserva works!</p>
+<nav class="stepper" aria-label="Progreso de la reserva">
+  <ol>
+    <li class="step done"><span class="step-dot" aria-hidden="true">✓</span>Vuelo</li>
+    <li class="step done"><span class="step-dot" aria-hidden="true">✓</span>Asiento</li>
+    <li class="step current" aria-current="step"><span class="step-dot" aria-hidden="true">3</span>Pago</li>
+  </ol>
+</nav>
+
+<main class="checkout">
+  <h1>Finalizá tu reserva</h1>
+
+  @if (cargando()) {
+    <p class="muted" role="status">Cargando tu reserva...</p>
+  } @else if (error()) {
+    <p class="form-error" role="alert">{{ error() }}</p>
+    <a routerLink="/carrito" class="btn btn-dark">Ir al carrito</a>
+  } @else {
+    @if (vuelo(); as vuelo) {
+      <p class="flight-summary">
+        <strong>{{ vuelo.aeropuertoOrigen.codigoIata }} → {{ vuelo.aeropuertoDestino.codigoIata }}</strong>
+        · Vuelo #{{ vuelo.id }} · {{ formatearFecha(vuelo.fechaSalida) }}
+        · {{ vuelo.horaSalida }} → {{ vuelo.horaLlegada }} · {{ vuelo.escala ? '1 escala' : 'Directo' }}
+      </p>
+    }
+
+    <section class="checkout-layout">
+
+      <!-- El submit lo maneja el SDK de Mercado Pago (callbacks.onSubmit en reserva.ts) -->
+      <form #formularioPago id="mp-card-form" class="checkout-form">
+        <fieldset class="checkout-section">
+          <legend class="checkout-section-title">
+            <span class="checkout-step-num">1</span> Datos de facturación
+          </legend>
+          <label class="form-group">
+            <span>Email</span>
+            <input type="email" class="form-control" name="email" placeholder="correo@ejemplo.com" required
+              [value]="email()" (input)="email.set($any($event.target).value)" />
+          </label>
+          <label class="form-group">
+            <span>Teléfono</span>
+            <input type="tel" class="form-control" name="telefono" placeholder="+54 11 1234 5678" required
+              [value]="telefono()" (input)="telefono.set($any($event.target).value)" />
+          </label>
+          <label class="form-group">
+            <span>CUIL / CUIT</span>
+            <input type="text" class="form-control" name="cuil" placeholder="Ej. 20351234561" inputmode="numeric" maxlength="13" required
+              [value]="cuil()" (input)="cuil.set($any($event.target).value)" />
+          </label>
+          <label class="form-group">
+            <span>Situación fiscal</span>
+            <select class="form-control" name="situacionFiscal"
+              [value]="situacionFiscal()" (change)="situacionFiscal.set($any($event.target).value)">
+              @for (situacion of situacionesFiscales; track situacion) {
+                <option [value]="situacion">{{ situacion }}</option>
+              }
+            </select>
+          </label>
+        </fieldset>
+
+        <section class="checkout-section" aria-labelledby="titulo-pasajeros">
+          <h2 id="titulo-pasajeros" class="checkout-section-title">
+            <span class="checkout-step-num">2</span> Datos de los pasajeros
+          </h2>
+          @for (pasajero of pasajeros(); track $index) {
+            <fieldset class="passenger">
+              <legend>
+                Pasajero {{ $index + 1 }}
+                @if (pasajero.asiento) {
+                  · Asiento {{ pasajero.asiento }}
+                }
+              </legend>
+              <label class="form-group">
+                <span>Nombre</span>
+                <input type="text" class="form-control" placeholder="Ej. María" required
+                  [value]="pasajero.nombre" (input)="actualizarPasajero($index, 'nombre', $any($event.target).value)" />
+              </label>
+              <label class="form-group">
+                <span>Apellido</span>
+                <input type="text" class="form-control" placeholder="Ej. González" required
+                  [value]="pasajero.apellido" (input)="actualizarPasajero($index, 'apellido', $any($event.target).value)" />
+              </label>
+              <label class="form-group">
+                <span>Tipo de documento</span>
+                <select class="form-control"
+                  [value]="pasajero.tipoDocumento" (change)="actualizarPasajero($index, 'tipoDocumento', $any($event.target).value)">
+                  @for (tipo of tiposDocumento; track tipo.valor) {
+                    <option [value]="tipo.valor">{{ tipo.etiqueta }}</option>
+                  }
+                </select>
+              </label>
+              <label class="form-group">
+                <span>Documento</span>
+                <input type="text" class="form-control" placeholder="Ej. 35123456" maxlength="20" required
+                  [value]="pasajero.documento" (input)="actualizarPasajero($index, 'documento', $any($event.target).value)" />
+              </label>
+              <label class="form-group">
+                <span>Fecha de nacimiento</span>
+                <input type="date" class="form-control" required
+                  [value]="pasajero.fechaNacimiento" (input)="actualizarPasajero($index, 'fechaNacimiento', $any($event.target).value)" />
+              </label>
+              <label class="form-group">
+                <span>Email (opcional)</span>
+                <input type="email" class="form-control" placeholder="correo@ejemplo.com"
+                  [value]="pasajero.email" (input)="actualizarPasajero($index, 'email', $any($event.target).value)" />
+              </label>
+            </fieldset>
+          }
+        </section>
+
+        <section class="checkout-section" aria-labelledby="titulo-extras">
+          <h2 id="titulo-extras" class="checkout-section-title">
+            <span class="checkout-step-num">3</span> Equipaje y extras
+          </h2>
+          @if (equipajes().length === 0 && asistencias().length === 0) {
+            <p class="muted">No hay extras disponibles para este vuelo.</p>
+          }
+          @for (pasajero of pasajeros(); track $index; let indicePasajero = $index) {
+            <fieldset class="passenger">
+              <legend>Pasajero {{ indicePasajero + 1 }}</legend>
+              @if (equipajes().length > 0) {
+                <label class="extra-opcion">
+                  <input type="checkbox" [checked]="pasajero.equipajeIds.length === 0"
+                    (change)="elegirSinEquipaje(indicePasajero, $any($event.target))" />
+                  <span class="extra-nombre">Sin equipaje</span>
+                </label>
+              }
+              @for (equipaje of equipajes(); track equipaje.id) {
+                <label class="extra-opcion">
+                  <input type="checkbox" [checked]="pasajero.equipajeIds.includes(equipaje.id)"
+                    (change)="alternarEquipaje(indicePasajero, equipaje.id, $any($event.target).checked)" />
+                  <span class="extra-nombre">{{ etiquetaEquipaje(equipaje) }}</span>
+                  <span class="extra-precio">+{{ formatearPrecio(equipaje.precio) }}</span>
+                </label>
+              }
+              @if (asistencias().length > 0) {
+                <label class="extra-opcion">
+                  <input type="radio" [name]="'asistencia-' + indicePasajero" [checked]="pasajero.asistenciaId === null"
+                    (change)="actualizarPasajero(indicePasajero, 'asistenciaId', null)" />
+                  <span class="extra-nombre">Sin asistencia al viajero</span>
+                </label>
+                @for (asistencia of asistencias(); track asistencia.id) {
+                  <label class="extra-opcion">
+                    <input type="radio" [name]="'asistencia-' + indicePasajero" [checked]="pasajero.asistenciaId === asistencia.id"
+                      (change)="actualizarPasajero(indicePasajero, 'asistenciaId', asistencia.id)" />
+                    <span class="extra-nombre">
+                      {{ asistencia.nombrePlan }}
+                      <small class="muted">{{ asistencia.descripcion }}</small>
+                    </span>
+                    <span class="extra-precio">+{{ formatearPrecio(asistencia.precio) }}</span>
+                  </label>
+                }
+              }
+            </fieldset>
+          }
+        </section>
+
+        <!-- Los ids de esta sección los usa el SDK de Mercado Pago: no cambiarlos sin cambiar reserva.ts -->
+        <fieldset class="checkout-section">
+          <legend class="checkout-section-title">
+            <span class="checkout-step-num">4</span> Datos de la tarjeta
+          </legend>
+          <label class="form-group">
+            <span>Número de tarjeta</span>
+            <input type="text" class="form-control" id="cardNumber" placeholder="Ej. 4509 9535 6623 3704" inputmode="numeric" maxlength="16" required />
+          </label>
+          <label class="form-group">
+            <span>Nombre del titular</span>
+            <input type="text" class="form-control" id="cardholderName" placeholder="Como figura en la tarjeta" required />
+          </label>
+          <label class="form-group">
+            <span>Vencimiento</span>
+            <input type="text" class="form-control" id="expirationDate" placeholder="MM / AA" inputmode="numeric" maxlength="5" required />
+          </label>
+          <label class="form-group">
+            <span>CVV</span>
+            <input type="text" class="form-control" id="securityCode" placeholder="123" inputmode="numeric" maxlength="4" required />
+          </label>
+          <label class="form-group">
+            <span>Tipo de documento</span>
+            <select class="form-control" id="docType"></select>
+          </label>
+          <label class="form-group">
+            <span>Número de documento</span>
+            <input type="text" class="form-control" id="docNumber" placeholder="Ej. 35123456" inputmode="numeric" maxlength="8" required />
+          </label>
+          <label class="form-group">
+            <span>Banco emisor</span>
+            <select class="form-control" id="issuer"></select>
+          </label>
+          <label class="form-group">
+            <span>Cuotas</span>
+            <select class="form-control" id="installments"></select>
+          </label>
+        </fieldset>
+
+        @if (errorPago()) {
+          <p class="form-error" role="alert">{{ errorPago() }}</p>
+        }
+
+        @if (procesando()) {
+          <p class="muted" role="status">Procesando pago...</p>
+        } @else {
+          <button type="submit" class="btn btn-dark btn-block">
+            Pagar {{ formatearPrecio(total()) }}
+          </button>
+        }
+      </form>
+
+      <aside class="order-summary" aria-labelledby="titulo-resumen">
+        <h2 id="titulo-resumen">Resumen de tu reserva</h2>
+        <dl class="summary-line-list">
+          <div class="summary-line">
+            <dt class="summary-line-label">Tarifa base ({{ pasajeros().length }} pasaje(s))</dt>
+            <dd>{{ formatearPrecio(tarifaBase()) }}</dd>
+          </div>
+          <div class="summary-line">
+            <dt class="summary-line-label">Asientos {{ asientosTexto() }}</dt>
+            <dd>Sin cargo</dd>
+          </div>
+          @for (linea of lineasExtras(); track $index) {
+            <div class="summary-line">
+              <dt class="summary-line-label">{{ linea.etiqueta }}</dt>
+              <dd>+{{ formatearPrecio(linea.precio) }}</dd>
+            </div>
+          }
+          <div class="summary-line">
+            <dt class="summary-line-label">Impuestos y tasas ({{ formatearPorcentaje(tarifas().tasaImpuesto) }})</dt>
+            <dd>{{ formatearPrecio(impuestos()) }}</dd>
+          </div>
+          <div class="summary-line">
+            <dt class="summary-line-label">Tarifa por servicio ({{ formatearPorcentaje(tarifas().tasaServicio) }})</dt>
+            <dd>{{ formatearPrecio(servicio()) }}</dd>
+          </div>
+        </dl>
+        <p class="summary-total">
+          <span class="summary-total-label">Total a pagar</span>
+          <strong class="summary-total-amount">{{ formatearPrecio(total()) }}</strong>
+        </p>
+      </aside>
+    </section>
+  }
+</main>
+
+<dialog #confirmacion class="confirm-modal" aria-labelledby="confirm-titulo">
+  <span class="confirm-emoji" aria-hidden="true">🎉</span>
+  <h2 id="confirm-titulo">¡Reserva confirmada!</h2>
+  <p class="muted">Tu número de reserva es:</p>
+  <p class="booking-code">{{ codigoReserva() }}</p>
+  <p class="muted">Te enviamos la confirmación a tu email. ¡Buen viaje!</p>
+  <footer>
+    <a routerLink="/reservas" class="btn btn-dark">Ver mis reservas</a>
+    <a routerLink="/" class="btn btn-outline">Inicio</a>
+  </footer>
+</dialog>

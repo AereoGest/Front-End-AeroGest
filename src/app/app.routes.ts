@@ -10,6 +10,7 @@ import { MiCarrito } from './pages/carrito/carrito';
 import { authGuard } from './guards/auth.guard';
 import { ForgotPassword } from './pages/forgot-password/forgot-password';
 import { ResetPassword } from './pages/reset-password/reset-password';
+import { Reserva } from './pages/reserva/reserva';
 
 export const routes: Routes = [
     { path: "", component: Home },
@@ -18,6 +19,7 @@ export const routes: Routes = [
     { path: "login", component: LoginForm },
     { path: "vuelos", component: Vuelos },
     { path: "verify", component: Verify },
+    { path: "checkoutReserva", component: Reserva, canActivate: [authGuard] },
     { path: "reservas", component: Reservas, canActivate: [authGuard] },
     { path: "carrito", component: MiCarrito, canActivate: [authGuard] },
     {path: "forgot-password", component: ForgotPassword},
