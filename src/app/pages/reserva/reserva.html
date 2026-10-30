@@ -25,181 +25,112 @@
 
     <section class="checkout-layout">
 
-      <!-- El submit lo maneja el SDK de Mercado Pago (callbacks.onSubmit en reserva.ts) -->
-      <form #formularioPago id="mp-card-form" class="checkout-form">
-        <fieldset class="checkout-section">
-          <legend class="checkout-section-title">
-            <span class="checkout-step-num">1</span> Datos de facturación
-          </legend>
-          <label class="form-group">
-            <span>Email</span>
-            <input type="email" class="form-control" name="email" placeholder="correo@ejemplo.com" required
-              [value]="email()" (input)="email.set($any($event.target).value)" />
-          </label>
-          <label class="form-group">
-            <span>Teléfono</span>
-            <input type="tel" class="form-control" name="telefono" placeholder="+54 11 1234 5678" required
-              [value]="telefono()" (input)="telefono.set($any($event.target).value)" />
-          </label>
-          <label class="form-group">
-            <span>CUIL / CUIT</span>
-            <input type="text" class="form-control" name="cuil" placeholder="Ej. 20351234561" inputmode="numeric" maxlength="13" required
-              [value]="cuil()" (input)="cuil.set($any($event.target).value)" />
-          </label>
-          <label class="form-group">
-            <span>Situación fiscal</span>
-            <select class="form-control" name="situacionFiscal"
-              [value]="situacionFiscal()" (change)="situacionFiscal.set($any($event.target).value)">
-              @for (situacion of situacionesFiscales; track situacion) {
-                <option [value]="situacion">{{ situacion }}</option>
-              }
-            </select>
-          </label>
-        </fieldset>
+      <section class="checkout-form checkout-section" aria-labelledby="titulo-pasajeros">
+        <h2 id="titulo-pasajeros" class="checkout-section-title">
+          <span class="checkout-step-num">1</span> Pasajeros, equipaje y extras
+        </h2>
 
-        <section class="checkout-section" aria-labelledby="titulo-pasajeros">
-          <h2 id="titulo-pasajeros" class="checkout-section-title">
-            <span class="checkout-step-num">2</span> Pasajeros, equipaje y extras
-          </h2>
-          <!-- Un bloque por pasajero con sus datos, su equipaje y su asistencia -->
-          @for (pasajero of pasajeros(); track $index; let indicePasajero = $index) {
-            <fieldset class="passenger">
-              <legend>
-                Pasajero {{ $index + 1 }}
-                @if (pasajero.asiento) {
-                  · Asiento {{ pasajero.asiento }}
+        <!-- Un bloque por pasajero con sus datos, su equipaje y su asistencia -->
+        @for (pasajero of pasajeros(); track $index; let indicePasajero = $index) {
+          <fieldset class="passenger">
+            <legend>
+              Pasajero {{ indicePasajero + 1 }}
+              @if (pasajero.asiento) {
+                · Asiento {{ pasajero.asiento }}
+              }
+            </legend>
+
+            <label class="form-group">
+              <span>Nombre</span>
+              <input type="text" class="form-control" placeholder="Ej. María" required
+                [value]="pasajero.nombre"
+                (input)="actualizarPasajero(indicePasajero, 'nombre', $any($event.target).value)" />
+            </label>
+
+            <label class="form-group">
+              <span>Apellido</span>
+              <input type="text" class="form-control" placeholder="Ej. González" required
+                [value]="pasajero.apellido"
+                (input)="actualizarPasajero(indicePasajero, 'apellido', $any($event.target).value)" />
+            </label>
+
+            <label class="form-group">
+              <span>Tipo de documento</span>
+              <select class="form-control"
+                [value]="pasajero.tipoDocumento"
+                (change)="actualizarPasajero(indicePasajero, 'tipoDocumento', $any($event.target).value)">
+                @for (tipo of tiposDocumento; track tipo.valor) {
+                  <option [value]="tipo.valor">{{ tipo.etiqueta }}</option>
                 }
-              </legend>
-              <label class="form-group">
-                <span>Nombre</span>
-                <input type="text" class="form-control" placeholder="Ej. María" required
-                  [value]="pasajero.nombre" (input)="actualizarPasajero($index, 'nombre', $any($event.target).value)" />
-              </label>
-              <label class="form-group">
-                <span>Apellido</span>
-                <input type="text" class="form-control" placeholder="Ej. González" required
-                  [value]="pasajero.apellido" (input)="actualizarPasajero($index, 'apellido', $any($event.target).value)" />
-              </label>
-              <label class="form-group">
-                <span>Tipo de documento</span>
-                <select class="form-control"
-                  [value]="pasajero.tipoDocumento" (change)="actualizarPasajero($index, 'tipoDocumento', $any($event.target).value)">
-                  @for (tipo of tiposDocumento; track tipo.valor) {
-                    <option [value]="tipo.valor">{{ tipo.etiqueta }}</option>
-                  }
-                </select>
-              </label>
-              <label class="form-group">
-                <span>Documento</span>
-                <input type="text" class="form-control" placeholder="Ej. 35123456" maxlength="20" required
-                  [value]="pasajero.documento" (input)="actualizarPasajero($index, 'documento', $any($event.target).value)" />
-              </label>
-              <label class="form-group">
-                <span>Fecha de nacimiento</span>
-                <input type="date" class="form-control" required
-                  [value]="pasajero.fechaNacimiento" (input)="actualizarPasajero($index, 'fechaNacimiento', $any($event.target).value)" />
-              </label>
-              <label class="form-group">
-                <span>Email (opcional)</span>
-                <input type="email" class="form-control" placeholder="correo@ejemplo.com"
-                  [value]="pasajero.email" (input)="actualizarPasajero($index, 'email', $any($event.target).value)" />
-              </label>
+              </select>
+            </label>
 
-              @if (equipajes().length > 0) {
-                <fieldset class="checkout-section">
-                  <legend>Equipaje</legend>
+            <label class="form-group">
+              <span>Documento</span>
+              <input type="text" class="form-control" placeholder="Ej. 35123456" maxlength="20" required
+                [value]="pasajero.documento"
+                (input)="actualizarPasajero(indicePasajero, 'documento', $any($event.target).value)" />
+            </label>
+
+            <label class="form-group">
+              <span>Fecha de nacimiento</span>
+              <input type="date" class="form-control" required
+                [value]="pasajero.fechaNacimiento"
+                (input)="actualizarPasajero(indicePasajero, 'fechaNacimiento', $any($event.target).value)" />
+            </label>
+
+            <label class="form-group">
+              <span>Email (opcional)</span>
+              <input type="email" class="form-control" placeholder="correo@ejemplo.com"
+                [value]="pasajero.email"
+                (input)="actualizarPasajero(indicePasajero, 'email', $any($event.target).value)" />
+            </label>
+
+            @if (equipajes().length > 0) {
+              <fieldset class="checkout-section">
+                <legend>Equipaje</legend>
+                <label class="extra-opcion">
+                  <input type="checkbox" [checked]="pasajero.equipajeIds.length === 0"
+                    (change)="elegirSinEquipaje(indicePasajero, $any($event.target))" />
+                  <span class="extra-nombre">Sin equipaje</span>
+                </label>
+                @for (equipaje of equipajes(); track equipaje.id) {
                   <label class="extra-opcion">
-                    <input type="checkbox" [checked]="pasajero.equipajeIds.length === 0"
-                      (change)="elegirSinEquipaje(indicePasajero, $any($event.target))" />
-                    <span class="extra-nombre">Sin equipaje</span>
+                    <input type="checkbox" [checked]="pasajero.equipajeIds.includes(equipaje.id)"
+                      (change)="alternarEquipaje(indicePasajero, equipaje.id, $any($event.target).checked)" />
+                    <span class="extra-nombre">{{ etiquetaEquipaje(equipaje) }}</span>
+                    <span class="extra-precio">+{{ formatearPrecio(equipaje.precio) }}</span>
                   </label>
-                  @for (equipaje of equipajes(); track equipaje.id) {
-                    <label class="extra-opcion">
-                      <input type="checkbox" [checked]="pasajero.equipajeIds.includes(equipaje.id)"
-                        (change)="alternarEquipaje(indicePasajero, equipaje.id, $any($event.target).checked)" />
-                      <span class="extra-nombre">{{ etiquetaEquipaje(equipaje) }}</span>
-                      <span class="extra-precio">+{{ formatearPrecio(equipaje.precio) }}</span>
-                    </label>
-                  }
-                </fieldset>
-              }
+                }
+              </fieldset>
+            }
 
-              @if (asistencias().length > 0) {
-                <fieldset class="checkout-section">
-                  <legend>Asistencia al viajero</legend>
+            @if (asistencias().length > 0) {
+              <fieldset class="checkout-section">
+                <legend>Asistencia al viajero</legend>
+                <label class="extra-opcion">
+                  <input type="radio" [name]="'asistencia-' + indicePasajero"
+                    [checked]="pasajero.asistenciaId === null"
+                    (change)="actualizarPasajero(indicePasajero, 'asistenciaId', null)" />
+                  <span class="extra-nombre">Sin asistencia al viajero</span>
+                </label>
+                @for (asistencia of asistencias(); track asistencia.id) {
                   <label class="extra-opcion">
-                    <input type="radio" [name]="'asistencia-' + indicePasajero" [checked]="pasajero.asistenciaId === null"
-                      (change)="actualizarPasajero(indicePasajero, 'asistenciaId', null)" />
-                    <span class="extra-nombre">Sin asistencia al viajero</span>
+                    <input type="radio" [name]="'asistencia-' + indicePasajero"
+                      [checked]="pasajero.asistenciaId === asistencia.id"
+                      (change)="actualizarPasajero(indicePasajero, 'asistenciaId', asistencia.id)" />
+                    <span class="extra-nombre">
+                      {{ asistencia.nombrePlan }}
+                      <small class="muted">{{ asistencia.descripcion }}</small>
+                    </span>
+                    <span class="extra-precio">+{{ formatearPrecio(asistencia.precio) }}</span>
                   </label>
-                  @for (asistencia of asistencias(); track asistencia.id) {
-                    <label class="extra-opcion">
-                      <input type="radio" [name]="'asistencia-' + indicePasajero" [checked]="pasajero.asistenciaId === asistencia.id"
-                        (change)="actualizarPasajero(indicePasajero, 'asistenciaId', asistencia.id)" />
-                      <span class="extra-nombre">
-                        {{ asistencia.nombrePlan }}
-                        <small class="muted">{{ asistencia.descripcion }}</small>
-                      </span>
-                      <span class="extra-precio">+{{ formatearPrecio(asistencia.precio) }}</span>
-                    </label>
-                  }
-                </fieldset>
-              }
-            </fieldset>
-          }
-        </section>
-
-        <!-- Los ids de esta sección los usa el SDK de Mercado Pago: no cambiarlos sin cambiar reserva.ts -->
-        <fieldset class="checkout-section">
-          <legend class="checkout-section-title">
-            <span class="checkout-step-num">3</span> Datos de la tarjeta
-          </legend>
-          <label class="form-group">
-            <span>Número de tarjeta</span>
-            <input type="text" class="form-control" id="cardNumber" placeholder="Ej. 4509 9535 6623 3704" inputmode="numeric" maxlength="16" required />
-          </label>
-          <label class="form-group">
-            <span>Nombre del titular</span>
-            <input type="text" class="form-control" id="cardholderName" placeholder="Como figura en la tarjeta" required />
-          </label>
-          <label class="form-group">
-            <span>Vencimiento</span>
-            <input type="text" class="form-control" id="expirationDate" placeholder="MM / AA" inputmode="numeric" maxlength="5" required />
-          </label>
-          <label class="form-group">
-            <span>CVV</span>
-            <input type="text" class="form-control" id="securityCode" placeholder="123" inputmode="numeric" maxlength="4" required />
-          </label>
-          <label class="form-group">
-            <span>Tipo de documento</span>
-            <select class="form-control" id="docType"></select>
-          </label>
-          <label class="form-group">
-            <span>Número de documento</span>
-            <input type="text" class="form-control" id="docNumber" placeholder="Ej. 35123456" inputmode="numeric" maxlength="8" required />
-          </label>
-          <label class="form-group">
-            <span>Banco emisor</span>
-            <select class="form-control" id="issuer"></select>
-          </label>
-          <label class="form-group">
-            <span>Cuotas</span>
-            <select class="form-control" id="installments"></select>
-          </label>
-        </fieldset>
-
-        @if (errorPago()) {
-          <p class="form-error" role="alert">{{ errorPago() }}</p>
+                }
+              </fieldset>
+            }
+          </fieldset>
         }
-
-        @if (procesando()) {
-          <p class="muted" role="status">Procesando pago...</p>
-        } @else {
-          <button type="submit" class="btn btn-dark btn-block">
-            Pagar {{ formatearPrecio(total()) }}
-          </button>
-        }
-      </form>
+      </section>
 
       <aside class="order-summary" aria-labelledby="titulo-resumen">
         <h2 id="titulo-resumen">Resumen de tu reserva</h2>
@@ -231,8 +162,26 @@
           <span class="summary-total-label">Total a pagar</span>
           <strong class="summary-total-amount">{{ formatearPrecio(total()) }}</strong>
         </p>
+        @if (errorPasajeros()) {
+  <p class="form-error" role="alert">{{ errorPasajeros() }}</p>
+}
+
+      @if (!mostrarPago()) {
+      <button type="button" class="btn btn-dark btn-reservar" (click)="continuarAlPago()">
+        Continuar al pago →
+      </button>
+      } @else {
+        <app-pago
+        [total]="total()"
+        [publicKey]="publicKey()"
+        [procesando]="procesando()"
+        [errorPago]="errorPago()"
+        [validarExtra]="validarPasajeros"
+        (pagar)="pagar($event)" />
+}
       </aside>
     </section>
+    
   }
 </main>
 

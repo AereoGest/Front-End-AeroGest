@@ -1,23 +1,21 @@
 import {
   Component,
   ElementRef,
-  OnDestroy,
   OnInit,
-  afterRenderEffect,
   computed,
   signal,
   viewChild
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Observable, forkJoin, from, map, of, switchMap } from 'rxjs';
+import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
 import { CarritoItem } from '../../Models/Carrito';
 import { Vuelo } from '../../Models/Vuelo';
 import { Equipaje, TipoEquipaje } from '../../Models/Equipaje';
 import { Asistencia } from '../../Models/Asistencia';
 import { TIPOS_DOCUMENTO, TipoDocumento } from '../../Models/Perfil';
 import { ReservaRequest } from '../../Models/Reserva';
-import { PagoRequest, PagoResponse, SituacionFiscal } from '../../Models/Pago';
+import { PagoRequest, PagoResponse } from '../../Models/Pago';
 import { CarritoService } from '../../services/carritoService';
 import { VueloService } from '../../services/vuelo';
 import { EquipajeService } from '../../services/equipajeService';
@@ -25,9 +23,7 @@ import { AsistenciaService } from '../../services/asistenciaService';
 import { ConfigService, Tarifas } from '../../services/config';
 import { MercadoPagoService } from '../../services/mercadoPagoService';
 import { ReservaService } from '../../services/reservaService';
-
-// Lo carga el script del SDK de Mercado Pago en index.html.
-declare const MercadoPago: any;
+import { Pago } from '../pago/pago';
 
 // Lo que guarda la página de asientos en sessionStorage.
 interface AsientoSeleccionado {
@@ -56,13 +52,6 @@ interface LineaExtra {
 
 const CLAVE_ASIENTOS = 'asientos_seleccionados';
 
-const SITUACIONES_FISCALES: SituacionFiscal[] = [
-  'Consumidor Final',
-  'Responsable Inscripto',
-  'Monotributista',
-  'Exento',
-];
-
 const ETIQUETAS_EQUIPAJE: Record<TipoEquipaje, string> = {
   CABINA: 'Cabina',
   BODEGA: 'Bodega',
@@ -78,18 +67,15 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 @Component({
   selector: 'app-reserva',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, Pago],
   templateUrl: './reserva.html',
   styleUrl: './reserva.css',
 })
-export class Reserva implements OnInit, OnDestroy {
-  // Formulario de pago (<form #formularioPago> del html), donde se monta el SDK de Mercado Pago.
-  private readonly formularioPago = viewChild<ElementRef<HTMLFormElement>>('formularioPago');
+export class Reserva implements OnInit {
   // Ventana de confirmación (<dialog #confirmacion> del html).
   private readonly confirmacion = viewChild.required<ElementRef<HTMLDialogElement>>('confirmacion');
 
   protected readonly tiposDocumento = TIPOS_DOCUMENTO;
-  protected readonly situacionesFiscales = SITUACIONES_FISCALES;
 
   protected readonly item = signal<CarritoItem | null>(null);
   protected readonly vuelo = signal<Vuelo | null>(null);
@@ -97,22 +83,24 @@ export class Reserva implements OnInit, OnDestroy {
   protected readonly asistencias = signal<Asistencia[]>([]);
   protected readonly tarifas = signal<Tarifas>({ tasaImpuesto: 0, tasaServicio: 0 });
   protected readonly pasajeros = signal<PasajeroFormulario[]>([]);
-
-  protected readonly email = signal('');
-  protected readonly telefono = signal('');
-  protected readonly cuil = signal('');
-  protected readonly situacionFiscal = signal<SituacionFiscal>('Consumidor Final');
+  protected readonly publicKey = signal('');
 
   protected readonly cargando = signal(true);
   protected readonly error = signal('');
   protected readonly procesando = signal(false);
   protected readonly errorPago = signal('');
   protected readonly codigoReserva = signal('');
+  protected readonly mostrarPago = signal(false);
+  protected readonly errorPasajeros = signal('');
 
-  private readonly publicKey = signal('');
-  private formularioTarjeta: any = null;
-  private tarjetaMontada = false;
-  private montoTarjeta = 0;
+protected continuarAlPago(): void {
+  const mensaje = this.validarPasajeros();
+  this.errorPasajeros.set(mensaje ?? '');
+
+  if (!mensaje) {
+    this.mostrarPago.set(true);
+  }
+}
 
   // Si la reserva se creó pero el pago falló, se reintenta el pago sobre la misma reserva.
   // Se descarta si cambian los datos de los pasajeros, para que se cree una nueva con los datos correctos.
@@ -181,22 +169,10 @@ export class Reserva implements OnInit, OnDestroy {
     private configService: ConfigService,
     private mercadoPagoService: MercadoPagoService,
     private reservaService: ReservaService
-  ) {
-    // El SDK de Mercado Pago necesita los inputs de la tarjeta en el DOM, por eso se monta después de renderizar.
-    // Se vuelve a montar cuando cambia el total, porque las cuotas dependen del monto.
-    afterRenderEffect(() => {
-      if (this.formularioPago() && this.publicKey()) {
-        this.montarFormularioTarjeta(this.total());
-      }
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
     this.cargarDatos();
-  }
-
-  ngOnDestroy(): void {
-    this.desmontarFormularioTarjeta();
   }
 
   protected cargarDatos(): void {
@@ -272,30 +248,13 @@ export class Reserva implements OnInit, OnDestroy {
     });
   }
 
-  // Lo llama el SDK de Mercado Pago al enviar el formulario (ver callbacks.onSubmit).
-  private pagar(): void {
+  // Lo emite <app-pago> cuando el token de la tarjeta ya está generado.
+  protected pagar(pago: PagoRequest): void {
     this.errorPago.set('');
-
-    const mensajeError = this.validarFormulario();
-    if (mensajeError) {
-      this.errorPago.set(mensajeError);
-      return;
-    }
-
-    if (!this.tarjetaMontada) {
-      this.errorPago.set('El formulario de pago se está cargando, intentá de nuevo.');
-      return;
-    }
-
     this.procesando.set(true);
 
-    // Primero se valida la tarjeta generando el token, así no se crea la reserva si los datos están mal.
-    from(this.formularioTarjeta.createCardToken() as Promise<{ id: string }>).pipe(
-      switchMap((token) =>
-        this.obtenerReservaPendiente().pipe(
-          switchMap((reservaId) => this.reservaService.pagarMiReserva(reservaId, this.armarPago(token.id)))
-        )
-      )
+    this.obtenerReservaPendiente().pipe(
+      switchMap((reservaId) => this.reservaService.pagarMiReserva(reservaId, pago))
     ).subscribe({
       next: (respuesta) => this.procesarRespuesta(respuesta),
       error: (error: unknown) => {
@@ -306,6 +265,38 @@ export class Reserva implements OnInit, OnDestroy {
       }
     }).add(() => this.procesando.set(false));
   }
+
+  // <app-pago> la llama antes de generar el token, así no se cobra si los pasajeros están mal.
+  // Es arrow function para que mantenga el `this` al llamarla desde el otro componente.
+  protected readonly validarPasajeros = (): string | null => {
+    const hoy = new Date().toISOString().slice(0, 10);
+
+    for (const [indice, pasajero] of this.pasajeros().entries()) {
+      const numero = indice + 1;
+      const documento = pasajero.documento.replace(/[\s.\-]/g, '').toUpperCase();
+
+      if (!SOLO_LETRAS.test(pasajero.nombre.trim())) {
+        return `Pasajero ${numero}: el nombre solo puede contener letras.`;
+      }
+      if (!SOLO_LETRAS.test(pasajero.apellido.trim())) {
+        return `Pasajero ${numero}: el apellido solo puede contener letras.`;
+      }
+      if (pasajero.tipoDocumento === 'DNI' && !/^\d{7,8}$/.test(documento)) {
+        return `Pasajero ${numero}: el DNI debe tener entre 7 y 8 dígitos.`;
+      }
+      if (pasajero.tipoDocumento === 'PASAPORTE' && !/^[A-Z0-9]{6,20}$/.test(documento)) {
+        return `Pasajero ${numero}: el pasaporte debe tener entre 6 y 20 letras o números.`;
+      }
+      if (!pasajero.fechaNacimiento || pasajero.fechaNacimiento >= hoy) {
+        return `Pasajero ${numero}: ingresá una fecha de nacimiento válida.`;
+      }
+      if (pasajero.email.trim() && !EMAIL_REGEX.test(pasajero.email.trim())) {
+        return `Pasajero ${numero}: el email no es válido.`;
+      }
+    }
+
+    return null;
+  };
 
   private procesarRespuesta(respuesta: PagoResponse): void {
     if (respuesta.status === 'approved') {
@@ -384,46 +375,8 @@ export class Reserva implements OnInit, OnDestroy {
       return [];
     }
   }
-
-  private validarFormulario(): string | null {
-    if (!EMAIL_REGEX.test(this.email().trim())) {
-      return 'Ingresá un email válido.';
-    }
-    if (!/^\d{10,11}$/.test(this.telefono().replace(/[\s\-()+]/g, ''))) {
-      return 'El teléfono debe tener 10 u 11 dígitos (ej: 02234567890 o +54 223 456-7890).';
-    }
-    if (!/^\d{11}$/.test(this.cuil().replace(/[-\s]/g, ''))) {
-      return 'El CUIL/CUIT debe tener 11 dígitos (ej: 20-35123456-1).';
-    }
-
-    const hoy = new Date().toISOString().slice(0, 10);
-
-    for (const [indice, pasajero] of this.pasajeros().entries()) {
-      const numero = indice + 1;
-      const documento = pasajero.documento.replace(/[\s.\-]/g, '').toUpperCase();
-
-      if (!SOLO_LETRAS.test(pasajero.nombre.trim())) {
-        return `Pasajero ${numero}: el nombre solo puede contener letras.`;
-      }
-      if (!SOLO_LETRAS.test(pasajero.apellido.trim())) {
-        return `Pasajero ${numero}: el apellido solo puede contener letras.`;
-      }
-      if (pasajero.tipoDocumento === 'DNI' && !/^\d{7,8}$/.test(documento)) {
-        return `Pasajero ${numero}: el DNI debe tener entre 7 y 8 dígitos.`;
-      }
-      if (pasajero.tipoDocumento === 'PASAPORTE' && !/^[A-Z0-9]{6,20}$/.test(documento)) {
-        return `Pasajero ${numero}: el pasaporte debe tener entre 6 y 20 letras o números.`;
-      }
-      if (!pasajero.fechaNacimiento || pasajero.fechaNacimiento >= hoy) {
-        return `Pasajero ${numero}: ingresá una fecha de nacimiento válida.`;
-      }
-      if (pasajero.email.trim() && !EMAIL_REGEX.test(pasajero.email.trim())) {
-        return `Pasajero ${numero}: el email no es válido.`;
-      }
-    }
-
-    return null;
-  }
+  
+  
 
   // Los asientos de la página de asientos todavía no tienen el id del backend, así que no se envía asientoId:
   // el backend lo permite y el asiento se puede asignar en el check-in.
@@ -445,69 +398,5 @@ export class Reserva implements OnInit, OnDestroy {
         email: pasajero.email.trim(),
       })),
     };
-  }
-
-  private armarPago(token: string): PagoRequest {
-    const datosTarjeta = this.formularioTarjeta.getCardFormData();
-
-    return {
-      token,
-      installments: Number(datosTarjeta.installments) || 1,
-      paymentMethodId: datosTarjeta.paymentMethodId,
-      issuerId: datosTarjeta.issuerId || null,
-      payerEmail: this.email().trim(),
-      payerDocType: datosTarjeta.identificationType,
-      payerDocNumber: datosTarjeta.identificationNumber,
-      cuil: this.cuil().replace(/[-\s]/g, ''),
-      situacionFiscal: this.situacionFiscal(),
-    };
-  }
-
-  private montarFormularioTarjeta(monto: number): void {
-    if (this.formularioTarjeta && monto === this.montoTarjeta) {
-      return;
-    }
-
-    this.desmontarFormularioTarjeta();
-    this.montoTarjeta = monto;
-
-    const mercadoPago = new MercadoPago(this.publicKey(), { locale: 'es-AR' });
-
-    // Los ids tienen que coincidir con los del html.
-    this.formularioTarjeta = mercadoPago.cardForm({
-      amount: String(monto),
-      autoMount: true,
-      form: {
-        id: 'mp-card-form',
-        cardNumber: { id: 'cardNumber' },
-        cardholderName: { id: 'cardholderName' },
-        expirationDate: { id: 'expirationDate' },
-        securityCode: { id: 'securityCode' },
-        installments: { id: 'installments' },
-        identificationType: { id: 'docType' },
-        identificationNumber: { id: 'docNumber' },
-        issuer: { id: 'issuer' },
-      },
-      callbacks: {
-        onFormMounted: (error: unknown) => {
-          this.tarjetaMontada = !error;
-          if (error) {
-            this.errorPago.set('No se pudo cargar el formulario de pago. Recargá la página.');
-          }
-        },
-        onSubmit: (event: Event) => {
-          event.preventDefault();
-          this.pagar();
-        },
-      },
-    });
-  }
-
-  private desmontarFormularioTarjeta(): void {
-    if (this.formularioTarjeta) {
-      this.formularioTarjeta.unmount();
-      this.formularioTarjeta = null;
-      this.tarjetaMontada = false;
-    }
   }
 }

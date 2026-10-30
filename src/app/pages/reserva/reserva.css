@@ -1,21 +1,29 @@
-.muted { color: var(--gray-500); font-size: 14px; }
-.btn-block { width: 100%; margin-top: 20px; padding: 14px; font-size: 16px; justify-content: center; }
+/* Solo se usan las variables globales de styles.css. */
+:host {
+  --texto-suave: color-mix(in srgb, var(--navy) 60%, transparent);
+  --borde-suave: color-mix(in srgb, var(--navy) 15%, transparent);
+  --borde-campo: color-mix(in srgb, var(--navy) 30%, transparent);
+  display: block;
+}
+
+/* ── Mensajes ── */
+.muted { color: var(--texto-suave); font-size: 14px; }
+
 .form-error {
+  margin: 16px 0;
   padding: 12px;
-  background: #fdf0ee;
-  color: #c0392b;
   border-radius: var(--radius);
-  margin-top: 16px;
+  background: color-mix(in srgb, var(--burgundy) 8%, white);
+  color: var(--burgundy);
   font-size: 14px;
 }
 
-/* Stepper */
+/* ── Stepper ── */
 .stepper {
-  background: var(--white);
-  border-bottom: 1px solid var(--gray-500);
-  padding: 16px 0;
   margin-top: 88px;
-  box-shadow: inset 0 2px 4px var(--light-blue-1);
+  padding: 16px 0;
+  background: var(--white);
+  border-bottom: 1px solid var(--borde-suave);
 }
 .stepper ol {
   display: flex;
@@ -26,13 +34,13 @@
   list-style: none;
 }
 .step {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   font-size: 11px;
-  color: var(--gray-500);
-  position: relative;
+  color: var(--texto-suave);
 }
 .step + .step::before {
   content: "";
@@ -41,84 +49,208 @@
   right: 50%;
   width: 100%;
   height: 2px;
-  background: var(--success);
+  background: var(--light-blue);
 }
 .step-dot {
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 28px;
   height: 28px;
   margin-bottom: 4px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: var(--light-blue);
+  color: var(--navy);
   font-size: 12px;
   font-weight: 700;
-  background: var(--success);
-  color: var(--navy);
 }
 .step.current { font-weight: 600; color: var(--navy); }
 .step.current .step-dot { background: var(--navy); color: var(--white); }
 
-/* Página */
-.checkout { padding: 40px 0 80px; box-shadow: inset 0 2px 4px var(--light-blue-1); }
-.checkout h1 { font-family: var(--font-display); font-size: 28px; font-weight: 800; margin-bottom: 28px; }
+/* ── Página ── */
+.checkout {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+.checkout h1 {
+  margin-bottom: 28px;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+}
 .flight-summary {
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
   background: var(--navy);
   color: var(--white);
-  border-radius: var(--radius-md);
-  padding: 16px 20px;
-  margin-bottom: 24px;
   font-size: 14px;
 }
 
-/* Campos */
+/* ── Layout: formulario + resumen ── */
+.checkout-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 32px;
+  align-items: start;
+}
+
+/* ── Secciones ── */
 .checkout-section { border: 0; padding: 0; margin: 0 0 32px; }
-.checkout-section .form-group,
-.passenger .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+
+.checkout-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.checkout-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: var(--cream);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ── Pasajeros ── */
 .passenger {
-  border: 1px solid var(--gray-500);
-  border-radius: var(--radius-md);
+  margin-bottom: 16px;
   padding: 20px;
+  border: 1px solid var(--borde-suave);
+  border-radius: var(--radius-md);
+  background: white;
+  box-shadow: var(--shadow-sm);
+}
+.passenger legend { padding: 0 8px; font-weight: 600; }
+.passenger .checkout-section { margin: 20px 0 0; }
+.passenger .checkout-section legend { margin-bottom: 10px; font-size: 14px; font-weight: 600; }
+
+/* ── Campos ── */
+.passenger .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   margin-bottom: 16px;
 }
-.passenger legend { font-weight: 600; padding: 0 8px; }
-
-/* Resumen */
-.summary-line-list { margin: 0; }
-.summary-line { display: flex; justify-content: space-between; }
-.summary-line dd { margin: 0; }
-.summary-total { display: flex; justify-content: space-between; }
-
-/* Modal de confirmación */
-.confirm-modal {
-  border: none;
-  border-radius: var(--radius-lg);
-  padding: 48px;
-  text-align: center;
-  max-width: 440px;
-  animation: fadeInUp 0.4s ease;
+.form-group > span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--texto-suave);
 }
-.confirm-modal::backdrop { background: rgba(10, 22, 40, 0.7); }
-.confirm-emoji { display: block; font-size: 56px; margin-bottom: 16px; }
-.confirm-modal h2 { font-family: var(--font-display); font-size: 26px; font-weight: 800; margin-bottom: 8px; }
-.booking-code { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--pink); margin-bottom: 20px; }
-.confirm-modal footer { display: flex; gap: 12px; justify-content: center; margin-top: 28px; }
-.confirm-modal .btn-outline { border-color: var(--navy); color: var(--navy); }
+.form-control {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--borde-campo);
+  border-radius: var(--radius-md);
+  background: white;
+  color: var(--navy);
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.form-control::placeholder { color: color-mix(in srgb, var(--navy) 40%, transparent); }
+.form-control:hover:not(:focus) { border-color: color-mix(in srgb, var(--navy) 60%, transparent); }
+.form-control:focus { border-color: var(--navy); box-shadow: 0 0 0 1px var(--navy); }
+select.form-control { cursor: pointer; }
 
-/* Extras por pasajero */
+/* ── Extras por pasajero ── */
 .extra-opcion {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 14px;
   margin-bottom: 8px;
-  border: 1px solid var(--light-blue);
-  border-radius: var(--radius);
+  padding: 14px;
+  border: 1px solid var(--borde-campo);
+  border-radius: var(--radius-md);
   cursor: pointer;
+  transition: border-color var(--transition);
 }
 .extra-opcion:hover { border-color: var(--navy); }
+.extra-opcion:has(input:checked) {
+  border-color: var(--light-blue);
+  background: var(--light-blue-difuse);
+}
 .extra-nombre { flex: 1; display: flex; flex-direction: column; gap: 2px; font-weight: 600; }
 .extra-nombre small { font-weight: 400; }
 .extra-precio { font-weight: 600; color: var(--navy); }
+
+/* ── Resumen ── */
+.order-summary {
+  position: sticky;
+  top: 100px;
+  padding: 24px;
+  border: 1px solid var(--borde-suave);
+  border-radius: var(--radius-md);
+  background: white;
+  box-shadow: var(--shadow-md);
+}
+.order-summary h2 { margin-bottom: 16px; font-size: 16px; font-weight: 600; }
+
+.summary-line-list { margin: 0; padding-top: 16px; border-top: 1px solid var(--borde-suave); }
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.summary-line-label { color: var(--texto-suave); }
+.summary-line dd { margin: 0; white-space: nowrap; }
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--navy);
+}
+.summary-total-label { font-weight: 600; }
+.summary-total-amount { font-family: var(--font-display); font-size: 22px; font-weight: 700; }
+
+/* ── Modal de confirmación ── */
+.confirm-modal {
+  margin: auto;
+  max-width: 440px;
+  padding: 48px;
+  border: none;
+  border-radius: var(--radius-lg);
+  text-align: center;
+  animation: fadeInUp 0.4s ease;
+}
+.confirm-modal::backdrop { background: rgba(10, 22, 40, 0.7); }
+.confirm-emoji { display: block; margin-bottom: 16px; font-size: 56px; }
+.confirm-modal h2 { margin-bottom: 8px; font-family: var(--font-display); font-size: 26px; font-weight: 800; }
+.booking-code {
+  margin-bottom: 20px;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--burgundy);
+}
+.confirm-modal footer { display: flex; justify-content: center; gap: 12px; margin-top: 28px; }
+.confirm-modal .btn-outline { border-color: var(--navy); color: var(--navy); }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .checkout-layout { grid-template-columns: minmax(0, 1fr); }
+  .order-summary { position: static; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form-control, .extra-opcion { transition-duration: 0.01ms; }
+}

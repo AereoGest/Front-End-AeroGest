@@ -1,0 +1,101 @@
+<!-- El submit lo maneja el SDK de Mercado Pago (callbacks.onSubmit en pago.ts) -->
+<form #formularioPago id="mp-card-form" class="checkout-form">
+
+  <fieldset class="checkout-section">
+    <legend class="checkout-section-title">
+      <span class="checkout-step-num">2</span> Datos de facturación
+    </legend>
+
+    <label class="form-group">
+      <span>Email</span>
+      <input type="email" class="form-control" name="email" placeholder="correo@ejemplo.com" required
+        [value]="email()" (input)="email.set($any($event.target).value)" />
+    </label>
+
+    <label class="form-group">
+      <span>Teléfono</span>
+      <input type="tel" class="form-control" name="telefono" placeholder="+54 11 1234 5678" required
+        [value]="telefono()" (input)="telefono.set($any($event.target).value)" />
+    </label>
+
+    <label class="form-group">
+      <span>CUIL / CUIT</span>
+      <input type="text" class="form-control" name="cuil" placeholder="Ej. 20351234561"
+        inputmode="numeric" maxlength="13" required
+        [value]="cuil()" (input)="cuil.set($any($event.target).value)" />
+    </label>
+
+    <label class="form-group">
+      <span>Situación fiscal</span>
+      <select class="form-control" name="situacionFiscal"
+        [value]="situacionFiscal()" (change)="situacionFiscal.set($any($event.target).value)">
+        @for (situacion of situacionesFiscales; track situacion) {
+          <option [value]="situacion">{{ situacion }}</option>
+        }
+      </select>
+    </label>
+  </fieldset>
+
+  <!-- Los ids de esta sección los usa el SDK de Mercado Pago: no cambiarlos sin cambiar pago.ts -->
+  <fieldset class="checkout-section">
+    <legend class="checkout-section-title">
+      <span class="checkout-step-num">3</span> Datos de la tarjeta
+    </legend>
+
+    <label class="form-group">
+      <span>Número de tarjeta</span>
+      <input type="text" class="form-control" id="cardNumber" placeholder="Ej. 4509 9535 6623 3704"
+        inputmode="numeric" maxlength="16" required />
+    </label>
+
+    <label class="form-group">
+      <span>Nombre del titular</span>
+      <input type="text" class="form-control" id="cardholderName" placeholder="Como figura en la tarjeta" required />
+    </label>
+
+    <label class="form-group">
+      <span>Vencimiento</span>
+      <input type="text" class="form-control" id="expirationDate" placeholder="MM / AA"
+        inputmode="numeric" maxlength="5" required />
+    </label>
+
+    <label class="form-group">
+      <span>CVV</span>
+      <input type="text" class="form-control" id="securityCode" placeholder="123"
+        inputmode="numeric" maxlength="4" required />
+    </label>
+
+    <label class="form-group">
+      <span>Tipo de documento</span>
+      <select class="form-control" id="docType"></select>
+    </label>
+
+    <label class="form-group">
+      <span>Número de documento</span>
+      <input type="text" class="form-control" id="docNumber" placeholder="Ej. 35123456"
+        inputmode="numeric" maxlength="8" required />
+    </label>
+
+    <label class="form-group">
+      <span>Banco emisor</span>
+      <select class="form-control" id="issuer"></select>
+    </label>
+
+    <label class="form-group">
+      <span>Cuotas</span>
+      <select class="form-control" id="installments"></select>
+    </label>
+  </fieldset>
+
+  @if (mensajeError()) {
+    <p class="form-error" role="alert">{{ mensajeError() }}</p>
+  }
+
+  @if (ocupado()) {
+    <p class="muted" role="status">Procesando pago...</p>
+  } @else {
+    <button type="submit" class="btn btn-dark btn-block">
+      Pagar {{ formatearPrecio(total()) }}
+    </button>
+  }
+</form>
