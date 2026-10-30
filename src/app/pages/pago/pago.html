@@ -1,3 +1,30 @@
+<!-- Progreso -->
+<nav class="progress-bar" aria-label="Progreso de la reserva">
+  <div class="progress-steps">
+    <div class="progress-step">
+      <span class="step-circle completed" aria-hidden="true">✓</span>
+      Vuelo
+    </div>
+    <div class="step-line completed-line"></div>
+
+    <div class="progress-step">
+      <span class="step-circle completed" aria-hidden="true">✓</span>
+      Asiento
+    </div>
+    <div class="step-line completed-line"></div>
+
+    <div class="progress-step">
+      <span class="step-circle completed" aria-hidden="true">✓</span>
+      Pasajeros
+    </div>
+    <div class="step-line completed-line"></div>
+
+    <div class="progress-step current-label" aria-current="step">
+      <span class="step-circle current" aria-hidden="true">4</span>
+      Pago
+    </div>
+  </div>
+</nav>
 <!-- El submit lo maneja el SDK de Mercado Pago (callbacks.onSubmit en pago.ts) -->
 <form #formularioPago id="mp-card-form" class="checkout-form">
 

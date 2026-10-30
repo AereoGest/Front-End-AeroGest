@@ -5,6 +5,70 @@
   display: block;
 }
 
+/* ── Barra de progreso ── */
+.progress-bar {
+  margin-top: 0;
+  padding: 16px 0;
+  background: var(--white);
+  border-bottom: 1px solid var(--borde-suave);
+}
+
+.progress-steps {
+  display: flex;
+  align-items: flex-start;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.progress-step {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 11px;
+  color: var(--texto-suave);
+}
+
+.step-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.step-circle.completed {
+  background: var(--light-blue);
+  color: var(--navy);
+}
+
+.step-circle.current {
+  background: var(--navy);
+  color: var(--white);
+}
+
+.current-label {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+/* La línea queda centrada a la altura de los círculos (28px / 2 = 14px) */
+.step-line {
+  flex: 1;
+  height: 2px;
+  margin-top: 13px;
+  background: var(--borde-suave);
+}
+
+.completed-line {
+  background: var(--light-blue);
+}
+
 /* ── Secciones ── */
 .checkout-section {
   border: 0;
