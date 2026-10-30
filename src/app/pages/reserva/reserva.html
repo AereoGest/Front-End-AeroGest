@@ -59,9 +59,10 @@
 
         <section class="checkout-section" aria-labelledby="titulo-pasajeros">
           <h2 id="titulo-pasajeros" class="checkout-section-title">
-            <span class="checkout-step-num">2</span> Datos de los pasajeros
+            <span class="checkout-step-num">2</span> Pasajeros, equipaje y extras
           </h2>
-          @for (pasajero of pasajeros(); track $index) {
+          <!-- Un bloque por pasajero con sus datos, su equipaje y su asistencia -->
+          @for (pasajero of pasajeros(); track $index; let indicePasajero = $index) {
             <fieldset class="passenger">
               <legend>
                 Pasajero {{ $index + 1 }}
@@ -103,52 +104,46 @@
                 <input type="email" class="form-control" placeholder="correo@ejemplo.com"
                   [value]="pasajero.email" (input)="actualizarPasajero($index, 'email', $any($event.target).value)" />
               </label>
-            </fieldset>
-          }
-        </section>
 
-        <section class="checkout-section" aria-labelledby="titulo-extras">
-          <h2 id="titulo-extras" class="checkout-section-title">
-            <span class="checkout-step-num">3</span> Equipaje y extras
-          </h2>
-          @if (equipajes().length === 0 && asistencias().length === 0) {
-            <p class="muted">No hay extras disponibles para este vuelo.</p>
-          }
-          @for (pasajero of pasajeros(); track $index; let indicePasajero = $index) {
-            <fieldset class="passenger">
-              <legend>Pasajero {{ indicePasajero + 1 }}</legend>
               @if (equipajes().length > 0) {
-                <label class="extra-opcion">
-                  <input type="checkbox" [checked]="pasajero.equipajeIds.length === 0"
-                    (change)="elegirSinEquipaje(indicePasajero, $any($event.target))" />
-                  <span class="extra-nombre">Sin equipaje</span>
-                </label>
-              }
-              @for (equipaje of equipajes(); track equipaje.id) {
-                <label class="extra-opcion">
-                  <input type="checkbox" [checked]="pasajero.equipajeIds.includes(equipaje.id)"
-                    (change)="alternarEquipaje(indicePasajero, equipaje.id, $any($event.target).checked)" />
-                  <span class="extra-nombre">{{ etiquetaEquipaje(equipaje) }}</span>
-                  <span class="extra-precio">+{{ formatearPrecio(equipaje.precio) }}</span>
-                </label>
-              }
-              @if (asistencias().length > 0) {
-                <label class="extra-opcion">
-                  <input type="radio" [name]="'asistencia-' + indicePasajero" [checked]="pasajero.asistenciaId === null"
-                    (change)="actualizarPasajero(indicePasajero, 'asistenciaId', null)" />
-                  <span class="extra-nombre">Sin asistencia al viajero</span>
-                </label>
-                @for (asistencia of asistencias(); track asistencia.id) {
+                <fieldset class="checkout-section">
+                  <legend>Equipaje</legend>
                   <label class="extra-opcion">
-                    <input type="radio" [name]="'asistencia-' + indicePasajero" [checked]="pasajero.asistenciaId === asistencia.id"
-                      (change)="actualizarPasajero(indicePasajero, 'asistenciaId', asistencia.id)" />
-                    <span class="extra-nombre">
-                      {{ asistencia.nombrePlan }}
-                      <small class="muted">{{ asistencia.descripcion }}</small>
-                    </span>
-                    <span class="extra-precio">+{{ formatearPrecio(asistencia.precio) }}</span>
+                    <input type="checkbox" [checked]="pasajero.equipajeIds.length === 0"
+                      (change)="elegirSinEquipaje(indicePasajero, $any($event.target))" />
+                    <span class="extra-nombre">Sin equipaje</span>
                   </label>
-                }
+                  @for (equipaje of equipajes(); track equipaje.id) {
+                    <label class="extra-opcion">
+                      <input type="checkbox" [checked]="pasajero.equipajeIds.includes(equipaje.id)"
+                        (change)="alternarEquipaje(indicePasajero, equipaje.id, $any($event.target).checked)" />
+                      <span class="extra-nombre">{{ etiquetaEquipaje(equipaje) }}</span>
+                      <span class="extra-precio">+{{ formatearPrecio(equipaje.precio) }}</span>
+                    </label>
+                  }
+                </fieldset>
+              }
+
+              @if (asistencias().length > 0) {
+                <fieldset class="checkout-section">
+                  <legend>Asistencia al viajero</legend>
+                  <label class="extra-opcion">
+                    <input type="radio" [name]="'asistencia-' + indicePasajero" [checked]="pasajero.asistenciaId === null"
+                      (change)="actualizarPasajero(indicePasajero, 'asistenciaId', null)" />
+                    <span class="extra-nombre">Sin asistencia al viajero</span>
+                  </label>
+                  @for (asistencia of asistencias(); track asistencia.id) {
+                    <label class="extra-opcion">
+                      <input type="radio" [name]="'asistencia-' + indicePasajero" [checked]="pasajero.asistenciaId === asistencia.id"
+                        (change)="actualizarPasajero(indicePasajero, 'asistenciaId', asistencia.id)" />
+                      <span class="extra-nombre">
+                        {{ asistencia.nombrePlan }}
+                        <small class="muted">{{ asistencia.descripcion }}</small>
+                      </span>
+                      <span class="extra-precio">+{{ formatearPrecio(asistencia.precio) }}</span>
+                    </label>
+                  }
+                </fieldset>
               }
             </fieldset>
           }
@@ -157,7 +152,7 @@
         <!-- Los ids de esta sección los usa el SDK de Mercado Pago: no cambiarlos sin cambiar reserva.ts -->
         <fieldset class="checkout-section">
           <legend class="checkout-section-title">
-            <span class="checkout-step-num">4</span> Datos de la tarjeta
+            <span class="checkout-step-num">3</span> Datos de la tarjeta
           </legend>
           <label class="form-group">
             <span>Número de tarjeta</span>
