@@ -99,6 +99,21 @@
 .resumen-total dt { font-weight: 600; color: var(--navy); }
 .resumen-total dd { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
 
+.resumen .btn-reservar {
+  width: 100%;
+  justify-content: center;
+  margin-top: 20px;
+}
+.resumen .btn-reservar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.resumen .btn-reservar:disabled:hover {
+  background: var(--dark-navy);
+}
+
 /* ── Avisos: reutilizan .toast global ── */
 .toast.error { border-left-color: var(--burgundy); }
 

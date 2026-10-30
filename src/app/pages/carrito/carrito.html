@@ -62,8 +62,18 @@
             <dt>Total</dt>
             <dd>{{ formatearPrecio(total()) }}</dd>
           </div>
+
+          <button
+          type="button"
+          class="btn btn-primary btn-reservar"
+          [disabled]="items().length === 0 || cargando()"
+          [routerLink]="['/asientos']">
+          Reservar
+        </button>
         </dl>
       </aside>
+
+  
     </div>
   </div>
 </section>
