@@ -2,7 +2,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import FilaAsientos from '../../Models/FilaAsientos';
 import AsientoVista from '../../Models/AsientoVista';
 import AsientoModel from '../../Models/AsientoModel';
@@ -10,7 +10,7 @@ import AsientoModel from '../../Models/AsientoModel';
 @Component({
   selector: 'app-asientos',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './asientos.html',
   styleUrl: './asientos.css'
 })
@@ -174,9 +174,6 @@ estaSeleccionado(id: string): boolean {
     return this.basePrice * this.seatsNeeded + this.totalExtra;
   }
 
-  get puedeContinuar(): boolean {
-    return this.selectedSeats.length === this.seatsNeeded;
-  }
 
   get asientosTexto(): string {
     return this.selectedSeats.length
@@ -184,16 +181,14 @@ estaSeleccionado(id: string): boolean {
       : 'Ninguno aún';
   }
 
-  continuarPago(): void {
-    if (!this.puedeContinuar) {
-      return;
-    }
+ continuarPago(): void {
+  console.log('click en continuar');
 
-    sessionStorage.setItem(
-      'asientos_seleccionados',
-      JSON.stringify(this.selectedSeats)
-    );
+  sessionStorage.setItem(
+    'asientos_seleccionados',
+    JSON.stringify(this.selectedSeats)
+  );
 
-    this.router.navigate(['/pago']);
-  }
+  this.router.navigate(['/checkoutReserva']);
+}
 }
