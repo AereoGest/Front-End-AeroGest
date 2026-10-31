@@ -17,6 +17,9 @@ export class Auth {
   private readonly sesion = signal<boolean>(this.haySesion());
   readonly usuarioAutenticado = computed(() => this.sesion());
 
+  private readonly emailActual = signal<string | null>(this.leerEmail());
+  readonly emailUsuario = this.emailActual.asReadonly();
+
   constructor(private http: HttpClient) {}
 
   iniciarSesion(credenciales: Login): Observable<AuthResponse> {
@@ -97,15 +100,21 @@ export class Auth {
     if (data.role) {
       localStorage.setItem('role', data.role);
     }
+    this.emailActual.set(data.email);
     this.sesion.set(true);
   }
 
   private limpiarSesion(): void {
     STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
+    this.emailActual.set(null);
     this.sesion.set(false);
   }
 
   private haySesion(): boolean {
     return !!localStorage.getItem('token');
+  }
+
+  private leerEmail(): string | null {
+    return localStorage.getItem('email');
   }
 }

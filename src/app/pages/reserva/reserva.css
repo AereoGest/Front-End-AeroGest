@@ -317,6 +317,12 @@ select.form-control {
   color: var(--text);
 }
 
+.order-summary .btn-reservar {
+  width: 100%;
+  justify-content: center;
+  margin-top: 20px;
+}
+
 /* ── Modal de confirmación ── */
 .confirm-modal {
   margin: auto;

@@ -6,8 +6,8 @@
 
     <nav id="nav" aria-label="Navegación principal">
         <ul>
-            <li><a routerLink="/">Inicio</a></li>
-            <li><a routerLink="/vuelos">Vuelos</a></li>
+            <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Inicio</a></li>
+            <li><a routerLink="/vuelos" routerLinkActive="active">Vuelos</a></li>
             <li><a routerLink="/">Destinos</a></li>
         </ul>
     </nav>
@@ -37,9 +37,108 @@
         </button>
 
         @if (auth.usuarioAutenticado()) {
-            <button id="perfil" [routerLink]="['/perfil']">MI PERFIL</button>
-            <button id="carrito" [routerLink]="['/carrito']">CARRITO</button>
-            <button id="cerrar" (click)="cerrarSesion()">CERRAR SESIÓN</button>
+            <div class="user-menu">
+                <button
+                    type="button"
+                    id="user-menu-trigger"
+                    class="user-menu-trigger"
+                    [class.is-open]="menuAbierto()"
+                    aria-haspopup="menu"
+                    [attr.aria-expanded]="menuAbierto()"
+                    aria-label="Menú de usuario"
+                    (click)="toggleMenu()">
+                    <span class="user-avatar" aria-hidden="true">{{ inicialUsuario() }}</span>
+                    <span class="user-name">{{ nombreCorto() }}</span>
+                    <svg class="user-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m6 9 6 6 6-6"></path>
+                    </svg>
+                </button>
+
+                @if (menuAbierto()) {
+                    <div class="user-dropdown" role="menu" aria-label="Opciones de cuenta">
+                        <div class="dropdown-header">
+                            <span class="dropdown-avatar" aria-hidden="true">{{ inicialUsuario() }}</span>
+                            <div class="dropdown-user-meta">
+                                <span class="dropdown-user-label">Sesión iniciada</span>
+                                <span class="dropdown-user-email">{{ auth.emailUsuario() || 'Mi cuenta' }}</span>
+                            </div>
+                        </div>
+
+                        <hr class="dropdown-divider" />
+
+                        <ul class="dropdown-list">
+                            <li role="none">
+                                <a
+                                    id="perfil"
+                                    class="dropdown-item"
+                                    role="menuitem"
+                                    [routerLink]="['/perfil']"
+                                    routerLinkActive="is-active"
+                                    (click)="cerrarMenu()">
+                                    <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                    <span>Mi perfil</span>
+                                </a>
+                            </li>
+                            <li role="none">
+                                <a
+                                    id="carrito"
+                                    class="dropdown-item"
+                                    role="menuitem"
+                                    [routerLink]="['/carrito']"
+                                    routerLinkActive="is-active"
+                                    (click)="cerrarMenu()">
+                                    <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <circle cx="9" cy="21" r="1"></circle>
+                                        <circle cx="20" cy="21" r="1"></circle>
+                                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                    </svg>
+                                    <span>Carrito</span>
+                                </a>
+                            </li>
+                            <li role="none">
+                                <a
+                                    id="compras"
+                                    class="dropdown-item"
+                                    role="menuitem"
+                                    [routerLink]="['/reservas']"
+                                    routerLinkActive="is-active"
+                                    (click)="cerrarMenu()">
+                                    <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                                        <path d="M3 6h18"></path>
+                                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                                    </svg>
+                                    <span>Compras realizadas</span>
+                                </a>
+                            </li>
+                        </ul>
+
+                        <hr class="dropdown-divider" />
+
+                        <button
+                            type="button"
+                            id="cerrar"
+                            class="dropdown-item dropdown-item-danger"
+                            role="menuitem"
+                            (click)="cerrarSesion()">
+                            <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            <span>Cerrar sesión</span>
+                        </button>
+                    </div>
+                }
+            </div>
         } @else {
             <button id="log" [routerLink]="['/login']">INICIAR SESIÓN</button>
             <button id="register" [routerLink]="['/register']">REGISTRAR</button>

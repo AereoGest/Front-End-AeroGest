@@ -12,18 +12,14 @@
     </div>
     <div class="step-line completed-line"></div>
 
-    <div class="progress-step" [class.current-label]="!mostrarPago()"
-      [attr.aria-current]="mostrarPago() ? null : 'step'">
-      <span class="step-circle" [class.current]="!mostrarPago()" [class.completed]="mostrarPago()"
-        aria-hidden="true">{{ mostrarPago() ? '✓' : '3' }}</span>
+    <div class="progress-step current-label" aria-current="step">
+      <span class="step-circle current" aria-hidden="true">3</span>
       Pasajeros
     </div>
-    <div class="step-line" [class.completed-line]="mostrarPago()"></div>
+    <div class="step-line"></div>
 
-    <div class="progress-step" [class.current-label]="mostrarPago()"
-      [attr.aria-current]="mostrarPago() ? 'step' : null">
-      <span class="step-circle" [class.current]="mostrarPago()" [class.pending]="!mostrarPago()"
-        aria-hidden="true">4</span>
+    <div class="progress-step">
+      <span class="step-circle pending" aria-hidden="true">4</span>
       Pago
     </div>
   </div>
@@ -34,8 +30,14 @@
 
   @if (cargando()) {
     <p class="muted" role="status">Cargando tu reserva...</p>
-  } @else if (error()) {
-    <p class="form-error" role="alert">{{ error() }}</p>
+  } @else if (errorCarga()) {
+    <p class="form-error" role="alert">
+      @switch (errorCarga()) {
+        @case ('carritoVacio') { Tu carrito está vacío. Elegí un vuelo para continuar. }
+        @case ('variosVuelos') { Por ahora solo podés reservar un vuelo a la vez. Dejá un único vuelo en el carrito para continuar. }
+        @case ('servidor') { {{ mensajeServidor() || 'No se pudo cargar tu reserva. Intentá nuevamente.' }} }
+      }
+    </p>
     <a routerLink="/carrito" class="btn btn-dark">Ir al carrito</a>
   } @else {
     @if (vuelo(); as vuelo) {
@@ -55,6 +57,8 @@
 
         <!-- Un bloque por pasajero con sus datos, su equipaje y su asistencia -->
         @for (pasajero of pasajeros(); track $index; let indicePasajero = $index) {
+          @let campos = formulario[indicePasajero];
+
           <fieldset class="passenger">
             <legend>
               Pasajero {{ indicePasajero + 1 }}
@@ -65,23 +69,33 @@
 
             <label class="form-group">
               <span>Nombre</span>
-              <input type="text" class="form-control" placeholder="Ej. María" required
-                [value]="pasajero.nombre"
-                (input)="actualizarPasajero(indicePasajero, 'nombre', $any($event.target).value)" />
+              <input type="text" class="form-control" placeholder="Ej. María" [formField]="campos.nombre" />
+              @if (campos.nombre().touched() && campos.nombre().invalid()) {
+                <small class="form-error" role="alert">
+                  @switch (campos.nombre().errors()[0].kind) {
+                    @case ('required') { El nombre es obligatorio. }
+                    @case ('pattern') { El nombre solo puede contener letras. }
+                  }
+                </small>
+              }
             </label>
 
             <label class="form-group">
               <span>Apellido</span>
-              <input type="text" class="form-control" placeholder="Ej. González" required
-                [value]="pasajero.apellido"
-                (input)="actualizarPasajero(indicePasajero, 'apellido', $any($event.target).value)" />
+              <input type="text" class="form-control" placeholder="Ej. González" [formField]="campos.apellido" />
+              @if (campos.apellido().touched() && campos.apellido().invalid()) {
+                <small class="form-error" role="alert">
+                  @switch (campos.apellido().errors()[0].kind) {
+                    @case ('required') { El apellido es obligatorio. }
+                    @case ('pattern') { El apellido solo puede contener letras. }
+                  }
+                </small>
+              }
             </label>
 
             <label class="form-group">
               <span>Tipo de documento</span>
-              <select class="form-control"
-                [value]="pasajero.tipoDocumento"
-                (change)="actualizarPasajero(indicePasajero, 'tipoDocumento', $any($event.target).value)">
+              <select class="form-control" [formField]="campos.tipoDocumento">
                 @for (tipo of tiposDocumento; track tipo.valor) {
                   <option [value]="tipo.valor">{{ tipo.etiqueta }}</option>
                 }
@@ -90,23 +104,39 @@
 
             <label class="form-group">
               <span>Documento</span>
-              <input type="text" class="form-control" placeholder="Ej. 35123456" maxlength="20" required
-                [value]="pasajero.documento"
-                (input)="actualizarPasajero(indicePasajero, 'documento', $any($event.target).value)" />
+              <input type="text" class="form-control" placeholder="Ej. 35123456"
+                [formField]="campos.documento" />
+              @if (campos.documento().touched() && campos.documento().invalid()) {
+                <small class="form-error" role="alert">
+                  @switch (campos.documento().errors()[0].kind) {
+                    @case ('required') { El documento es obligatorio. }
+                    @case ('dni') { El DNI debe tener entre 7 y 8 dígitos. }
+                    @case ('pasaporte') { El pasaporte debe tener entre 6 y 20 letras o números. }
+                  }
+                </small>
+              }
             </label>
 
             <label class="form-group">
               <span>Fecha de nacimiento</span>
-              <input type="date" class="form-control" required
-                [value]="pasajero.fechaNacimiento"
-                (input)="actualizarPasajero(indicePasajero, 'fechaNacimiento', $any($event.target).value)" />
+              <input type="date" class="form-control" [formField]="campos.fechaNacimiento"
+                (click)="$any($event.target).showPicker?.()" />
+              @if (campos.fechaNacimiento().touched() && campos.fechaNacimiento().invalid()) {
+                <small class="form-error" role="alert">
+                  @switch (campos.fechaNacimiento().errors()[0].kind) {
+                    @case ('required') { La fecha de nacimiento es obligatoria. }
+                    @case ('fechaFutura') { Ingresá una fecha de nacimiento válida. }
+                  }
+                </small>
+              }
             </label>
 
             <label class="form-group">
               <span>Email (opcional)</span>
-              <input type="email" class="form-control" placeholder="correo@ejemplo.com"
-                [value]="pasajero.email"
-                (input)="actualizarPasajero(indicePasajero, 'email', $any($event.target).value)" />
+              <input type="email" class="form-control" placeholder="correo@ejemplo.com" [formField]="campos.email" />
+              @if (campos.email().touched() && campos.email().invalid()) {
+                <small class="form-error" role="alert">El email no es válido.</small>
+              }
             </label>
 
             @if (equipajes().length > 0) {
@@ -133,15 +163,15 @@
                 <legend>Asistencia al viajero</legend>
                 <label class="extra-opcion">
                   <input type="radio" [name]="'asistencia-' + indicePasajero"
-                    [checked]="pasajero.asistenciaId === null"
-                    (change)="actualizarPasajero(indicePasajero, 'asistenciaId', null)" />
+                    [checked]="pasajero.asistenciaId === ''"
+                    (change)="elegirAsistencia(indicePasajero, null)" />
                   <span class="extra-nombre">Sin asistencia al viajero</span>
                 </label>
                 @for (asistencia of asistencias(); track asistencia.id) {
                   <label class="extra-opcion">
                     <input type="radio" [name]="'asistencia-' + indicePasajero"
-                      [checked]="pasajero.asistenciaId === asistencia.id"
-                      (change)="actualizarPasajero(indicePasajero, 'asistenciaId', asistencia.id)" />
+                      [checked]="pasajero.asistenciaId === asistencia.id.toString()"
+                      (change)="elegirAsistencia(indicePasajero, asistencia.id)" />
                     <span class="extra-nombre">
                       {{ asistencia.nombrePlan }}
                       <small class="muted">{{ asistencia.descripcion }}</small>
@@ -185,37 +215,15 @@
           <span class="summary-total-label">Total a pagar</span>
           <strong class="summary-total-amount">{{ formatearPrecio(total()) }}</strong>
         </p>
-        @if (errorPasajeros()) {
-  <p class="form-error" role="alert">{{ errorPasajeros() }}</p>
-}
 
-      @if (!mostrarPago()) {
-      <button type="button" class="btn btn-dark btn-reservar" (click)="continuarAlPago()">
-        Continuar al pago →
-      </button>
-      } @else {
-        <app-pago
-        [total]="total()"
-        [publicKey]="publicKey()"
-        [procesando]="procesando()"
-        [errorPago]="errorPago()"
-        [validarExtra]="validarPasajeros"
-        (pagar)="pagar($event)" />
-}
+        @if (intentoContinuar() && formulario().invalid()) {
+          <p class="form-error" role="alert">Revisá los datos marcados de los pasajeros.</p>
+        }
+
+        <button type="button" class="btn btn-dark btn-reservar" (click)="continuarAlPago()">
+          Continuar al pago →
+        </button>
       </aside>
     </section>
-    
   }
 </main>
-
-<dialog #confirmacion class="confirm-modal" aria-labelledby="confirm-titulo">
-  <span class="confirm-emoji" aria-hidden="true">🎉</span>
-  <h2 id="confirm-titulo">¡Reserva confirmada!</h2>
-  <p class="muted">Tu número de reserva es:</p>
-  <p class="booking-code">{{ codigoReserva() }}</p>
-  <p class="muted">Te enviamos la confirmación a tu email. ¡Buen viaje!</p>
-  <footer>
-    <a routerLink="/reservas" class="btn btn-dark">Ver mis reservas</a>
-    <a routerLink="/" class="btn btn-outline">Inicio</a>
-  </footer>
-</dialog>
