@@ -4,15 +4,40 @@ import {
   OnDestroy,
   afterRenderEffect,
   computed,
-  input,
-  output,
+  inject,
   signal,
   viewChild
 } from '@angular/core';
-import { PagoRequest, SituacionFiscal } from '../../Models/Pago';
+import { RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  FormField,
+  email,
+  form,
+  maxLength,
+  required,
+  submit,
+  validate
+} from '@angular/forms/signals';
+import { PagoRequest, PagoResponse, SituacionFiscal } from '../../Models/Pago';
+import { CheckoutService } from '../../services/checkout-service';
 
 // Lo carga el script del SDK de Mercado Pago en index.html.
 declare const MercadoPago: any;
+
+// Modelo del formulario de facturación.
+interface Facturacion {
+  email: string;
+  telefono: string;
+  cuil: string;
+  situacionFiscal: SituacionFiscal;
+}
+
+// Problemas con la tarjeta o el SDK. El texto de cada caso está en el html.
+type ErrorTarjeta = 'sdkNoCargo' | 'tarjetaCargando' | 'tarjetaInvalida';
+
+// Resultado del pago en el back. El texto de cada caso está en el html.
+type EstadoPago = 'rechazado' | 'enProceso' | 'error';
 
 const SITUACIONES_FISCALES: SituacionFiscal[] = [
   'Consumidor Final',
@@ -21,42 +46,94 @@ const SITUACIONES_FISCALES: SituacionFiscal[] = [
   'Exento',
 ];
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const TELEFONO_REGEX = /^\d{10,11}$/;
+const CUIL_REGEX = /^\d{11}$/;
 
+function soloDigitosTelefono(telefono: string): string {
+  return telefono.replace(/[\s\-()+]/g, '');
+}
+
+function soloDigitosCuil(cuil: string): string {
+  return cuil.replace(/[-\s]/g, '');
+}
+
+// Paso 4 del checkout (/checkoutReserva/pago): facturación, tarjeta y pago.
+// Los pasajeros, el vuelo y el total vienen de CheckoutService (los cargó la página de pasajeros).
+// El guard checkoutPagoGuard no deja entrar si los pasajeros no se completaron.
 @Component({
   selector: 'app-pago',
   standalone: true,
+  imports: [RouterLink, FormField],
   templateUrl: './pago.html',
   styleUrl: './pago.css',
 })
 export class Pago implements OnDestroy {
+  private readonly checkout = inject(CheckoutService);
+
   // <form #formularioPago> del html, donde se monta el SDK de Mercado Pago.
   private readonly formularioPago = viewChild<ElementRef<HTMLFormElement>>('formularioPago');
-
-  // Vienen de reserva
-  readonly total = input.required<number>();
-  readonly publicKey = input.required<string>();
-  readonly procesando = input(false);
-  readonly errorPago = input('');
-  // Validación de reserva (pasajeros). Se corre antes de generar el token.
-  readonly validarExtra = input<() => string | null>(() => null);
-
-  // Se emite con el pago listo para mandar al back
-  readonly pagar = output<PagoRequest>();
+  // Ventana de confirmación (<dialog #confirmacion> del html).
+  private readonly confirmacion = viewChild.required<ElementRef<HTMLDialogElement>>('confirmacion');
 
   protected readonly situacionesFiscales = SITUACIONES_FISCALES;
 
-  protected readonly email = signal('');
-  protected readonly telefono = signal('');
-  protected readonly cuil = signal('');
-  protected readonly situacionFiscal = signal<SituacionFiscal>('Consumidor Final');
+  protected readonly vuelo = this.checkout.vuelo;
+  protected readonly pasajeros = this.checkout.pasajeros;
+  private readonly publicKey = this.checkout.publicKey;
 
-  private readonly errorLocal = signal('');
+  // Resumen de precios (se calcula en el servicio, lo usan las dos páginas).
+  protected readonly tarifas = this.checkout.tarifas;
+  protected readonly tarifaBase = this.checkout.tarifaBase;
+  protected readonly lineasExtras = this.checkout.lineasExtras;
+  protected readonly impuestos = this.checkout.impuestos;
+  protected readonly servicio = this.checkout.servicio;
+  protected readonly total = this.checkout.total;
+  protected readonly asientosTexto = this.checkout.asientosTexto;
+
+  // Formulario de facturación con signals.
+  // Los datos de la tarjeta no van acá: esos inputs los maneja el SDK de Mercado Pago.
+  protected readonly datosFacturacion = signal<Facturacion>({
+    email: '',
+    telefono: '',
+    cuil: '',
+    situacionFiscal: 'Consumidor Final',
+  });
+
+  // Los mensajes de error se arman en el html según el `kind` de cada error.
+  protected readonly facturacion = form(this.datosFacturacion, (datos) => {
+    required(datos.email);
+    email(datos.email);
+
+    required(datos.telefono);
+    validate(datos.telefono, ({ value }) => {
+      const telefono = soloDigitosTelefono(value());
+      return telefono && !TELEFONO_REGEX.test(telefono) ? { kind: 'telefono' } : undefined;
+    });
+
+    required(datos.cuil);
+    // [formField] pone el atributo maxlength en el input a partir de esta regla.
+    maxLength(datos.cuil, 13);
+    validate(datos.cuil, ({ value }) => {
+      const cuil = soloDigitosCuil(value());
+      return cuil && !CUIL_REGEX.test(cuil) ? { kind: 'cuil' } : undefined;
+    });
+  });
+
+  // Se pone en true al tocar "Pagar": recién ahí se muestra el aviso general de errores.
+  protected readonly intentoPagar = signal(false);
+
+  protected readonly errorTarjeta = signal<ErrorTarjeta | null>(null);
+
+  // Resultado del último intento de pago contra el back.
+  protected readonly estadoPago = signal<EstadoPago | null>(null);
+  // Mensaje que manda el back, si lo hay. Si viene vacío, el html muestra uno propio.
+  protected readonly mensajeServidor = signal('');
+  protected readonly codigoReserva = signal('');
+
   private readonly generandoToken = signal(false);
+  private readonly procesando = signal(false);
 
-  // Error propio (validación, tarjeta) o el que manda reserva (respuesta del back)
-  protected readonly mensajeError = computed(() => this.errorLocal() || this.errorPago());
-  // Evita doble click entre que se genera el token y reserva empieza a procesar
+  // Evita doble click entre que se genera el token y termina el pago
   protected readonly ocupado = computed(() => this.generandoToken() || this.procesando());
 
   private formularioTarjeta: any = null;
@@ -81,58 +158,90 @@ export class Pago implements OnDestroy {
     return `$${valor.toLocaleString('es-AR')}`;
   }
 
-  // Lo llama el SDK de Mercado Pago al enviar el formulario (ver callbacks.onSubmit).
-  private enviar(): void {
-    this.errorLocal.set('');
-
-    const mensajeError = this.validarFacturacion() ?? this.validarExtra()();
-    if (mensajeError) {
-      this.errorLocal.set(mensajeError);
-      return;
-    }
-
-    if (!this.tarjetaMontada) {
-      this.errorLocal.set('El formulario de pago se está cargando, intentá de nuevo.');
-      return;
-    }
-
-    this.generandoToken.set(true);
-
-    // Primero se valida la tarjeta generando el token, así no se crea la reserva si los datos están mal.
-    (this.formularioTarjeta.createCardToken() as Promise<{ id: string }>)
-      .then((token) => this.pagar.emit(this.armarPago(token.id)))
-      .catch(() =>
-        this.errorLocal.set('No se pudo validar la tarjeta. Revisá los datos e intentá nuevamente.')
-      )
-      .finally(() => this.generandoToken.set(false));
+  protected formatearPorcentaje(tasa: number): string {
+    return `${(tasa * 100).toLocaleString('es-AR')}%`;
   }
 
-  private validarFacturacion(): string | null {
-    if (!EMAIL_REGEX.test(this.email().trim())) {
-      return 'Ingresá un email válido.';
+  protected formatearFecha(fecha: string): string {
+    return new Date(`${fecha}T00:00:00`).toLocaleDateString('es-AR', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  }
+
+  // Lo llama el SDK de Mercado Pago al enviar el formulario (ver callbacks.onSubmit).
+  // submit() marca todos los campos de facturación como tocados (así se ven los errores)
+  // y solo sigue si son válidos.
+  private enviar(): void {
+    this.intentoPagar.set(true);
+    this.errorTarjeta.set(null);
+    this.estadoPago.set(null);
+
+    submit(this.facturacion, async () => {
+      if (!this.tarjetaMontada) {
+        this.errorTarjeta.set('tarjetaCargando');
+        return undefined;
+      }
+
+      this.generandoToken.set(true);
+
+      // Primero se valida la tarjeta generando el token, así no se crea la reserva si los datos están mal.
+      try {
+        const token = (await this.formularioTarjeta.createCardToken()) as { id: string };
+        this.pagar(this.armarPago(token.id));
+      } catch {
+        this.errorTarjeta.set('tarjetaInvalida');
+      } finally {
+        this.generandoToken.set(false);
+      }
+      return undefined;
+    });
+  }
+
+  private pagar(pago: PagoRequest): void {
+    this.mensajeServidor.set('');
+    this.procesando.set(true);
+
+    this.checkout.pagar(pago).subscribe({
+      next: (respuesta) => this.procesarRespuesta(respuesta),
+      error: (error: unknown) => {
+        if (error instanceof HttpErrorResponse) {
+          this.mensajeServidor.set(error.error?.message ?? '');
+        }
+        this.estadoPago.set('error');
+      }
+    }).add(() => this.procesando.set(false));
+  }
+
+  private procesarRespuesta(respuesta: PagoResponse): void {
+    this.codigoReserva.set(respuesta.codigoReserva);
+
+    if (respuesta.status === 'approved') {
+      this.confirmacion().nativeElement.showModal();
+    } else if (respuesta.status === 'rejected') {
+      this.estadoPago.set('rechazado');
+    } else {
+      // in_process / pending: la reserva queda PROCESANDO hasta que Mercado Pago confirme el pago.
+      this.estadoPago.set('enProceso');
     }
-    if (!/^\d{10,11}$/.test(this.telefono().replace(/[\s\-()+]/g, ''))) {
-      return 'El teléfono debe tener 10 u 11 dígitos (ej: 02234567890 o +54 223 456-7890).';
-    }
-    if (!/^\d{11}$/.test(this.cuil().replace(/[-\s]/g, ''))) {
-      return 'El CUIL/CUIT debe tener 11 dígitos (ej: 20-35123456-1).';
-    }
-    return null;
   }
 
   private armarPago(token: string): PagoRequest {
     const datosTarjeta = this.formularioTarjeta.getCardFormData();
+    const facturacion = this.datosFacturacion();
 
     return {
       token,
       installments: Number(datosTarjeta.installments) || 1,
       paymentMethodId: datosTarjeta.paymentMethodId,
       issuerId: datosTarjeta.issuerId || null,
-      payerEmail: this.email().trim(),
+      payerEmail: facturacion.email.trim(),
       payerDocType: datosTarjeta.identificationType,
       payerDocNumber: datosTarjeta.identificationNumber,
-      cuil: this.cuil().replace(/[-\s]/g, ''),
-      situacionFiscal: this.situacionFiscal(),
+      cuil: soloDigitosCuil(facturacion.cuil),
+      situacionFiscal: facturacion.situacionFiscal,
     };
   }
 
@@ -165,7 +274,7 @@ export class Pago implements OnDestroy {
         onFormMounted: (error: unknown) => {
           this.tarjetaMontada = !error;
           if (error) {
-            this.errorLocal.set('No se pudo cargar el formulario de pago. Recargá la página.');
+            this.errorTarjeta.set('sdkNoCargo');
           }
         },
         onSubmit: (event: Event) => {

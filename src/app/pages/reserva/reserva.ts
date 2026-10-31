@@ -1,234 +1,175 @@
-import {
-  Component,
-  ElementRef,
-  OnInit,
-  computed,
-  signal,
-  viewChild
-} from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
-import { CarritoItem } from '../../Models/Carrito';
-import { Vuelo } from '../../Models/Vuelo';
-import { Equipaje, TipoEquipaje } from '../../Models/Equipaje';
-import { Asistencia } from '../../Models/Asistencia';
-import { TIPOS_DOCUMENTO, TipoDocumento } from '../../Models/Perfil';
-import { ReservaRequest } from '../../Models/Reserva';
-import { PagoRequest, PagoResponse } from '../../Models/Pago';
-import { CarritoService } from '../../services/carritoService';
-import { VueloService } from '../../services/vuelo';
-import { EquipajeService } from '../../services/equipajeService';
-import { AsistenciaService } from '../../services/asistenciaService';
-import { ConfigService, Tarifas } from '../../services/config';
-import { MercadoPagoService } from '../../services/mercadoPagoService';
-import { ReservaService } from '../../services/reservaService';
-import { Pago } from '../pago/pago';
+import {
+  FormField,
+  applyEach,
+  email,
+  form,
+  maxLength,
+  pattern,
+  required,
+  submit,
+  validate
+} from '@angular/forms/signals';
+import { TIPOS_DOCUMENTO } from '../../Models/Perfil';
+import {
+  CheckoutService,
+  ErrorCarrito,
+  PasajeroFormulario,
+  etiquetaEquipaje
+} from '../../services/checkout-service';
 
-// Lo que guarda la página de asientos en sessionStorage.
-interface AsientoSeleccionado {
-  id: string;
-  clase: string;
-  precio: number;
+// Qué salió mal al cargar la página. El texto de cada caso está en el html.
+type ErrorCarga = ErrorCarrito | 'servidor';
+
+// Letras y espacios, con al menos una letra (así "   " no pasa).
+const SOLO_LETRAS = /^\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+(\s+[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)*\s*$/;
+const DNI_REGEX = /^\d{7,8}$/;
+const PASAPORTE_REGEX = /^[A-Z0-9]{6,20}$/;
+
+function normalizarDocumento(documento: string): string {
+  return documento.replace(/[\s.\-]/g, '').toUpperCase();
 }
 
-// Datos de un pasajero mientras se completa el formulario.
-interface PasajeroFormulario {
-  asiento: string;
-  nombre: string;
-  apellido: string;
-  tipoDocumento: TipoDocumento;
-  documento: string;
-  fechaNacimiento: string;
-  email: string;
-  equipajeIds: number[];
-  asistenciaId: number | null;
+// Fecha de hoy en hora local (toISOString usa UTC y a la noche ya da el día siguiente).
+function hoyLocal(): string {
+  const hoy = new Date();
+  const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+  const dia = String(hoy.getDate()).padStart(2, '0');
+  return `${hoy.getFullYear()}-${mes}-${dia}`;
 }
 
-interface LineaExtra {
-  etiqueta: string;
-  precio: number;
-}
-
-const CLAVE_ASIENTOS = 'asientos_seleccionados';
-
-const ETIQUETAS_EQUIPAJE: Record<TipoEquipaje, string> = {
-  CABINA: 'Cabina',
-  BODEGA: 'Bodega',
-  MANO: 'De mano',
-};
-
-// Orden en que se muestran los equipajes, del más chico al más grande.
-const ORDEN_EQUIPAJE: TipoEquipaje[] = ['MANO', 'CABINA', 'BODEGA'];
-
-const SOLO_LETRAS = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/;
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+// Paso 3 del checkout: datos de los pasajeros, equipaje y asistencia.
+// Al continuar, navega a /checkoutReserva/pago. Los datos quedan en CheckoutService.
 @Component({
   selector: 'app-reserva',
   standalone: true,
-  imports: [RouterLink, Pago],
+  imports: [RouterLink, FormField],
   templateUrl: './reserva.html',
   styleUrl: './reserva.css',
 })
 export class Reserva implements OnInit {
-  // Ventana de confirmación (<dialog #confirmacion> del html).
-  private readonly confirmacion = viewChild.required<ElementRef<HTMLDialogElement>>('confirmacion');
+  private readonly checkout = inject(CheckoutService);
+  private readonly router = inject(Router);
 
   protected readonly tiposDocumento = TIPOS_DOCUMENTO;
+  protected readonly etiquetaEquipaje = etiquetaEquipaje;
 
-  protected readonly item = signal<CarritoItem | null>(null);
-  protected readonly vuelo = signal<Vuelo | null>(null);
-  protected readonly equipajes = signal<Equipaje[]>([]);
-  protected readonly asistencias = signal<Asistencia[]>([]);
-  protected readonly tarifas = signal<Tarifas>({ tasaImpuesto: 0, tasaServicio: 0 });
-  protected readonly pasajeros = signal<PasajeroFormulario[]>([]);
-  protected readonly publicKey = signal('');
+  protected readonly vuelo = this.checkout.vuelo;
+  protected readonly equipajes = this.checkout.equipajes;
+  protected readonly asistencias = this.checkout.asistencias;
+
+  // Modelo del formulario: un elemento por pasajero. Vive en el servicio para que lo use la página de pago.
+  protected readonly pasajeros = this.checkout.pasajeros;
+
+  // Resumen de precios (se calcula en el servicio, lo usan las dos páginas).
+  protected readonly tarifas = this.checkout.tarifas;
+  protected readonly tarifaBase = this.checkout.tarifaBase;
+  protected readonly lineasExtras = this.checkout.lineasExtras;
+  protected readonly impuestos = this.checkout.impuestos;
+  protected readonly servicio = this.checkout.servicio;
+  protected readonly total = this.checkout.total;
+  protected readonly asientosTexto = this.checkout.asientosTexto;
+
+  // Formulario de signals con las validaciones de cada pasajero.
+  // Los mensajes de error se arman en el html según el `kind` de cada error.
+  protected readonly formulario = form(this.pasajeros, (pasajeros) => {
+    applyEach(pasajeros, (pasajero) => {
+      required(pasajero.nombre);
+      pattern(pasajero.nombre, SOLO_LETRAS);
+
+      required(pasajero.apellido);
+      pattern(pasajero.apellido, SOLO_LETRAS);
+
+      required(pasajero.documento);
+      // [formField] pone el atributo maxlength en el input a partir de esta regla.
+      maxLength(pasajero.documento, 20);
+      validate(pasajero.documento, ({ value, valueOf }) => {
+        const documento = normalizarDocumento(value());
+        if (!documento) {
+          return undefined; // de esto se encarga required
+        }
+
+        const tipo = valueOf(pasajero.tipoDocumento);
+        if (tipo === 'DNI' && !DNI_REGEX.test(documento)) {
+          return { kind: 'dni' };
+        }
+        if (tipo === 'PASAPORTE' && !PASAPORTE_REGEX.test(documento)) {
+          return { kind: 'pasaporte' };
+        }
+        return undefined;
+      });
+
+      required(pasajero.fechaNacimiento);
+      validate(pasajero.fechaNacimiento, ({ value }) =>
+        value() && value() >= hoyLocal() ? { kind: 'fechaFutura' } : undefined
+      );
+
+      // Opcional: email() no marca error si el campo está vacío.
+      email(pasajero.email);
+    });
+  });
 
   protected readonly cargando = signal(true);
-  protected readonly error = signal('');
-  protected readonly procesando = signal(false);
-  protected readonly errorPago = signal('');
-  protected readonly codigoReserva = signal('');
-  protected readonly mostrarPago = signal(false);
-  protected readonly errorPasajeros = signal('');
+  protected readonly errorCarga = signal<ErrorCarga | null>(null);
 
-protected continuarAlPago(): void {
-  const mensaje = this.validarPasajeros();
-  this.errorPasajeros.set(mensaje ?? '');
+  // Mensaje que manda el backend, si lo hay. Si viene vacío, el html muestra uno propio.
+  protected readonly mensajeServidor = signal('');
 
-  if (!mensaje) {
-    this.mostrarPago.set(true);
-  }
-}
-
-  // Si la reserva se creó pero el pago falló, se reintenta el pago sobre la misma reserva.
-  // Se descarta si cambian los datos de los pasajeros, para que se cree una nueva con los datos correctos.
-  private reservaPendiente: number | null = null;
-
-  protected readonly tarifaBase = computed(
-    () => (this.vuelo()?.precioVuelo ?? 0) * this.pasajeros().length
-  );
-
-  protected readonly lineasExtras = computed(() => {
-    const lineas: LineaExtra[] = [];
-
-    this.pasajeros().forEach((pasajero, indice) => {
-      this.equipajes()
-        .filter((equipaje) => pasajero.equipajeIds.includes(equipaje.id))
-        .forEach((equipaje) =>
-          lineas.push({
-            etiqueta: `Pasajero ${indice + 1} · ${this.etiquetaEquipaje(equipaje)}`,
-            precio: equipaje.precio,
-          })
-        );
-
-      const asistencia = this.asistencias().find((opcion) => opcion.id === pasajero.asistenciaId);
-      if (asistencia) {
-        lineas.push({
-          etiqueta: `Pasajero ${indice + 1} · ${asistencia.nombrePlan}`,
-          precio: asistencia.precio,
-        });
-      }
-    });
-
-    return lineas;
-  });
-
-  protected readonly totalExtras = computed(() =>
-    this.lineasExtras().reduce((suma, linea) => suma + linea.precio, 0)
-  );
-
-  // Mismo cálculo que ReservaService.calcularTotal del backend, para mostrar lo mismo que se va a cobrar.
-  protected readonly impuestos = computed(() =>
-    Math.round(this.tarifaBase() * this.tarifas().tasaImpuesto)
-  );
-
-  protected readonly servicio = computed(() =>
-    Math.round(
-      (this.tarifaBase() + this.totalExtras() + this.impuestos()) * this.tarifas().tasaServicio
-    )
-  );
-
-  protected readonly total = computed(
-    () => this.tarifaBase() + this.totalExtras() + this.impuestos() + this.servicio()
-  );
-
-  protected readonly asientosTexto = computed(() => {
-    const asientos = this.pasajeros()
-      .map((pasajero) => pasajero.asiento)
-      .filter((asiento) => asiento);
-    return asientos.length ? asientos.join(', ') : '—';
-  });
-
-  constructor(
-    private carritoService: CarritoService,
-    private vueloService: VueloService,
-    private equipajeService: EquipajeService,
-    private asistenciaService: AsistenciaService,
-    private configService: ConfigService,
-    private mercadoPagoService: MercadoPagoService,
-    private reservaService: ReservaService
-  ) {}
+  // Se pone en true al tocar "Continuar al pago": recién ahí se muestra el aviso general de errores.
+  protected readonly intentoContinuar = signal(false);
 
   ngOnInit(): void {
+    // Si vuelve desde la página de pago, tiene que confirmar los pasajeros de nuevo para seguir.
+    this.checkout.pasajerosListos.set(false);
     this.cargarDatos();
   }
 
   protected cargarDatos(): void {
     this.cargando.set(true);
-    this.error.set('');
+    this.errorCarga.set(null);
+    this.mensajeServidor.set('');
 
-    forkJoin({
-      carrito: this.carritoService.obtenerMiCarrito(),
-      equipajes: this.equipajeService.obtenerTodos(),
-      asistencias: this.asistenciaService.obtenerTodas(),
-      tarifas: this.configService.obtenerTarifas(),
-      publicKey: this.mercadoPagoService.obtenerPublicKey(),
-    }).pipe(
-      switchMap((datos) => {
-        this.equipajes.set(
-          (datos.equipajes ?? []).sort(
-            (a, b) => ORDEN_EQUIPAJE.indexOf(a.tipo) - ORDEN_EQUIPAJE.indexOf(b.tipo)
-          )
-        );
-        this.asistencias.set(datos.asistencias ?? []);
-        this.tarifas.set(datos.tarifas);
-        this.publicKey.set(datos.publicKey);
-        return this.cargarVuelo(datos.carrito.items ?? []);
-      })
-    ).subscribe({
-      next: (vuelo) => this.vuelo.set(vuelo),
+    this.checkout.cargar().subscribe({
+      next: (errorCarrito) => this.errorCarga.set(errorCarrito),
       error: (error: HttpErrorResponse) => {
-        this.error.set(error.error?.message || 'No se pudo cargar tu reserva. Intentá nuevamente.');
+        this.mensajeServidor.set(error.error?.message ?? '');
+        this.errorCarga.set('servidor');
       }
     }).add(() => this.cargando.set(false));
   }
 
-  protected actualizarPasajero<K extends keyof PasajeroFormulario>(
-    indice: number,
-    campo: K,
-    valor: PasajeroFormulario[K]
-  ): void {
-    this.pasajeros.update((pasajeros) =>
-      pasajeros.map((pasajero, i) => (i === indice ? { ...pasajero, [campo]: valor } : pasajero))
-    );
-    this.reservaPendiente = null;
+  // submit() marca todos los campos como tocados (así se ven los errores)
+  // y solo ejecuta la acción si el formulario es válido.
+  protected continuarAlPago(): void {
+    this.intentoContinuar.set(true);
+    submit(this.formulario, async () => {
+      this.checkout.pasajerosListos.set(true);
+      await this.router.navigate(['/checkoutReserva/pago']);
+      return undefined;
+    });
   }
 
   protected alternarEquipaje(indice: number, equipajeId: number, marcado: boolean): void {
-    const equipajeIds = this.pasajeros()[indice].equipajeIds.filter((id) => id !== equipajeId);
-    this.actualizarPasajero(indice, 'equipajeIds', marcado ? [...equipajeIds, equipajeId] : equipajeIds);
+    this.actualizarPasajero(indice, (pasajero) => {
+      const sinEste = pasajero.equipajeIds.filter((id) => id !== equipajeId);
+      return { ...pasajero, equipajeIds: marcado ? [...sinEste, equipajeId] : sinEste };
+    });
   }
 
   // "Sin equipaje" no se desmarca a mano: se desmarca solo cuando se elige algún equipaje.
   protected elegirSinEquipaje(indice: number, casilla: HTMLInputElement): void {
     casilla.checked = true;
-    this.actualizarPasajero(indice, 'equipajeIds', []);
+    this.actualizarPasajero(indice, (pasajero) => ({ ...pasajero, equipajeIds: [] }));
   }
 
-  protected etiquetaEquipaje(equipaje: Equipaje): string {
-    return `${ETIQUETAS_EQUIPAJE[equipaje.tipo] ?? equipaje.tipo} (${equipaje.peso} kg)`;
+  // asistenciaId es string porque Signal Forms no admite null: '' = sin asistencia.
+  protected elegirAsistencia(indice: number, asistenciaId: number | null): void {
+    this.actualizarPasajero(indice, (pasajero) => ({
+      ...pasajero,
+      asistenciaId: asistenciaId === null ? '' : String(asistenciaId),
+    }));
   }
 
   protected formatearPrecio(valor: number): string {
@@ -248,155 +189,12 @@ protected continuarAlPago(): void {
     });
   }
 
-  // Lo emite <app-pago> cuando el token de la tarjeta ya está generado.
-  protected pagar(pago: PagoRequest): void {
-    this.errorPago.set('');
-    this.procesando.set(true);
-
-    this.obtenerReservaPendiente().pipe(
-      switchMap((reservaId) => this.reservaService.pagarMiReserva(reservaId, pago))
-    ).subscribe({
-      next: (respuesta) => this.procesarRespuesta(respuesta),
-      error: (error: unknown) => {
-        this.errorPago.set(
-          (error instanceof HttpErrorResponse && error.error?.message) ||
-            'No se pudo procesar el pago. Revisá los datos de la tarjeta e intentá nuevamente.'
-        );
-      }
-    }).add(() => this.procesando.set(false));
-  }
-
-  // <app-pago> la llama antes de generar el token, así no se cobra si los pasajeros están mal.
-  // Es arrow function para que mantenga el `this` al llamarla desde el otro componente.
-  protected readonly validarPasajeros = (): string | null => {
-    const hoy = new Date().toISOString().slice(0, 10);
-
-    for (const [indice, pasajero] of this.pasajeros().entries()) {
-      const numero = indice + 1;
-      const documento = pasajero.documento.replace(/[\s.\-]/g, '').toUpperCase();
-
-      if (!SOLO_LETRAS.test(pasajero.nombre.trim())) {
-        return `Pasajero ${numero}: el nombre solo puede contener letras.`;
-      }
-      if (!SOLO_LETRAS.test(pasajero.apellido.trim())) {
-        return `Pasajero ${numero}: el apellido solo puede contener letras.`;
-      }
-      if (pasajero.tipoDocumento === 'DNI' && !/^\d{7,8}$/.test(documento)) {
-        return `Pasajero ${numero}: el DNI debe tener entre 7 y 8 dígitos.`;
-      }
-      if (pasajero.tipoDocumento === 'PASAPORTE' && !/^[A-Z0-9]{6,20}$/.test(documento)) {
-        return `Pasajero ${numero}: el pasaporte debe tener entre 6 y 20 letras o números.`;
-      }
-      if (!pasajero.fechaNacimiento || pasajero.fechaNacimiento >= hoy) {
-        return `Pasajero ${numero}: ingresá una fecha de nacimiento válida.`;
-      }
-      if (pasajero.email.trim() && !EMAIL_REGEX.test(pasajero.email.trim())) {
-        return `Pasajero ${numero}: el email no es válido.`;
-      }
-    }
-
-    return null;
-  };
-
-  private procesarRespuesta(respuesta: PagoResponse): void {
-    if (respuesta.status === 'approved') {
-      sessionStorage.removeItem(CLAVE_ASIENTOS);
-      this.reservaPendiente = null;
-      this.codigoReserva.set(respuesta.codigoReserva);
-      this.confirmacion().nativeElement.showModal();
-      return;
-    }
-
-    if (respuesta.status === 'rejected') {
-      // El backend cancela la reserva rechazada: el próximo intento crea una nueva.
-      this.reservaPendiente = null;
-      this.errorPago.set('El pago fue rechazado. Revisá los datos de la tarjeta o probá con otra.');
-      return;
-    }
-
-    // in_process / pending: la reserva queda PROCESANDO hasta que Mercado Pago confirme el pago.
-    this.errorPago.set(
-      `Tu pago está en proceso. Podés ver el estado de la reserva ${respuesta.codigoReserva} en Mis reservas.`
+  private actualizarPasajero(
+    indice: number,
+    cambio: (pasajero: PasajeroFormulario) => PasajeroFormulario
+  ): void {
+    this.pasajeros.update((pasajeros) =>
+      pasajeros.map((pasajero, i) => (i === indice ? cambio(pasajero) : pasajero))
     );
-  }
-
-  private obtenerReservaPendiente(): Observable<number> {
-    if (this.reservaPendiente !== null) {
-      return of(this.reservaPendiente);
-    }
-
-    return this.reservaService.crearMiReserva(this.armarReserva()).pipe(
-      map((reserva) => {
-        this.reservaPendiente = reserva.id;
-        return reserva.id;
-      })
-    );
-  }
-
-  // El backend arma una reserva por vuelo y, al aprobarse el pago, vacía todo el carrito.
-  // Por eso solo se permite pagar cuando el carrito tiene un único vuelo.
-  private cargarVuelo(items: CarritoItem[]): Observable<Vuelo | null> {
-    if (items.length === 0) {
-      this.error.set('Tu carrito está vacío. Elegí un vuelo para continuar.');
-      return of(null);
-    }
-
-    if (items.length > 1) {
-      this.error.set('Por ahora solo podés reservar un vuelo a la vez. Dejá un único vuelo en el carrito para continuar.');
-      return of(null);
-    }
-
-    const item = items[0];
-    this.item.set(item);
-    this.pasajeros.set(this.crearPasajeros(item.cantidad));
-    return this.vueloService.obtenerPorId(item.vueloId);
-  }
-
-  private crearPasajeros(cantidad: number): PasajeroFormulario[] {
-    const asientos = this.leerAsientosSeleccionados();
-
-    return Array.from({ length: cantidad }, (_, indice) => ({
-      asiento: asientos[indice]?.id ?? '',
-      nombre: '',
-      apellido: '',
-      tipoDocumento: 'DNI',
-      documento: '',
-      fechaNacimiento: '',
-      email: '',
-      equipajeIds: [],
-      asistenciaId: null,
-    }));
-  }
-
-  private leerAsientosSeleccionados(): AsientoSeleccionado[] {
-    try {
-      return JSON.parse(sessionStorage.getItem(CLAVE_ASIENTOS) ?? '[]');
-    } catch {
-      return [];
-    }
-  }
-  
-  
-
-  // Los asientos de la página de asientos todavía no tienen el id del backend, así que no se envía asientoId:
-  // el backend lo permite y el asiento se puede asignar en el check-in.
-  private armarReserva(): ReservaRequest {
-    const item = this.item()!;
-
-    return {
-      vueloId: item.vueloId,
-      cantidadPasajes: this.pasajeros().length,
-      pasajes: this.pasajeros().map((pasajero) => ({
-        clasesVuelo: item.claseVuelo,
-        equipajeIds: pasajero.equipajeIds,
-        asistenciaId: pasajero.asistenciaId,
-        nombre: pasajero.nombre.trim(),
-        apellido: pasajero.apellido.trim(),
-        tipoDocumento: pasajero.tipoDocumento,
-        documento: pasajero.documento,
-        fechaNacimiento: pasajero.fechaNacimiento,
-        email: pasajero.email.trim(),
-      })),
-    };
   }
 }
