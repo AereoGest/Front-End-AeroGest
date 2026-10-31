@@ -1,10 +1,10 @@
 <header class="header">
-    <div id="principal">
-        <img src="/logo_aeroGest.png" alt="LogoAerogest" width="50px" height="50px">
+    <a id="principal" routerLink="/" aria-label="AeroGest, ir al inicio">
+        <img src="/logo_aeroGest.png" alt="Logo AeroGest" width="50" height="50">
         <p id="nombre">Aero<span>Gest</span></p>
-    </div>
+    </a>
 
-    <nav id="nav">
+    <nav id="nav" aria-label="Navegación principal">
         <ul>
             <li><a routerLink="/">Inicio</a></li>
             <li><a routerLink="/vuelos">Vuelos</a></li>
@@ -13,12 +13,35 @@
     </nav>
 
     <div id="buttons">
+        <button
+            type="button"
+            class="theme-toggle"
+            [class.is-dark]="theme.isDark()"
+            [attr.aria-label]="theme.label()"
+            [attr.title]="theme.label()"
+            [attr.aria-pressed]="theme.isDark()"
+            (click)="theme.toggle()">
+            <span class="theme-toggle-track" aria-hidden="true">
+                <span class="theme-toggle-thumb">
+                    <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="4.2"></circle>
+                        <path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"></path>
+                    </svg>
+                    <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.5 14.2A8.6 8.6 0 1 1 9.8 3.5a6.8 6.8 0 0 0 10.7 10.7Z"></path>
+                    </svg>
+                </span>
+            </span>
+        </button>
+
         @if (auth.usuarioAutenticado()) {
             <button id="perfil" [routerLink]="['/perfil']">MI PERFIL</button>
             <button id="carrito" [routerLink]="['/carrito']">CARRITO</button>
             <button id="cerrar" (click)="cerrarSesion()">CERRAR SESIÓN</button>
         } @else {
-            <button id="log" [routerLink]="['/login']">INICIAR SESION</button>
+            <button id="log" [routerLink]="['/login']">INICIAR SESIÓN</button>
             <button id="register" [routerLink]="['/register']">REGISTRAR</button>
         }
     </div>

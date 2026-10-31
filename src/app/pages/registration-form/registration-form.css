@@ -1,4 +1,3 @@
-
 /* ── Registro AeroGest ── */
 
 .auth-container-sign {
@@ -16,16 +15,16 @@
 .auth-card {
   width: 100%;
   max-width: 560px;
-  background: var(--white);
-  border: 1px solid var(--light-blue-1);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 40px;
   box-shadow: var(--shadow-lg);
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), background-color var(--transition-theme);
 }
 
 .auth-card:hover {
-  border-color: var(--blue);
+  border-color: var(--accent);
 }
 
 /* Encabezado */
@@ -39,20 +38,21 @@
   font-size: 32px;
   font-weight: 800;
   line-height: 1.2;
-  color: var(--navy);
+  letter-spacing: -0.01em;
+  color: var(--text);
   margin-bottom: 8px;
 }
 
 .auth-title em {
   font-style: italic;
-  color: var(--light-blue);
+  color: var(--accent-text);
 }
 
 .auth-subtitle {
   font-family: var(--font-body);
   font-size: 14px;
   line-height: 1.6;
-  color: var(--gray-500);
+  color: var(--text-muted);
 }
 
 /* Formulario */
@@ -86,7 +86,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--navy);
+  color: var(--text-muted);
 }
 
 /* Inputs y selectores */
@@ -94,22 +94,23 @@
 .form-control {
   width: 100%;
   padding: 12px 14px;
-  border: 1.5px solid var(--navy);
+  border: 1.5px solid var(--field-border);
   border-radius: var(--radius);
   font-family: var(--font-body);
   font-size: 14px;
-  color: var(--navy);
-  background: var(--cream);
+  color: var(--text);
+  background: var(--field-bg);
   outline: none;
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition), background-color var(--transition-theme);
 }
 
 .form-control:focus {
-  border-color: var(--light-blue);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus);
 }
 
 .form-control::placeholder {
-  color: var(--light-blue);
+  color: var(--text-subtle);
 }
 
 select.form-control {
@@ -125,7 +126,7 @@ select.form-control {
   font-family: var(--font-body);
   font-size: 13px;
   line-height: 1.5;
-  color: var(--gray-700);
+  color: var(--text-muted);
   cursor: pointer;
 }
 
@@ -133,7 +134,7 @@ select.form-control {
   flex-shrink: 0;
   margin-top: 4px;
   cursor: pointer;
-  accent-color: var(--blue);
+  accent-color: var(--accent);
 }
 
 .auth-checkbox label {
@@ -147,16 +148,16 @@ select.form-control {
   font-family: var(--font-body);
   font-size: 12px;
   line-height: 1.5;
-  color: #c62828;
+  color: var(--danger);
 }
 
 .mensaje-success {
   margin: 0;
   padding: 12px 14px;
-  border: 1px solid #a5d6a7;
+  border: 1px solid var(--success-border);
   border-radius: var(--radius-md);
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--success-soft);
+  color: var(--success);
   font-family: var(--font-body);
   font-size: 13px;
   line-height: 1.5;
@@ -164,21 +165,17 @@ select.form-control {
 
 /* Botón de registro */
 
-.btn-block {
-  width: 100%;
-  justify-content: center;
-}
-
 .auth-btn-accent {
-  background: var(--navy);
-  color: var(--white);
-  border: 1.5px solid var(--navy);
+  background: var(--btn-solid-bg);
+  color: var(--btn-solid-text);
+  border: 1.5px solid transparent;
+  font-weight: 700;
+  letter-spacing: 0.06em;
 }
 
 .auth-btn-accent:hover:not(:disabled) {
-  background: var(--light-blue);
-  border-color: var(--light-blue);
-  color: var(--cream);
+  background: var(--btn-solid-hover-bg);
+  color: var(--btn-solid-hover-text);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }

@@ -1,16 +1,23 @@
 /* Solo se usan las variables globales de styles.css. */
 :host {
-  --texto-suave: color-mix(in srgb, var(--navy) 60%, transparent);
-  --borde-suave: color-mix(in srgb, var(--navy) 30%, transparent);
+  --texto-suave: var(--text-muted);
+  --borde-suave: var(--border);
   display: block;
+}
+
+/* ── Formulario ── */
+.checkout-form {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
 }
 
 /* ── Barra de progreso ── */
 .progress-bar {
   margin-top: 0;
   padding: 16px 0;
-  background: var(--white);
-  border-bottom: 1px solid var(--borde-suave);
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
 }
 
 .progress-steps {
@@ -43,17 +50,23 @@
 }
 
 .step-circle.completed {
-  background: var(--light-blue);
-  color: var(--navy);
+  background: var(--accent);
+  color: var(--accent-contrast);
 }
 
 .step-circle.current {
-  background: var(--navy);
-  color: var(--white);
+  background: var(--btn-solid-bg);
+  color: var(--btn-solid-text);
+}
+
+.step-circle.pending {
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  color: var(--text-subtle);
 }
 
 .current-label {
-  color: var(--navy);
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -62,11 +75,11 @@
   flex: 1;
   height: 2px;
   margin-top: 13px;
-  background: var(--borde-suave);
+  background: var(--border);
 }
 
 .completed-line {
-  background: var(--light-blue);
+  background: var(--accent);
 }
 
 /* ── Secciones ── */
@@ -84,7 +97,7 @@
   font-family: var(--font-display);
   font-size: 18px;
   font-weight: 700;
-  color: var(--navy);
+  color: var(--text);
 }
 
 .checkout-step-num {
@@ -94,8 +107,8 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--navy);
-  color: var(--cream);
+  background: var(--btn-solid-bg);
+  color: var(--btn-solid-text);
   font-size: 13px;
   font-weight: 700;
 }
@@ -118,23 +131,32 @@
   width: 100%;
   height: 48px;
   padding: 0 14px;
-  border: 1px solid var(--borde-suave);
+  border: 1px solid var(--field-border);
   border-radius: var(--radius-md);
-  background: white;
-  color: var(--navy);
+  background: var(--field-bg);
+  color: var(--text);
   font: inherit;
   font-size: 15px;
   outline: none;
-  transition: border-color var(--transition), box-shadow var(--transition);
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition),
+    background-color var(--transition-theme);
 }
 
-.form-control::placeholder { color: color-mix(in srgb, var(--navy) 40%, transparent); }
-.form-control:hover:not(:focus) { border-color: color-mix(in srgb, var(--navy) 60%, transparent); }
-.form-control:focus {
-  border-color: var(--navy);
-  box-shadow: 0 0 0 1px var(--navy);
+.form-control::placeholder {
+  color: var(--text-subtle);
 }
-select.form-control { cursor: pointer; }
+.form-control:hover:not(:focus) {
+  border-color: var(--field-border-hover);
+}
+.form-control:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus);
+}
+select.form-control {
+  cursor: pointer;
+}
 
 /* ── Mensajes ── */
 .muted {
@@ -145,9 +167,10 @@ select.form-control { cursor: pointer; }
 .form-error {
   margin-top: 16px;
   padding: 12px;
+  border: 1px solid var(--danger-border);
   border-radius: var(--radius);
-  background: color-mix(in srgb, var(--burgundy) 8%, white);
-  color: var(--burgundy);
+  background: var(--danger-soft);
+  color: var(--danger);
   font-size: 14px;
 }
 
@@ -158,13 +181,13 @@ select.form-control { cursor: pointer; }
   padding: 14px;
   justify-content: center;
   font-size: 16px;
-  background: var(--dark-navy);
-  color: var(--cream);
+  background: var(--btn-solid-bg);
+  color: var(--btn-solid-text);
 }
 
 .btn-block:hover {
-  background: var(--navy);
-  color: var(--cream);
+  background: var(--btn-solid-hover-bg);
+  color: var(--btn-solid-hover-text);
 }
 
 .btn-block:disabled {
@@ -172,6 +195,15 @@ select.form-control { cursor: pointer; }
   cursor: not-allowed;
   transform: none;
 }
+
+@media (max-width: 600px) {
+  .checkout-form {
+    padding: 28px 16px 64px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .form-control { transition-duration: 0.01ms; }
+  .form-control {
+    transition-duration: 0.01ms;
+  }
 }

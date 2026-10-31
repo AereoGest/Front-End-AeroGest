@@ -1,28 +1,33 @@
 /* Solo se usan las variables globales de styles.css. */
 :host {
-  --texto-suave: color-mix(in srgb, var(--navy) 60%, transparent);
-  --borde-suave: color-mix(in srgb, var(--navy) 15%, transparent);
-  --borde-campo: color-mix(in srgb, var(--navy) 30%, transparent);
+  --texto-suave: var(--text-muted);
+  --borde-suave: var(--border);
+  --borde-campo: var(--field-border);
   display: block;
 }
 
 /* ── Mensajes ── */
-.muted { color: var(--texto-suave); font-size: 14px; }
+.muted {
+  color: var(--texto-suave);
+  font-size: 14px;
+}
 
 .form-error {
   margin: 16px 0;
   padding: 12px;
+  border: 1px solid var(--danger-border);
   border-radius: var(--radius);
-  background: color-mix(in srgb, var(--burgundy) 8%, white);
-  color: var(--burgundy);
+  background: var(--danger-soft);
+  color: var(--danger);
   font-size: 14px;
 }
+
 /* ── Barra de progreso ── */
 .progress-bar {
   margin-top: 0;
   padding: 16px 0;
-  background: var(--white);
-  border-bottom: 1px solid var(--borde-suave);
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
 }
 
 .progress-steps {
@@ -55,22 +60,23 @@
 }
 
 .step-circle.completed {
-  background: var(--light-blue);
-  color: var(--navy);
+  background: var(--accent);
+  color: var(--accent-contrast);
 }
 
 .step-circle.current {
-  background: var(--navy);
-  color: var(--white);
+  background: var(--btn-solid-bg);
+  color: var(--btn-solid-text);
 }
 
 .step-circle.pending {
-  background: var(--borde-suave);
-  color: var(--texto-suave);
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  color: var(--text-subtle);
 }
 
 .current-label {
-  color: var(--navy);
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -79,12 +85,13 @@
   flex: 1;
   height: 2px;
   margin-top: 13px;
-  background: var(--borde-suave);
+  background: var(--border);
 }
 
 .completed-line {
-  background: var(--light-blue);
+  background: var(--accent);
 }
+
 /* ── Página ── */
 .checkout {
   max-width: 1200px;
@@ -96,13 +103,15 @@
   font-family: var(--font-display);
   font-size: 28px;
   font-weight: 800;
+  color: var(--text);
 }
 .flight-summary {
   margin-bottom: 24px;
   padding: 16px 20px;
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: var(--navy);
-  color: var(--white);
+  background: var(--surface-strong);
+  color: var(--text-inverse);
   font-size: 14px;
 }
 
@@ -115,7 +124,11 @@
 }
 
 /* ── Secciones ── */
-.checkout-section { border: 0; padding: 0; margin: 0 0 32px; }
+.checkout-section {
+  border: 0;
+  padding: 0;
+  margin: 0 0 32px;
+}
 
 .checkout-section-title {
   display: flex;
@@ -125,7 +138,7 @@
   font-family: var(--font-display);
   font-size: 18px;
   font-weight: 700;
-  color: var(--navy);
+  color: var(--text);
 }
 .checkout-step-num {
   display: inline-flex;
@@ -134,8 +147,8 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--navy);
-  color: var(--cream);
+  background: var(--btn-solid-bg);
+  color: var(--btn-solid-text);
   font-size: 13px;
   font-weight: 700;
 }
@@ -144,14 +157,24 @@
 .passenger {
   margin-bottom: 16px;
   padding: 20px;
-  border: 1px solid var(--borde-suave);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: white;
+  background: var(--bg-elevated);
   box-shadow: var(--shadow-sm);
 }
-.passenger legend { padding: 0 8px; font-weight: 600; }
-.passenger .checkout-section { margin: 20px 0 0; }
-.passenger .checkout-section legend { margin-bottom: 10px; font-size: 14px; font-weight: 600; }
+.passenger legend {
+  padding: 0 8px;
+  font-weight: 600;
+  color: var(--text);
+}
+.passenger .checkout-section {
+  margin: 20px 0 0;
+}
+.passenger .checkout-section legend {
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
 
 /* ── Campos ── */
 .passenger .form-group {
@@ -163,25 +186,37 @@
 .form-group > span {
   font-size: 13px;
   font-weight: 500;
-  color: var(--texto-suave);
+  color: var(--text-muted);
 }
 .form-control {
   width: 100%;
   height: 48px;
   padding: 0 14px;
-  border: 1px solid var(--borde-campo);
+  border: 1px solid var(--field-border);
   border-radius: var(--radius-md);
-  background: white;
-  color: var(--navy);
+  background: var(--field-bg);
+  color: var(--text);
   font: inherit;
   font-size: 15px;
   outline: none;
-  transition: border-color var(--transition), box-shadow var(--transition);
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition),
+    background-color var(--transition-theme);
 }
-.form-control::placeholder { color: color-mix(in srgb, var(--navy) 40%, transparent); }
-.form-control:hover:not(:focus) { border-color: color-mix(in srgb, var(--navy) 60%, transparent); }
-.form-control:focus { border-color: var(--navy); box-shadow: 0 0 0 1px var(--navy); }
-select.form-control { cursor: pointer; }
+.form-control::placeholder {
+  color: var(--text-subtle);
+}
+.form-control:hover:not(:focus) {
+  border-color: var(--field-border-hover);
+}
+.form-control:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus);
+}
+select.form-control {
+  cursor: pointer;
+}
 
 /* ── Extras por pasajero ── */
 .extra-opcion {
@@ -190,42 +225,78 @@ select.form-control { cursor: pointer; }
   gap: 14px;
   margin-bottom: 8px;
   padding: 14px;
-  border: 1px solid var(--borde-campo);
+  border: 1px solid var(--field-border);
   border-radius: var(--radius-md);
+  background: var(--bg-elevated);
   cursor: pointer;
-  transition: border-color var(--transition);
+  transition:
+    border-color var(--transition),
+    background-color var(--transition-theme);
 }
-.extra-opcion:hover { border-color: var(--navy); }
+.extra-opcion:hover {
+  border-color: var(--accent);
+}
 .extra-opcion:has(input:checked) {
-  border-color: var(--light-blue);
-  background: var(--light-blue-difuse);
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
-.extra-nombre { flex: 1; display: flex; flex-direction: column; gap: 2px; font-weight: 600; }
-.extra-nombre small { font-weight: 400; }
-.extra-precio { font-weight: 600; color: var(--navy); }
+.extra-opcion input {
+  accent-color: var(--accent);
+}
+.extra-nombre {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-weight: 600;
+  color: var(--text);
+}
+.extra-nombre small {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+.extra-precio {
+  font-weight: 600;
+  color: var(--text);
+}
 
 /* ── Resumen ── */
 .order-summary {
   position: sticky;
   top: 100px;
   padding: 24px;
-  border: 1px solid var(--borde-suave);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: white;
+  background: var(--bg-elevated);
   box-shadow: var(--shadow-md);
 }
-.order-summary h2 { margin-bottom: 16px; font-size: 16px; font-weight: 600; }
+.order-summary h2 {
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
 
-.summary-line-list { margin: 0; padding-top: 16px; border-top: 1px solid var(--borde-suave); }
+.summary-line-list {
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
 .summary-line {
   display: flex;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 8px;
   font-size: 14px;
+  color: var(--text);
 }
-.summary-line-label { color: var(--texto-suave); }
-.summary-line dd { margin: 0; white-space: nowrap; }
+.summary-line-label {
+  color: var(--text-muted);
+}
+.summary-line dd {
+  margin: 0;
+  white-space: nowrap;
+}
 
 .summary-total {
   display: flex;
@@ -233,40 +304,83 @@ select.form-control { cursor: pointer; }
   align-items: baseline;
   margin-top: 8px;
   padding-top: 12px;
-  border-top: 1px solid var(--navy);
+  border-top: 1px solid var(--border-strong);
 }
-.summary-total-label { font-weight: 600; }
-.summary-total-amount { font-family: var(--font-display); font-size: 22px; font-weight: 700; }
+.summary-total-label {
+  font-weight: 600;
+  color: var(--text);
+}
+.summary-total-amount {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
 
 /* ── Modal de confirmación ── */
 .confirm-modal {
   margin: auto;
   max-width: 440px;
   padding: 48px;
-  border: none;
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
   text-align: center;
   animation: fadeInUp 0.4s ease;
 }
-.confirm-modal::backdrop { background: rgba(10, 22, 40, 0.7); }
-.confirm-emoji { display: block; margin-bottom: 16px; font-size: 56px; }
-.confirm-modal h2 { margin-bottom: 8px; font-family: var(--font-display); font-size: 26px; font-weight: 800; }
+.confirm-modal::backdrop {
+  background: var(--overlay);
+}
+.confirm-emoji {
+  display: block;
+  margin-bottom: 16px;
+  font-size: 56px;
+}
+.confirm-modal h2 {
+  margin-bottom: 8px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+}
 .booking-code {
   margin-bottom: 20px;
   font-family: var(--font-display);
   font-size: 28px;
   font-weight: 700;
-  color: var(--burgundy);
+  color: var(--accent-text);
 }
-.confirm-modal footer { display: flex; justify-content: center; gap: 12px; margin-top: 28px; }
-.confirm-modal .btn-outline { border-color: var(--navy); color: var(--navy); }
+.confirm-modal footer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+.confirm-modal .btn-outline {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.confirm-modal .btn-outline:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+}
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
-  .checkout-layout { grid-template-columns: minmax(0, 1fr); }
-  .order-summary { position: static; }
+  .checkout-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .order-summary {
+    position: static;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .form-control, .extra-opcion { transition-duration: 0.01ms; }
+  .form-control,
+  .extra-opcion {
+    transition-duration: 0.01ms;
+  }
 }

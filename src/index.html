@@ -1,11 +1,29 @@
 <!doctype html>
-<html lang="en">
+<html lang="es" data-theme="light">
 <head>
   <meta charset="utf-8">
-  <title>FrontendAerogest</title>
+  <title>AeroGest</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#1D3557">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script>
+    /* Aplica el tema guardado antes de pintar para evitar el "flash" blanco. */
+    (function () {
+      try {
+        var guardado = localStorage.getItem('aerogest-theme');
+        var sistema = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var tema = guardado === 'light' || guardado === 'dark' ? guardado : (sistema ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', tema);
+        document.documentElement.style.colorScheme = tema;
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', tema === 'dark' ? '#070e19' : '#1D3557');
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
   <script src="https://sdk.mercadopago.com/js/v2"></script>
 </head>
 <body>

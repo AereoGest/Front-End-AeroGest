@@ -2,7 +2,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import FilaAsientos from '../../Models/FilaAsientos';
 import AsientoVista from '../../Models/AsientoVista';
 import AsientoModel from '../../Models/AsientoModel';
@@ -10,7 +10,7 @@ import AsientoModel from '../../Models/AsientoModel';
 @Component({
   selector: 'app-asientos',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './asientos.html',
   styleUrl: './asientos.css'
 })

@@ -1,23 +1,26 @@
 <section class="section">
   <div class="container">
-    <div class="auth-card" style="max-width:520px;margin:0 auto">
+    <div class="auth-card animate">
       <div class="auth-header">
         <h1 class="auth-title">Verificación de <em>cuenta</em></h1>
         <p class="auth-subtitle">Estamos validando tu email para activar tu cuenta.</p>
       </div>
 
       @if (cargando()) {
-        <p role="status">Verificando token...</p>
+        <p class="verify-status" role="status">
+          <span class="spinner" aria-hidden="true"></span>
+          Verificando token...
+        </p>
       }
 
       @if (verificado()) {
         <p class="mensaje-success" role="status">¡Cuenta verificada correctamente! Te redirigimos...</p>
-        <a routerLink="/" class="btn btn-primary btn-lg btn-block">Ir al inicio</a>
+        <a routerLink="/" class="btn btn-dark btn-lg btn-block">Ir al inicio</a>
       }
 
       @if (error()) {
         <p class="mensaje-error" role="alert">{{ error() }}</p>
-        <a routerLink="/login" class="btn btn-lg btn-block">Ir a iniciar sesión</a>
+        <a routerLink="/login" class="btn btn-dark btn-lg btn-block">Ir a iniciar sesión</a>
       }
     </div>
   </div>

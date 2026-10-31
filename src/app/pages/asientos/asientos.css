@@ -1,9 +1,7 @@
-
 /* ── Página de selección de asientos ── */
 
 .seat-page {
   padding: 40px 0 108px;
-  box-shadow: inset 0 2px 4px var(--light-blue-1);
 }
 
 .page-title {
@@ -11,22 +9,20 @@
   font-size: 28px;
   font-weight: 800;
   margin-bottom: 8px;
+  color: var(--text);
 }
 
 .flight-info {
-  color: var(--gray-500);
+  color: var(--text-muted);
   margin-bottom: 32px;
 }
 
 /* ── Barra de progreso ── */
 .progress-bar {
-  --texto-suave: color-mix(in srgb, var(--navy) 60%, transparent);
-  --borde-suave: color-mix(in srgb, var(--navy) 15%, transparent);
-
   margin-top: 0;
   padding: 16px 0;
-  background: var(--white);
-  border-bottom: 1px solid var(--borde-suave);
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
 }
 
 .progress-steps {
@@ -43,7 +39,7 @@
   flex-direction: column;
   align-items: center;
   font-size: 11px;
-  color: var(--texto-suave);
+  color: var(--text-muted);
 }
 
 .step-circle {
@@ -59,22 +55,23 @@
 }
 
 .step-circle.completed {
-  background: var(--light-blue);
-  color: var(--navy);
+  background: var(--accent);
+  color: var(--accent-contrast);
 }
 
 .step-circle.current {
-  background: var(--navy);
-  color: var(--white);
+  background: var(--btn-solid-bg);
+  color: var(--btn-solid-text);
 }
 
 .step-circle.pending {
-  background: var(--borde-suave);
-  color: var(--texto-suave);
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  color: var(--text-subtle);
 }
 
 .current-label {
-  color: var(--navy);
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -83,15 +80,14 @@
   flex: 1;
   height: 2px;
   margin-top: 13px;
-  background: var(--borde-suave);
+  background: var(--border);
 }
 
 .completed-line {
-  background: var(--light-blue);
+  background: var(--accent);
 }
 
 /* ── Distribución principal ── */
-
 .seat-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 300px;
@@ -103,17 +99,18 @@
   order: 1;
   min-width: 0;
   overflow-x: auto;
-  background: var(--white);
-  border: 1px solid var(--light-blue-1);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 24px;
-  box-shadow: 0 0.5px 4px var(--light-blue-1);
+  box-shadow: var(--shadow-sm);
 }
 
 .cabin-plane-nose {
   text-align: center;
   font-size: 36px;
   margin-bottom: 20px;
+  color: var(--text);
 }
 
 .cabin-section-label {
@@ -121,15 +118,14 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--navy);
+  color: var(--text-muted);
   text-align: center;
   margin: 16px 0 12px;
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--blue-pale);
+  border-bottom: 1px solid var(--border);
 }
 
 /* ── Filas de asientos ── */
-
 .seat-row {
   display: flex;
   align-items: center;
@@ -142,7 +138,7 @@
   width: 24px;
   flex-shrink: 0;
   font-size: 11px;
-  color: var(--navy);
+  color: var(--text-subtle);
   text-align: center;
 }
 
@@ -151,10 +147,7 @@
   flex-shrink: 0;
 }
 
-/* ── Asientos disponibles ── */
-
-
-/* Asientos disponibles */
+/* ── Asientos ── */
 .seat {
   width: 34px;
   height: 34px;
@@ -163,96 +156,103 @@
   align-items: center;
   justify-content: center;
 
-  background-color: var(--white);
-  border: 2px solid var(--navy);
+  background-color: var(--bg-elevated);
+  border: 2px solid var(--accent-text);
   border-radius: 7px;
-  color: var(--navy);
+  color: var(--text);
 
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
 
-  transition: background-color 0.2s ease,
-              border-color 0.2s ease,
-              color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 /* Primera clase disponible */
 .seat.first-class {
-  background-color: var(--white);
-  border-color: var(--navy);
-  color: var(--navy);
+  background-color: var(--bg-elevated);
+  border-color: var(--accent-text);
+  color: var(--text);
 }
 
 /* Hover */
 .seat:hover:not(:disabled):not(.selected) {
-  background-color: var(--blue-pale);
+  background-color: var(--accent-soft);
+  border-color: var(--accent);
 }
 
-/* Seleccionado: celeste */
+/* Foco de teclado */
+.seat:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Seleccionado */
 .seat.selected,
 .seat.first-class.selected {
-  background-color: #3CA5E3;
-  border: 2px solid #3CA5E3;
-  color: #FFFFFF;
-  box-shadow: 0 0 0 2px rgba(60, 165, 227, 0.25);
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow: 0 0 0 2px var(--focus);
 }
 
-/* Ocupado: bordó */
+/* Ocupado */
 .seat.taken,
 .seat:disabled {
-  background-color: #921B25;
-  border: 2px solid #921B25;
-  color: #FFFFFF;
+  background-color: var(--danger);
+  border-color: var(--danger);
+  color: var(--danger-contrast);
   cursor: not-allowed;
   opacity: 1;
   box-shadow: none;
 }
 
-
 /* ── Resumen de selección ── */
-
 .seat-summary-card {
   order: 2;
   position: sticky;
   top: 100px;
-  background: var(--white);
-  border: 1px solid var(--light-blue-1);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 28px;
-  box-shadow: 0 0.5px 4px var(--light-blue-1);
+  box-shadow: var(--shadow-sm);
 }
 
 .summary-title {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 16px;
+  color: var(--text);
 }
 
 .selected-seat-display {
-  background: var(--navy);
+  background: var(--surface-strong);
   border-radius: var(--radius);
   padding: 20px;
   margin-bottom: 20px;
   text-align: center;
-  color: var(--white);
+  color: var(--text-inverse);
 }
 
 .asientos-progress {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-inverse-muted);
   margin-bottom: 8px;
 }
 
 .asientos-seleccionados {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-inverse);
   margin-top: 8px;
   overflow-wrap: anywhere;
 }
 
 /* ── Leyenda ── */
-
 .seat-legend {
   display: flex;
   flex-direction: column;
@@ -265,6 +265,7 @@
   align-items: center;
   gap: 10px;
   font-size: 14px;
+  color: var(--text);
 }
 
 .legend-dot {
@@ -275,29 +276,26 @@
 }
 
 .dot-available {
-  background: var(--white);
-  border: 2px solid var(--navy);
+  background: var(--bg-elevated);
+  border: 2px solid var(--accent-text);
 }
 
 .dot-selected {
-  background: var(--light-blue);
- 
+  background: var(--accent);
 }
 
 .dot-taken {
-  background: var(--burgundy);
+  background: var(--danger);
 }
 
-
 .dot-first {
-  background: var(--cream);
-  border: 2px solid var(--burgundy);
+  background: var(--bg-inset);
+  border: 2px solid var(--accent-text);
 }
 
 /* ── Precios ── */
-
 .price-summary {
-  border-top: 1px solid var(--navy-mid);
+  border-top: 1px solid var(--border);
   padding-top: 16px;
   margin-bottom: 20px;
 }
@@ -308,41 +306,50 @@
   gap: 12px;
   margin-bottom: 8px;
   font-size: 14px;
+  color: var(--text);
 }
 
 .price-row > span:first-child {
-  color: var(--gray-500);
+  color: var(--text-muted);
 }
 
 .price-total {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  border-top: 1px solid var(--navy);
+  border-top: 1px solid var(--border-strong);
   padding-top: 12px;
   margin-top: 8px;
   font-family: var(--font-display);
   font-size: 20px;
   font-weight: 700;
+  color: var(--text);
 }
 
 /* ── Botón de continuar ── */
-
 .btn-continue {
   width: 100%;
   padding: 14px 18px;
   border: none;
   border-radius: var(--radius);
-  background: var(--navy);
-  color: var(--white);
+  background: var(--btn-solid-bg);
+  color: var(--btn-solid-text);
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .btn-continue:hover:not(:disabled) {
-  opacity: 0.9;
+  background: var(--btn-solid-hover-bg);
+  color: var(--btn-solid-hover-text);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-continue:disabled {
@@ -351,7 +358,6 @@
 }
 
 /* ── Mensajes ── */
-
 .mensaje {
   margin: 20px 0;
   padding: 14px 18px;
@@ -365,28 +371,27 @@
 }
 
 .mensaje.error {
-  color: var(--burgundy);
-  background: color-mix(in srgb, var(--burgundy) 8%, var(--light-cream));
-  border: 1px solid color-mix(in srgb, var(--burgundy) 30%, transparent);
-  border-left: 4px solid var(--burgundy);
+  color: var(--danger);
+  background: var(--danger-soft);
+  border: 1px solid var(--danger-border);
+  border-left: 4px solid var(--danger);
 }
 
 .mensaje.info {
-  color: var(--navy);
-  background: color-mix(in srgb, var(--light-blue) 10%, var(--light-cream));
-  border: 1px solid color-mix(in srgb, var(--light-blue) 35%, transparent);
-  border-left: 4px solid var(--light-blue);
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
 }
 
 .mensaje.exito {
-  color: var(--navy);
-  background: var(--cream);
-  border: 1px solid color-mix(in srgb, var(--navy) 20%, transparent);
-  border-left: 4px solid var(--navy);
+  color: var(--success);
+  background: var(--success-soft);
+  border: 1px solid var(--success-border);
+  border-left: 4px solid var(--success);
 }
 
 /* ── Accesibilidad ── */
-
 .sr-only {
   position: absolute;
   width: 1px;
@@ -400,7 +405,6 @@
 }
 
 /* ── Diseño responsive ── */
-
 @media (max-width: 850px) {
   .seat-layout {
     grid-template-columns: 1fr;

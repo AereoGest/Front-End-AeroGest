@@ -1,8 +1,10 @@
+/* ── Buscador de vuelos ── */
 .flight-search-bar {
   display: flex;
   flex-direction: column;
-  padding: 40px 0 28px;   
-  background: var(--cream);       
+  padding: 40px 0 28px;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
 }
 
@@ -14,26 +16,38 @@
 }
 
 .search-bar-form .btn {
-  height: 52px;                  
+  height: 52px;
   justify-content: center;
   white-space: nowrap;
 }
 
-.resultados { padding-top: 48px; }
+.resultados {
+  padding-top: 48px;
+}
 
-.dest-card { cursor: pointer; } 
+.dest-card {
+  cursor: pointer;
+}
 
-.dest-card-body { padding: 20px; }
+.dest-card-body {
+  padding: 20px;
+}
 
 @media (max-width: 900px) {
-  .search-bar-form { grid-template-columns: 1fr 1fr; }
-  .search-bar-form .btn { grid-column: 1 / -1; }
+  .search-bar-form {
+    grid-template-columns: 1fr 1fr;
+  }
+  .search-bar-form .btn {
+    grid-column: 1 / -1;
+  }
 }
 @media (max-width: 600px) {
-  .search-bar-form { grid-template-columns: 1fr; }
+  .search-bar-form {
+    grid-template-columns: 1fr;
+  }
 }
 
-.field{
+.field {
   border: none;
 }
 
@@ -44,14 +58,21 @@
   gap: 8px;
   margin-top: 16px;
 }
-.carrito-acciones .btn { padding: 8px 16px; font-size: 12px; }
-.carrito-acciones .btn-dark { flex: 1; justify-content: center; }
+.carrito-acciones .btn {
+  padding: 8px 16px;
+  font-size: 12px;
+}
+.carrito-acciones .btn-dark {
+  flex: 1;
+  justify-content: center;
+}
 
 /* ── Avisos: reutilizan .toast global ── */
-.toast.error { border-left-color: var(--burgundy); }
+.toast.error {
+  border-left-color: var(--danger);
+}
 
-
-/*----------------------------------------------------------------------------------*/
+/* ── Resultados ── */
 .resultados {
   padding: 40px 0 80px;
 }
@@ -66,22 +87,21 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: var(--light-blue);
+  color: var(--accent-text);
   margin-bottom: 10px;
 }
 
 .resultados .section-title {
-  color: var(--navy);
+  color: var(--text);
   margin-bottom: 10px;
 }
 
 .resultados .section-subtitle {
-  color: var(--dark-navy);
+  color: var(--text-muted);
   font-size: 15px;
 }
 
 /* ── Grilla de vuelos ── */
-
 .resultados .destinations-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -90,21 +110,25 @@
 }
 
 /* ── Tarjeta de vuelo ── */
-
 .resultados .dest-card {
-  background: var(--cream);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
   border-radius: var(--radius-md);
   overflow: hidden;
-  transition: border-color var(--transition),
-              box-shadow var(--transition),
-              transform var(--transition);
+  transition:
+    border-color var(--transition),
+    background-color var(--transition-theme),
+    box-shadow var(--transition),
+    transform var(--transition);
 }
 
-.resultados .dest-card:hover {
-  border-color: var(--navy);
+.resultados .dest-card:hover,
+.resultados .dest-card:focus-visible {
+  border-color: var(--accent);
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
+  outline: none;
 }
 
 .resultados .dest-card-body {
@@ -116,26 +140,23 @@
 }
 
 /* ── Ruta: origen y destino ── */
-
 .resultados .dest-card-city {
   grid-column: 1;
-  color: var(--navy);
+  color: var(--text);
   font-size: 20px;
   font-weight: 700;
   line-height: 1.4;
 }
 
 /* ── Horarios y duración ── */
-
 .resultados .dest-card-country {
   grid-column: 1;
-  color: var(--navy);
+  color: var(--text-muted);
   font-size: 13px;
   line-height: 1.6;
 }
 
 /* ── Precio ── */
-
 .resultados .dest-card-price {
   grid-column: 2;
   grid-row: 1 / span 3;
@@ -147,18 +168,19 @@
 }
 
 .resultados .dest-price-from {
-  color: var(--light-blue);
+  color: var(--accent-text);
   font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .resultados .dest-price-amount {
-  color: var(--navy);
+  color: var(--text);
   font-family: var(--font-display);
   font-size: 28px;
   font-weight: 700;
   white-space: nowrap;
 }
-
 
 /* ── Botones debajo de la información ── */
 .resultados .carrito-acciones {
@@ -170,25 +192,25 @@
   gap: 12px;
   margin-top: 12px;
   padding-top: 16px;
-  border-top: 1px solid var(--light-blue);
+  border-top: 1px solid var(--border);
 }
-
 
 .resultados .carrito-acciones .btn-primary {
   grid-column: 4;
   align-items: center;
   justify-content: center;
-  background-color: var(--light-blue-difuse);
+  background-color: var(--accent-soft);
+  color: var(--text);
   width: 46px;
   height: 42px;
   padding: 0;
   font-size: 18px;
 }
 
-.resultados .carrito-acciones .btn-primary:hover{
-  background-color: var(--light-blue);
+.resultados .carrito-acciones .btn-primary:hover {
+  background-color: var(--accent);
+  color: var(--accent-contrast);
 }
-
 
 .resultados .carrito-acciones .btn-dark {
   grid-column: 2;
@@ -200,14 +222,15 @@
   font-size: 14px;
 }
 
-/* Espaciado y efecto hover */
 .resultados .carrito-acciones .btn {
- 
   font-family: var(--font-body);
   font-weight: 600;
   cursor: pointer;
-  transition: transform var(--transition),
-              box-shadow var(--transition);
+  transition:
+    transform var(--transition),
+    background-color var(--transition),
+    color var(--transition),
+    box-shadow var(--transition);
 }
 
 .resultados .carrito-acciones .btn:hover {
@@ -215,25 +238,23 @@
 }
 
 /* ── Mensajes de estado ── */
-
 .resultados .auth-subtitle {
   margin: 20px 0;
-  color: var(--navy);
+  color: var(--text-muted);
   font-size: 14px;
 }
 
 .resultados .mensaje-error {
   padding: 14px 18px;
   margin: 20px 0;
-  border: 1px solid var(--cream);
+  border: 1px solid var(--danger-border);
   border-radius: var(--radius);
-  background: var(--cream);
-  color: var(--burgundy);
+  background: var(--danger-soft);
+  color: var(--danger);
   font-size: 14px;
 }
 
 /* ── Responsive: tablets y celulares ── */
-
 @media (max-width: 768px) {
   .resultados {
     padding: 28px 0 56px;
@@ -288,18 +309,21 @@
     min-width: 100px;
   }
 }
-  
+
+/* ── Modal de detalle ── */
 .modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background: rgba(6, 24, 49, 0.6);
-    animation: overlay-in 0.4s ease;
-  }
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: var(--overlay);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: overlay-in 0.4s ease;
+}
 
 .modal-vuelo {
   position: relative;
@@ -308,7 +332,9 @@
   max-height: 90vh;
   overflow-y: auto;
   padding: 32px;
-  background: var(--cream);
+  background: var(--bg-elevated);
+  color: var(--text);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   animation: modal-in 0.45s ease;
@@ -323,13 +349,18 @@
   border: none;
   border-radius: 50%;
   background: transparent;
-  color: var(--navy);
+  color: var(--text-muted);
   font-size: 18px;
   cursor: pointer;
-  transition: background var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
-.modal-cerrar:hover { background: var(--light-blue); }
+.modal-cerrar:hover {
+  background: var(--accent-soft);
+  color: var(--text);
+}
 
 .modal-vuelo .section-eyebrow {
   display: inline-block;
@@ -337,12 +368,12 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: var(--light-blue);
+  color: var(--accent-text);
   margin-bottom: 8px;
 }
 
 .modal-ruta {
-  color: var(--navy);
+  color: var(--text);
   font-family: var(--font-display);
   font-size: 22px;
   line-height: 1.3;
@@ -356,14 +387,14 @@
   margin: 0 0 20px;
 }
 .modal-datos dt {
-  color: var(--light-blue);
+  color: var(--text-subtle);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 .modal-datos dd {
   margin: 2px 0 0;
-  color: var(--navy);
+  color: var(--text);
   font-size: 15px;
   font-weight: 600;
 }
@@ -374,7 +405,19 @@
   align-items: flex-end;
   gap: 4px;
   padding-top: 16px;
-  border-top: 1px solid var(--light-blue);
+  border-top: 1px solid var(--border);
+}
+.modal-precio .dest-price-from {
+  color: var(--text-subtle);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.modal-precio .dest-price-amount {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
 }
 
 .modal-acciones {
@@ -383,14 +426,30 @@
   margin-top: 20px;
 }
 
-.modal-acciones .btn-dark{ grid-column: 1; }
+.modal-acciones .btn-dark {
+  grid-column: 1;
+}
 
-.modal-acciones .btn-primary{ grid-column: 3; background-color: var(--light-blue-difuse);}
+.modal-acciones .btn-primary {
+  grid-column: 3;
+  background-color: var(--accent-soft);
+  color: var(--text);
+}
+.modal-acciones .btn-primary:hover {
+  background-color: var(--accent);
+  color: var(--accent-contrast);
+}
 
 @media (max-width: 480px) {
-  .modal-vuelo { padding: 24px 20px; }
-  .modal-datos { grid-template-columns: 1fr; }
-  .modal-acciones { flex-direction: column; }
+  .modal-vuelo {
+    padding: 24px 20px;
+  }
+  .modal-datos {
+    grid-template-columns: 1fr;
+  }
+  .modal-acciones {
+    flex-direction: column;
+  }
 }
 
 .modal-overlay.cerrando {
@@ -400,16 +459,42 @@
   animation: modal-out 0.4s ease forwards;
 }
 
-@keyframes overlay-in  { from { opacity: 0; } to { opacity: 1; } }
-@keyframes overlay-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes overlay-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
 
 @keyframes modal-in {
-  from { opacity: 0; transform: translateY(16px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 @keyframes modal-out {
-  from { opacity: 1; transform: translateY(0) scale(1); }
-  to   { opacity: 0; transform: translateY(16px) scale(0.97); }
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
