@@ -13,6 +13,7 @@ import { ResetPassword } from './pages/reset-password/reset-password';
 import { Reserva } from './pages/reserva/reserva';
 import { Asientos } from './pages/asientos/asientos';
 import { Pago } from './pages/pago/pago';
+import { checkoutPagoGuard } from './guards/checkoutPagoGuard';
 
 export const routes: Routes = [
     { path: "", component: Home },
@@ -22,7 +23,7 @@ export const routes: Routes = [
     { path: "vuelos", component: Vuelos },
     { path: "verify", component: Verify },
     { path: "checkoutReserva", component: Reserva, canActivate: [authGuard] },
-    {path: "checkoutReserva/pago", component: Pago, canActivate: [authGuard]},
+    {path: "checkoutReserva/pago", component: Pago, canActivate: [checkoutPagoGuard, authGuard] },
     { path: "reservas", component: Reservas, canActivate: [authGuard] },
     { path: "carrito", component: MiCarrito, canActivate: [authGuard] },
     {path: "forgot-password", component: ForgotPassword},
