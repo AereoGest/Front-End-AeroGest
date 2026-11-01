@@ -6,24 +6,23 @@
     <div class="hero-content">
       <!-- Left -->
       <div>
-        <p class="hero-eyebrow animate">La aerolínea que te lleva más lejos</p>
+        <p class="hero-eyebrow animate">{{ 'home.heroEyebrow' | translate }}</p>
         <h1 class="hero-title animate delay-1">
-          Volá hacia tu próxima <em>aventura</em>
+          {{ 'home.heroTitle' | translate }} <em>{{ 'home.heroTitleEm' | translate }}</em>
         </h1>
         <p class="hero-subtitle animate delay-2">
-          Encontrá los mejores vuelos al precio justo. Más de 150 destinos, atención personalizada y el confort que
-          merecés.
+          {{ 'home.heroSubtitle' | translate }}
         </p>
         <div class="hero-actions animate delay-3">
-          <a routerLink="/vuelos" class="btn btn-primary btn-lg">Buscar vuelos</a>
+          <a routerLink="/vuelos" class="btn btn-primary btn-lg">{{ 'home.searchFlightsBtn' | translate }}</a>
           <a (click)="irASeccion('destinos')" class="btn btn-outline btn-lg" role="button" tabindex="0"
-            (keydown.enter)="irASeccion('destinos')">Ver destinos</a>
+            (keydown.enter)="irASeccion('destinos')">{{ 'home.viewDestinationsBtn' | translate }}</a>
         </div>
         <div class="hero-stats animate delay-4">
-          @for (s of stats; track s.etiqueta) {
+          @for (s of stats; track s.etiquetaKey) {
             <div>
               <div class="hero-stat-value">{{ s.valor }}</div>
-              <div class="hero-stat-label">{{ s.etiqueta }}</div>
+              <div class="hero-stat-label">{{ s.etiquetaKey | translate }}</div>
             </div>
           }
         </div>
@@ -31,38 +30,38 @@
 
       <!-- Search Card -->
       <div class="search-card">
-        <h2 class="sr-only">Buscador de vuelos</h2>
+        <h2 class="sr-only">{{ 'home.searchFlightsBtn' | translate }}</h2>
         <div class="search-card-header">
-          <div class="search-tab">Solo ida</div>
+          <div class="search-tab">{{ 'home.oneWay' | translate }}</div>
         </div>
 
         <form (submit)="buscarVuelos($event)">
           <div class="search-row">
             <div class="form-group">
-              <label for="origen">Origen</label>
+              <label for="origen">{{ 'home.origin' | translate }}</label>
               <input type="text" id="origen" name="origen" class="form-control"
-                placeholder="Ciudad o aeropuerto" [(ngModel)]="origen" />
+                [placeholder]="'home.originPlaceholder' | translate" [(ngModel)]="origen" />
             </div>
             <div class="search-divider">
-              <button type="button" class="search-swap" (click)="swapAirports()" title="Intercambiar">⇄</button>
+              <button type="button" class="search-swap" (click)="swapAirports()" [title]="'home.swap' | translate">⇄</button>
             </div>
             <div class="form-group">
-              <label for="destino">Destino</label>
+              <label for="destino">{{ 'home.destination' | translate }}</label>
               <input type="text" id="destino" name="destino" class="form-control"
-                placeholder="Ciudad o aeropuerto" [(ngModel)]="destino" />
+                [placeholder]="'home.destinationPlaceholder' | translate" [(ngModel)]="destino" />
             </div>
           </div>
 
           <div class="search-row search-row-1" id="fechas-row">
             <div class="form-group">
-              <label for="fecha-ida">Ida</label>
+              <label for="fecha-ida">{{ 'home.departureDate' | translate }}</label>
               <input type="date" id="fecha-ida" name="fechaIda" class="form-control" [(ngModel)]="fechaIda" />
             </div>
           </div>
 
           <div class="search-row search-row-2">
             <div class="form-group">
-              <label for="pasajeros">Pasajeros</label>
+              <label for="pasajeros">{{ 'home.passengers' | translate }}</label>
               <select id="pasajeros" name="pasajeros" class="form-control" [(ngModel)]="pasajeros">
                 @for (p of opcionesPasajeros; track p) {
                   <option [value]="p">{{ p }}</option>
@@ -70,7 +69,7 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="clase">Clase</label>
+              <label for="clase">{{ 'home.class' | translate }}</label>
               <select id="clase" name="clase" class="form-control" [(ngModel)]="clase">
                 @for (c of opcionesClase; track c) {
                   <option [value]="c">{{ c }}</option>
@@ -81,7 +80,7 @@
 
           <button type="submit" class="btn btn-primary btn-lg"
             style="width:100%;justify-content:center;margin-top:6px">
-            ✈ Buscar vuelos
+            {{ 'home.submitSearch' | translate }}
           </button>
         </form>
       </div>
@@ -93,16 +92,16 @@
 <section class="section section-alt">
   <div class="container">
     <div class="section-header">
-      <span class="section-eyebrow">¿Por qué AeroGest?</span>
-      <h2 class="section-title">Volamos distinto</h2>
-      <p class="section-subtitle">Más de 20 años conectando personas con sus destinos soñados</p>
+      <span class="section-eyebrow">{{ 'home.whyUsEyebrow' | translate }}</span>
+      <h2 class="section-title">{{ 'home.whyUsTitle' | translate }}</h2>
+      <p class="section-subtitle">{{ 'home.whyUsSubtitle' | translate }}</p>
     </div>
     <div class="why-grid">
-      @for (b of beneficios; track b.titulo) {
+      @for (b of beneficios; track b.tituloKey) {
         <div class="why-card">
           <div class="why-icon">{{ b.icono }}</div>
-          <h3 class="why-title">{{ b.titulo }}</h3>
-          <p class="why-desc">{{ b.desc }}</p>
+          <h3 class="why-title">{{ b.tituloKey | translate }}</h3>
+          <p class="why-desc">{{ b.descKey | translate }}</p>
         </div>
       }
     </div>
@@ -113,9 +112,9 @@
 <section class="section" id="destinos">
   <div class="container">
     <div class="section-header">
-      <span class="section-eyebrow">Destinos populares</span>
-      <h2 class="section-title">¿A dónde querés ir?</h2>
-      <p class="section-subtitle">Explorá nuestros destinos más buscados con las mejores tarifas</p>
+      <span class="section-eyebrow">{{ 'home.popularDestinations' | translate }}</span>
+      <h2 class="section-title">{{ 'home.whereTo' | translate }}</h2>
+      <p class="section-subtitle">{{ 'home.whereToSubtitle' | translate }}</p>
     </div>
     <div class="destinations-grid">
       @for (d of destinos; track d.ciudad) {
@@ -129,7 +128,7 @@
               <div class="dest-card-city">{{ d.ciudad }}</div>
               <div class="dest-card-country">{{ d.pais }}</div>
               <div class="dest-card-price">
-                <span class="dest-price-from">Desde</span>
+                <span class="dest-price-from">{{ 'home.from' | translate }}</span>
                 <span class="dest-price-amount">{{ d.desde }}</span>
               </div>
             </div>

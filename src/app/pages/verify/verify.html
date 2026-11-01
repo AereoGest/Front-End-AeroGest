@@ -2,33 +2,33 @@
   <div class="container">
     <div class="auth-card animate">
       <div class="auth-header">
-        <h1 class="auth-title">Verificación de <em>cuenta</em></h1>
-        <p class="auth-subtitle">Estamos validando tu email para activar tu cuenta.</p>
+        <h1 class="auth-title">{{ 'verify.title' | translate }} <em>{{ 'verify.titleEm' | translate }}</em></h1>
+        <p class="auth-subtitle">{{ 'verify.subtitle' | translate }}</p>
       </div>
 
       @if (cargando()) {
         <p class="verify-status" role="status">
           <span class="spinner" aria-hidden="true"></span>
-          Verificando token...
+          {{ 'verify.verifyingToken' | translate }}
         </p>
       }
 
       @if (verificado()) {
-        <p class="mensaje-success" role="status">¡Cuenta verificada correctamente! Te redirigimos...</p>
-        <a routerLink="/" class="btn btn-dark btn-lg btn-block">Ir al inicio</a>
+        <p class="mensaje-success" role="status">{{ 'verify.success' | translate }}</p>
+        <a routerLink="/" class="btn btn-dark btn-lg btn-block">{{ 'verify.goHome' | translate }}</a>
       }
 
       @if (error()) {
         <p class="mensaje-error" role="alert">{{ error() }}</p>
         <div style="margin-top: 1rem; margin-bottom: 1rem;">
           <label for="email-reenvio" style="display: block; font-size: 0.875rem; margin-bottom: 0.25rem;">
-            ¿Necesitás un nuevo enlace de verificación?
+            {{ 'verify.needNewLink' | translate }}
           </label>
           <input
             id="email-reenvio"
             type="email"
             class="form-control"
-            placeholder="Ingresá tu correo"
+            [placeholder]="'auth.emailPlaceholder' | translate"
             [value]="emailReenvio()"
             (input)="emailReenvio.set($any($event.target).value)"
             style="margin-bottom: 0.5rem;"
@@ -38,7 +38,7 @@
             class="btn btn-primary btn-block"
             (click)="reenviar()"
             [disabled]="reenviando() || !emailReenvio().trim()">
-            {{ reenviando() ? 'Enviando...' : 'Reenviar enlace de verificación' }}
+            {{ reenviando() ? ('auth.resending' | translate) : ('verify.resendLink' | translate) }}
           </button>
           @if (mensajeReenvio()) {
             <p class="mensaje-success" style="margin-top: 0.5rem;" role="status">
@@ -46,7 +46,7 @@
             </p>
           }
         </div>
-        <a routerLink="/login" class="btn btn-dark btn-lg btn-block">Ir a iniciar sesión</a>
+        <a routerLink="/login" class="btn btn-dark btn-lg btn-block">{{ 'verify.goToLogin' | translate }}</a>
       }
     </div>
   </div>

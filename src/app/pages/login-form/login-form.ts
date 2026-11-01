@@ -1,5 +1,4 @@
-
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import {
   form,
   FormField,
@@ -11,6 +10,8 @@ import { Auth } from '../../services/auth';
 import { Router, RouterLink } from '@angular/router';
 import { Login } from '../../Models/Login';
 import { AuthResponse } from '../../Models/Perfil';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { I18nService } from '../../services/i18n';
 
 interface TwoFactorData {
   code: string;
@@ -19,16 +20,14 @@ interface TwoFactorData {
 @Component({
   selector: 'app-login-form',
   standalone: true,
-  imports: [FormField, RouterLink],
+  imports: [FormField, RouterLink, TranslatePipe],
   templateUrl: './login-form.html',
   styleUrl: './login-form.css'
 })
 export class LoginForm {
-
-  constructor(
-    private auth: Auth,
-    private router: Router
-  ) {}
+  private readonly auth = inject(Auth);
+  private readonly router = inject(Router);
+  protected readonly i18n = inject(I18nService);
 
   datos = signal<Login>({
     email: '',
@@ -74,14 +73,13 @@ export class LoginForm {
         if (data.requires2fa) {
           this.email2FA.set(data.email || this.datos().email);
           this.paso2FA.set(true);
-          alert('Se envió un código a tu email.');
           return;
         }
 
         this.completarLogin(data);
       },
       error: (error: HttpErrorResponse) => {
-        const msg = error.error?.message || 'Error al iniciar sesión.';
+        const msg = error.error?.message || this.i18n.t('common.error');
         this.mensajeError.set(msg);
         if (msg.toLowerCase().includes('verific') || error.status === 403) {
           this.mostrarReenviarVerificacion.set(true);
@@ -103,7 +101,7 @@ export class LoginForm {
     this.auth.verificarCodigo(this.email2FA(), this.datos2FA().code).subscribe({
       next: (data) => this.completarLogin(data),
       error: (error: HttpErrorResponse) => {
-        this.mensajeError.set(error.error?.message || 'No se pudo verificar el código.');
+        this.mensajeError.set(error.error?.message || this.i18n.t('common.error'));
       }
     }).add(() => this.cargando.set(false));
   }
@@ -111,18 +109,18 @@ export class LoginForm {
   reenviarVerificacion(): void {
     const email = this.datos().email || this.email2FA();
     if (!email) {
-      this.mensajeError.set('Ingresá tu correo electrónico para reenviar la verificación.');
+      this.mensajeError.set(this.i18n.t('auth.emailRequired'));
       return;
     }
     this.reenviando.set(true);
     this.mensajeInfo.set('');
     this.auth.reenviarVerificacion(email).subscribe({
       next: (res) => {
-        this.mensajeInfo.set(res.message || 'Se envió un correo de verificación. Revisa tu casilla.');
+        this.mensajeInfo.set(res.message || this.i18n.t('auth.registerSuccess'));
         this.mensajeError.set('');
       },
       error: (err: HttpErrorResponse) => {
-        this.mensajeError.set(err.error?.message || 'No se pudo reenviar la verificación.');
+        this.mensajeError.set(err.error?.message || this.i18n.t('common.error'));
       }
     }).add(() => this.reenviando.set(false));
   }
@@ -131,7 +129,6 @@ export class LoginForm {
     this.auth.guardarSesion(data);
 
     if (!data.perfilCompleto) {
-      alert('Completá tu perfil para continuar.');
       this.router.navigate(['/perfil']);
     } else {
       this.router.navigate(['/']);

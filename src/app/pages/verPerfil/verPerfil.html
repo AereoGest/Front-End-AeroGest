@@ -2,21 +2,20 @@
   <div class="container profile-layout">
     @if (perfilIncompleto()) {
       <aside class="profile-alert" role="note">
-        <strong>Tu perfil está incompleto.</strong>
-        Completá todos los campos para poder realizar compras y guardar favoritos.
+        <strong>{{ 'profile.incompleteNotice' | translate }}</strong>
+        {{ 'profile.incompleteDesc' | translate }}
       </aside>
     }
 
     <article class="auth-card animate">
       <header class="auth-header">
-        <h1 class="auth-title" id="perfil-titulo">Mi <em>Perfil</em></h1>
-        <p class="auth-subtitle">Actualizá tus datos personales para usar todos los servicios.</p>
+        <h1 class="auth-title" id="perfil-titulo">{{ 'profile.title' | translate }} <em>{{ 'profile.titleEm' | translate }}</em></h1>
+        <p class="auth-subtitle">{{ 'profile.subtitle' | translate }}</p>
       </header>
 
       @if (cuentaSinVerificar()) {
         <p class="profile-warning" role="alert">
-          <strong>Cuenta no verificada:</strong> revisá tu email para verificarla.
-          No vas a poder reservar ni comprar vuelos hasta hacerlo.
+          <strong>{{ 'profile.unverifiedTitle' | translate }}</strong> {{ 'profile.unverifiedDesc' | translate }}
           <br />
           <button
             type="button"
@@ -24,7 +23,7 @@
             style="margin-top: 0.5rem;"
             (click)="reenviarEmailVerificacion()"
             [disabled]="reenviando()">
-            {{ reenviando() ? 'Enviando...' : 'Reenviar correo de verificación' }}
+            {{ reenviando() ? ('auth.resending' | translate) : ('profile.resendEmail' | translate) }}
           </button>
           @if (mensajeVerificacion()) {
             <span class="mensaje-success" style="display: block; margin-top: 0.5rem;" role="status">
@@ -35,7 +34,7 @@
       }
 
       @if (cargando()) {
-        <p class="auth-subtitle" role="status">Cargando perfil...</p>
+        <p class="auth-subtitle" role="status">{{ 'profile.loading' | translate }}</p>
       }
 
       @if (mensajeExito()) {
@@ -50,7 +49,7 @@
           <input id="p-nombre" type="text" class="field-input" placeholder=" " autocomplete="given-name"
             [formField]="perfilForm.nombre" [attr.aria-invalid]="errorVisible(perfilForm.nombre)"
             aria-describedby="p-nombre-error" />
-          <label class="field-label" for="p-nombre">Nombre</label>
+          <label class="field-label" for="p-nombre">{{ 'profile.firstName' | translate }}</label>
           @if (errorVisible(perfilForm.nombre)) {
             <p class="field-error" id="p-nombre-error">Ingresá tu nombre, solo con letras y espacios.</p>
           }
@@ -60,7 +59,7 @@
           <input id="p-apellido" type="text" class="field-input" placeholder=" " autocomplete="family-name"
             [formField]="perfilForm.apellido" [attr.aria-invalid]="errorVisible(perfilForm.apellido)"
             aria-describedby="p-apellido-error" />
-          <label class="field-label" for="p-apellido">Apellido</label>
+          <label class="field-label" for="p-apellido">{{ 'profile.lastName' | translate }}</label>
           @if (errorVisible(perfilForm.apellido)) {
             <p class="field-error" id="p-apellido-error">Ingresá tu apellido, solo con letras y espacios.</p>
           }
@@ -69,7 +68,7 @@
         <div class="field full">
           <input id="p-email" type="email" class="field-input" placeholder=" " autocomplete="email"
             [value]="perfil()?.email ?? ''" readonly />
-          <label class="field-label" for="p-email">Email</label>
+          <label class="field-label" for="p-email">{{ 'profile.email' | translate }}</label>
         </div>
 
         <div class="field full">
@@ -77,7 +76,7 @@
             autocomplete="tel" (input)="soloDigitos('telefono', $event)"
             [formField]="perfilForm.telefono" [attr.aria-invalid]="errorVisible(perfilForm.telefono)"
             aria-describedby="p-telefono-error" />
-          <label class="field-label" for="p-telefono">Teléfono</label>
+          <label class="field-label" for="p-telefono">{{ 'profile.phone' | translate }}</label>
           @if (errorVisible(perfilForm.telefono)) {
             <p class="field-error" id="p-telefono-error">Ingresá un teléfono de hasta 15 dígitos.</p>
           }
@@ -89,7 +88,7 @@
               <option [value]="tipo.valor">{{ tipo.etiqueta }}</option>
             }
           </select>
-          <label class="field-label" for="p-identificador">Tipo de documento</label>
+          <label class="field-label" for="p-identificador">{{ 'profile.docType' | translate }}</label>
         </div>
 
         <div class="field">
@@ -97,7 +96,7 @@
             (input)="soloDigitos('numeroIdentificador', $event)"
             [formField]="perfilForm.numeroIdentificador"
             [attr.aria-invalid]="errorVisible(perfilForm.numeroIdentificador)" aria-describedby="p-dni-error" />
-          <label class="field-label" for="p-dni">Número de documento</label>
+          <label class="field-label" for="p-dni">{{ 'profile.docNumber' | translate }}</label>
           @if (errorVisible(perfilForm.numeroIdentificador)) {
             <p class="field-error" id="p-dni-error">Ingresá un documento de 7 u 8 dígitos.</p>
           }
@@ -106,12 +105,12 @@
         <div class="field">
           <select id="p-sexo" class="field-input" [formField]="perfilForm.sexo"
             [attr.aria-invalid]="errorVisible(perfilForm.sexo)" aria-describedby="p-sexo-error">
-            <option value="" disabled>Seleccioná...</option>
+            <option value="" disabled>{{ 'profile.genderSelect' | translate }}</option>
             @for (genero of generos; track genero.valor) {
               <option [value]="genero.valor">{{ genero.etiqueta }}</option>
             }
           </select>
-          <label class="field-label" for="p-sexo">Género</label>
+          <label class="field-label" for="p-sexo">{{ 'profile.gender' | translate }}</label>
           @if (errorVisible(perfilForm.sexo)) {
             <p class="field-error" id="p-sexo-error">Seleccioná un género.</p>
           }
@@ -121,38 +120,38 @@
           <input id="p-nacimiento" type="date" class="field-input" autocomplete="bday" [attr.max]="fechaMaxima"
             [formField]="perfilForm.fechaNacimiento"
             [attr.aria-invalid]="errorVisible(perfilForm.fechaNacimiento)" aria-describedby="p-nacimiento-error" />
-          <label class="field-label" for="p-nacimiento">Fecha de nacimiento</label>
+          <label class="field-label" for="p-nacimiento">{{ 'profile.birthDate' | translate }}</label>
           @if (errorVisible(perfilForm.fechaNacimiento)) {
             <p class="field-error" id="p-nacimiento-error">Ingresá una fecha de nacimiento anterior a hoy.</p>
           }
         </div>
 
         <button type="submit" class="btn btn-lg btn-block auth-btn-accent full" [disabled]="guardando()">
-          {{ guardando() ? 'Guardando...' : 'Guardar cambios' }}
+          {{ guardando() ? ('profile.saving' | translate) : ('profile.save' | translate) }}
         </button>
       </form>
     </article>
 
     <aside class="profile-panel animate delay-1" aria-labelledby="seguridad-titulo">
       <header class="profile-panel-header">
-        <h2 id="seguridad-titulo">Seguridad</h2>
-        <p>Opciones preparadas para doble factor.</p>
+        <h2 id="seguridad-titulo">{{ 'profile.security' | translate }}</h2>
+        <p>{{ 'profile.securityDesc' | translate }}</p>
       </header>
 
       <label class="security-option">
         <input type="checkbox" [checked]="perfil()?.twoFactorEnabled ?? false" [disabled]="!perfil()"
           (change)="toggleDosFactores()" />
         <span>
-          <strong>2FA por correo</strong>
-          <small>Enviar código de verificación al iniciar sesión.</small>
+          <strong>{{ 'profile.twoFactorEmail' | translate }}</strong>
+          <small>{{ 'profile.twoFactorEmailDesc' | translate }}</small>
         </span>
       </label>
 
       <label class="security-option">
         <input type="checkbox" disabled />
         <span>
-          <strong>App autenticadora</strong>
-          <small>Usar códigos temporales de una app compatible.</small>
+          <strong>{{ 'profile.twoFactorApp' | translate }}</strong>
+          <small>{{ 'profile.twoFactorAppDesc' | translate }}</small>
         </span>
       </label>
     </aside>

@@ -1,4 +1,3 @@
-
 <footer class="footer">
   <div class="container">
     <div class="footer-grid">
@@ -19,44 +18,43 @@
         </div>
 
         <p class="footer-brand-desc">
-          Conectamos destinos y personas. Volamos con excelencia,
-          puntualidad y el servicio que merecés.
+          {{ 'footer.brandDesc' | translate }}
         </p>
       </div>
 
       <!-- Vuelos -->
       <div>
-        <p class="footer-heading">Vuelos</p>
+        <p class="footer-heading">{{ 'footer.flights' | translate }}</p>
 
         <ul class="footer-links">
-          <li><a routerLink="/vuelos">Buscar vuelos</a></li>
-          <li><a routerLink="/vuelos">Vuelos baratos</a></li>
-          <li><a routerLink="/vuelos">Internacionales</a></li>
-          <li><a routerLink="/vuelos">Cabotaje</a></li>
+          <li><a routerLink="/vuelos">{{ 'footer.searchFlights' | translate }}</a></li>
+          <li><a routerLink="/vuelos">{{ 'footer.cheapFlights' | translate }}</a></li>
+          <li><a routerLink="/vuelos">{{ 'footer.international' | translate }}</a></li>
+          <li><a routerLink="/vuelos">{{ 'footer.domestic' | translate }}</a></li>
         </ul>
       </div>
 
       <!-- Servicios -->
       <div>
-        <p class="footer-heading">Servicios</p>
+        <p class="footer-heading">{{ 'footer.services' | translate }}</p>
 
         <ul class="footer-links">
-          <li><a routerLink="/reservas">Mis reservas</a></li>
-          <li><a routerLink="/check-in">Check-in online</a></li>
-          <li><a routerLink="/equipaje">Equipaje</a></li>
-          <li><a routerLink="/viajero-frecuente">Viajero frecuente</a></li>
+          <li><a routerLink="/reservas">{{ 'footer.myBookings' | translate }}</a></li>
+          <li><a routerLink="/check-in">{{ 'footer.checkinOnline' | translate }}</a></li>
+          <li><a routerLink="/equipaje">{{ 'footer.baggage' | translate }}</a></li>
+          <li><a routerLink="/viajero-frecuente">{{ 'footer.frequentFlyer' | translate }}</a></li>
         </ul>
       </div>
 
       <!-- Ayuda -->
       <div>
-        <p class="footer-heading">Ayuda</p>
+        <p class="footer-heading">{{ 'footer.help' | translate }}</p>
 
         <ul class="footer-links">
-          <li><a routerLink="/ayuda">Centro de ayuda</a></li>
-          <li><a routerLink="/contacto">Contacto</a></li>
-          <li><a routerLink="/politicas">Políticas</a></li>
-          <li><a routerLink="/accesibilidad">Accesibilidad</a></li>
+          <li><a routerLink="/ayuda">{{ 'footer.helpCenter' | translate }}</a></li>
+          <li><a routerLink="/contacto">{{ 'footer.contact' | translate }}</a></li>
+          <li><a routerLink="/politicas">{{ 'footer.policies' | translate }}</a></li>
+          <li><a routerLink="/accesibilidad">{{ 'footer.accessibility' | translate }}</a></li>
         </ul>
       </div>
 
@@ -64,11 +62,11 @@
 
     <!-- Pie inferior -->
     <div class="footer-bottom">
-      <span>© 2026 AeroGest. Todos los derechos reservados.</span>
+      <span>{{ 'footer.rights' | translate }}</span>
 
       <div class="footer-legal-links">
-        <a routerLink="/privacidad">Privacidad</a>
-        <a routerLink="/terminos">Términos</a>
+        <a routerLink="/privacidad">{{ 'footer.privacy' | translate }}</a>
+        <a routerLink="/terminos">{{ 'footer.terms' | translate }}</a>
       </div>
     </div>
   </div>
