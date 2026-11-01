@@ -54,6 +54,10 @@ export class LoginForm {
   intentoEnviar = signal(false);
   intentoEnviar2FA = signal(false);
   cargando = signal(false);
+  mensajeError = signal('');
+  mensajeInfo = signal('');
+  mostrarReenviarVerificacion = signal(false);
+  reenviando = signal(false);
 
   iniciarSesion(event: SubmitEvent): void {
     event.preventDefault();
@@ -77,7 +81,11 @@ export class LoginForm {
         this.completarLogin(data);
       },
       error: (error: HttpErrorResponse) => {
-        alert(error.error?.message || 'Error al iniciar sesión.');
+        const msg = error.error?.message || 'Error al iniciar sesión.';
+        this.mensajeError.set(msg);
+        if (msg.toLowerCase().includes('verific') || error.status === 403) {
+          this.mostrarReenviarVerificacion.set(true);
+        }
       }
     }).add(() => this.cargando.set(false));
   }
@@ -95,9 +103,28 @@ export class LoginForm {
     this.auth.verificarCodigo(this.email2FA(), this.datos2FA().code).subscribe({
       next: (data) => this.completarLogin(data),
       error: (error: HttpErrorResponse) => {
-        alert(error.error?.message || 'No se pudo verificar el código.');
+        this.mensajeError.set(error.error?.message || 'No se pudo verificar el código.');
       }
     }).add(() => this.cargando.set(false));
+  }
+
+  reenviarVerificacion(): void {
+    const email = this.datos().email || this.email2FA();
+    if (!email) {
+      this.mensajeError.set('Ingresá tu correo electrónico para reenviar la verificación.');
+      return;
+    }
+    this.reenviando.set(true);
+    this.mensajeInfo.set('');
+    this.auth.reenviarVerificacion(email).subscribe({
+      next: (res) => {
+        this.mensajeInfo.set(res.message || 'Se envió un correo de verificación. Revisa tu casilla.');
+        this.mensajeError.set('');
+      },
+      error: (err: HttpErrorResponse) => {
+        this.mensajeError.set(err.error?.message || 'No se pudo reenviar la verificación.');
+      }
+    }).add(() => this.reenviando.set(false));
   }
 
   private completarLogin(data: AuthResponse): void {

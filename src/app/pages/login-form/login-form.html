@@ -74,7 +74,27 @@
             }
           </div>
 
+          @if (mensajeError()) {
+            <p class="mensaje-error" role="alert">{{ mensajeError() }}</p>
+          }
           <div class="auth-actions">
+          @if (mensajeError()) {
+            <p class="mensaje-error" role="alert">{{ mensajeError() }}</p>
+            @if (mostrarReenviarVerificacion()) {
+              <button
+                type="button"
+                class="btn btn-outline btn-sm"
+                style="margin-bottom: 0.75rem;"
+                (click)="reenviarVerificacion()"
+                [disabled]="reenviando()">
+                {{ reenviando() ? 'Enviando...' : 'Reenviar email de verificación' }}
+              </button>
+            }
+          }
+          @if (mensajeInfo()) {
+            <p class="mensaje-success" role="status">{{ mensajeInfo() }}</p>
+          }
+
             <a [routerLink]="['/forgot-password']" class="auth-forgot">
               ¿Olvidaste tu contraseña?
             </a>
@@ -114,6 +134,9 @@
             }
           </div>
 
+          @if (mensajeError()) {
+            <p class="mensaje-error" role="alert">{{ mensajeError() }}</p>
+          }
           <div class="auth-actions">
             <button
               type="submit"

@@ -20,6 +20,32 @@
 
       @if (error()) {
         <p class="mensaje-error" role="alert">{{ error() }}</p>
+        <div style="margin-top: 1rem; margin-bottom: 1rem;">
+          <label for="email-reenvio" style="display: block; font-size: 0.875rem; margin-bottom: 0.25rem;">
+            ¿Necesitás un nuevo enlace de verificación?
+          </label>
+          <input
+            id="email-reenvio"
+            type="email"
+            class="form-control"
+            placeholder="Ingresá tu correo"
+            [value]="emailReenvio()"
+            (input)="emailReenvio.set($any($event.target).value)"
+            style="margin-bottom: 0.5rem;"
+          />
+          <button
+            type="button"
+            class="btn btn-primary btn-block"
+            (click)="reenviar()"
+            [disabled]="reenviando() || !emailReenvio().trim()">
+            {{ reenviando() ? 'Enviando...' : 'Reenviar enlace de verificación' }}
+          </button>
+          @if (mensajeReenvio()) {
+            <p class="mensaje-success" style="margin-top: 0.5rem;" role="status">
+              {{ mensajeReenvio() }}
+            </p>
+          }
+        </div>
         <a routerLink="/login" class="btn btn-dark btn-lg btn-block">Ir a iniciar sesión</a>
       }
     </div>

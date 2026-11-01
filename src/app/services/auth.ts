@@ -6,7 +6,7 @@ import { AuthResponse, DatosPerfil, Perfil } from '../Models/Perfil';
 import { Login } from '../Models/Login';
 import { User } from '../Models/User';
 
-const STORAGE_KEYS = ['token', 'email', 'userId', 'perfilCompleto', 'role'];
+const STORAGE_KEYS = ['token', 'email', 'userId', 'perfilCompleto', 'role', 'isVerified'];
 
 @Injectable({
   providedIn: 'root'
@@ -54,6 +54,10 @@ export class Auth {
       .pipe(tap((data) => this.aplicarRespuesta(data)));
   }
 
+  reenviarVerificacion(email?: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.baseUrl}/resend-verification`, { email });
+  }
+
   toggle2fa(): Observable<string> {
     return this.http.post(`${this.baseUrl}/toggle-2fa`, {}, { responseType: 'text' });
   }
@@ -89,6 +93,10 @@ export class Auth {
     return localStorage.getItem('role');
   }
 
+  estaVerificado(): boolean {
+    return localStorage.getItem('isVerified') === 'true';
+  }
+
   private aplicarRespuesta(data: AuthResponse): void {
     if (!data || data.requires2fa || !data.token) {
       return;
@@ -97,6 +105,9 @@ export class Auth {
     localStorage.setItem('email', data.email);
     localStorage.setItem('userId', String(data.userId));
     localStorage.setItem('perfilCompleto', String(data.perfilCompleto ?? false));
+    if (data.isVerified !== undefined) {
+      localStorage.setItem('isVerified', String(data.isVerified));
+    }
     if (data.role) {
       localStorage.setItem('role', data.role);
     }

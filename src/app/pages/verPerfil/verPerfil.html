@@ -17,6 +17,20 @@
         <p class="profile-warning" role="alert">
           <strong>Cuenta no verificada:</strong> revisá tu email para verificarla.
           No vas a poder reservar ni comprar vuelos hasta hacerlo.
+          <br />
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            style="margin-top: 0.5rem;"
+            (click)="reenviarEmailVerificacion()"
+            [disabled]="reenviando()">
+            {{ reenviando() ? 'Enviando...' : 'Reenviar correo de verificación' }}
+          </button>
+          @if (mensajeVerificacion()) {
+            <span class="mensaje-success" style="display: block; margin-top: 0.5rem;" role="status">
+              {{ mensajeVerificacion() }}
+            </span>
+          }
         </p>
       }
 
