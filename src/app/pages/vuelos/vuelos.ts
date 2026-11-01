@@ -1,20 +1,29 @@
-import { Component, HostListener, OnInit, signal } from '@angular/core';
+import { Component, HostListener, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { VueloService } from '../../services/vuelo';
 import { Vuelo } from '../../Models/Vuelo';
 import { CarritoService } from '../../services/carritoService';
 import { Auth } from '../../services/auth';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { I18nService } from '../../services/i18n';
 
 @Component({
   selector: 'app-vuelos',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './vuelos.html',
   styleUrl: './vuelos.css',
 })
 export class Vuelos implements OnInit {
+  private readonly vueloService = inject(VueloService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly carritoService = inject(CarritoService);
+  private readonly auth = inject(Auth);
+  protected readonly i18n = inject(I18nService);
+
   protected readonly vuelos = signal<Vuelo[]>([]);
   protected readonly vueloDetalle = signal<Vuelo | null>(null);
   protected readonly cargando = signal(false);
@@ -22,18 +31,10 @@ export class Vuelos implements OnInit {
   protected readonly busquedaRealizada = signal(false);
   protected readonly mensajeExito = signal('');
   protected readonly mensajeError = signal('');
-  protected readonly cerrando = signal (false)
+  protected readonly cerrando = signal(false);
   protected readonly origen = signal('');
   protected readonly destino = signal('');
   protected readonly fechaIda = signal('');
-
-  constructor(
-    private vueloService: VueloService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private carritoService: CarritoService,
-    private auth: Auth
-  ) {}
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
@@ -62,7 +63,7 @@ export class Vuelos implements OnInit {
       error: (error: HttpErrorResponse) => {
         this.vuelos.set([]);
         this.error.set(
-          error.error?.message || 'No se pudieron obtener los vuelos. Intentá nuevamente.'
+          error.error?.message || this.i18n.t('common.error')
         );
       },
     }).add(() => this.cargando.set(false));
@@ -82,14 +83,14 @@ export class Vuelos implements OnInit {
   // Agrega 1 pasaje en clase económica y se queda en la página de vuelos.
   protected agregarAlCarrito(vuelo: Vuelo): void {
     if (!this.auth.estaAutenticado()) {
-      this.mostrarMensaje(this.mensajeError, 'Iniciá sesión para agregar al carrito.');
+      this.mostrarMensaje(this.mensajeError, this.i18n.t('nav.login'));
       return;
     }
 
     this.carritoService.agregarItem(Number(vuelo.id), 1, 'ECONOMICA').subscribe({
-      next: () => this.mostrarMensaje(this.mensajeExito, 'Vuelo agregado al carrito.'),
+      next: () => this.mostrarMensaje(this.mensajeExito, this.i18n.t('common.success')),
       error: (error: HttpErrorResponse) => {
-        this.mostrarMensaje(this.mensajeError, error.error?.message || 'No se pudo agregar al carrito.');
+        this.mostrarMensaje(this.mensajeError, error.error?.message || this.i18n.t('common.error'));
       }
     });
   }
@@ -97,14 +98,14 @@ export class Vuelos implements OnInit {
   // Agrega 1 pasaje en clase económica y lleva al carrito.
   protected elegirVuelo(vuelo: Vuelo): void {
     if (!this.auth.estaAutenticado()) {
-      this.mostrarMensaje(this.mensajeError, 'Iniciá sesión para comprar.');
+      this.mostrarMensaje(this.mensajeError, this.i18n.t('nav.login'));
       return;
     }
 
     this.carritoService.agregarItem(Number(vuelo.id), 1, 'ECONOMICA').subscribe({
       next: () => this.router.navigate(['/carrito']),
       error: (error: HttpErrorResponse) => {
-        this.mostrarMensaje(this.mensajeError, error.error?.message || 'No se pudo agregar al carrito.');
+        this.mostrarMensaje(this.mensajeError, error.error?.message || this.i18n.t('common.error'));
       }
     });
   }

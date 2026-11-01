@@ -1,50 +1,49 @@
-
 <!-- Progreso -->
 <nav class="progress-bar" aria-label="Progreso de la reserva">
   <div class="progress-steps">
     <div class="progress-step">
       <span class="step-circle completed" aria-hidden="true">✓</span>
-      Vuelo
+      {{ 'seats.progressFlight' | translate }}
     </div>
     <div class="step-line completed-line"></div>
 
     <div class="progress-step current-label" aria-current="step">
       <span class="step-circle current" aria-hidden="true">2</span>
-      Asiento
+      {{ 'seats.progressSeat' | translate }}
     </div>
     <div class="step-line"></div>
 
     <div class="progress-step">
       <span class="step-circle pending" aria-hidden="true">3</span>
-      Pasajeros
+      {{ 'seats.progressPassengers' | translate }}
     </div>
     <div class="step-line"></div>
 
     <div class="progress-step">
       <span class="step-circle pending" aria-hidden="true">4</span>
-      Pago
+      {{ 'seats.progressPayment' | translate }}
     </div>
   </div>
 </nav>
 
 <section class="seat-page">
   <div class="container">
-    <h1 class="page-title">Elegí tu asiento</h1>
+    <h1 class="page-title">{{ 'seats.title' | translate }}</h1>
 
     <p class="flight-info">
-      {{ origen }} → {{ destino }} · {{ seatsNeeded }} pasaje(s)
+      {{ origen }} → {{ destino }} · {{ 'seats.passengersCount' | translate:{ count: seatsNeeded } }}
     </p>
 
     <div class="seat-layout">
 
       <!-- Mapa de asientos -->
       <div class="cabin-map">
-        <h2 class="sr-only">Mapa de asientos del avión</h2>
+        <h2 class="sr-only">{{ 'seats.cabinMap' | translate }}</h2>
 
         <div class="cabin-plane-nose">✈</div>
 
         <div class="cabin-section-label">
-          Primera clase
+          {{ 'seats.firstClass' | translate }}
         </div>
 
         @for (fila of filasPrimera; track fila.numero) {
@@ -59,7 +58,7 @@
                 [class.taken]="asiento.ocupado"
                 [class.selected]="estaSeleccionado(asiento.id)"
                 [disabled]="asiento.ocupado"
-                [title]="asiento.ocupado ? 'Ocupado' : asiento.id + ' · ' + asiento.clase"
+                [title]="asiento.ocupado ? ('seats.taken' | translate) : asiento.id + ' · ' + asiento.clase"
                 (click)="toggleSeat(asiento)">
                 {{ asiento.ocupado ? '' : asiento.id }}
               </button>
@@ -75,7 +74,7 @@
                 [class.taken]="asiento.ocupado"
                 [class.selected]="estaSeleccionado(asiento.id)"
                 [disabled]="asiento.ocupado"
-                [title]="asiento.ocupado ? 'Ocupado' : asiento.id + ' · ' + asiento.clase"
+                [title]="asiento.ocupado ? ('seats.taken' | translate) : asiento.id + ' · ' + asiento.clase"
                 (click)="toggleSeat(asiento)">
                 {{ asiento.ocupado ? '' : asiento.id }}
               </button>
@@ -83,7 +82,7 @@
           </div>
         }
 
-        <div class="cabin-section-label">Clase ejecutiva</div>
+        <div class="cabin-section-label">{{ 'seats.businessClass' | translate }}</div>
 
         @for (fila of filasEjecutiva; track fila.numero) {
           <div class="seat-row">
@@ -96,7 +95,7 @@
                 [class.taken]="asiento.ocupado"
                 [class.selected]="estaSeleccionado(asiento.id)"
                 [disabled]="asiento.ocupado"
-                [title]="asiento.ocupado ? 'Ocupado' : asiento.id + ' · ' + asiento.clase"
+                [title]="asiento.ocupado ? ('seats.taken' | translate) : asiento.id + ' · ' + asiento.clase"
                 (click)="toggleSeat(asiento)">
                 {{ asiento.ocupado ? '' : asiento.id }}
               </button>
@@ -111,7 +110,7 @@
                 [class.taken]="asiento.ocupado"
                 [class.selected]="estaSeleccionado(asiento.id)"
                 [disabled]="asiento.ocupado"
-                [title]="asiento.ocupado ? 'Ocupado' : asiento.id + ' · ' + asiento.clase"
+                [title]="asiento.ocupado ? ('seats.taken' | translate) : asiento.id + ' · ' + asiento.clase"
                 (click)="toggleSeat(asiento)">
                 {{ asiento.ocupado ? '' : asiento.id }}
               </button>
@@ -119,7 +118,7 @@
           </div>
         }
 
-        <div class="cabin-section-label">Clase económica</div>
+        <div class="cabin-section-label">{{ 'seats.economyClass' | translate }}</div>
 
         @for (fila of filasEconomica; track fila.numero) {
           <div class="seat-row">
@@ -132,7 +131,7 @@
                 [class.taken]="asiento.ocupado"
                 [class.selected]="estaSeleccionado(asiento.id)"
                 [disabled]="asiento.ocupado"
-                [title]="asiento.ocupado ? 'Ocupado' : asiento.id + ' · ' + asiento.clase"
+                [title]="asiento.ocupado ? ('seats.taken' | translate) : asiento.id + ' · ' + asiento.clase"
                 (click)="toggleSeat(asiento)">
                 {{ asiento.ocupado ? '' : asiento.id }}
               </button>
@@ -147,7 +146,7 @@
                 [class.taken]="asiento.ocupado"
                 [class.selected]="estaSeleccionado(asiento.id)"
                 [disabled]="asiento.ocupado"
-                [title]="asiento.ocupado ? 'Ocupado' : asiento.id + ' · ' + asiento.clase"
+                [title]="asiento.ocupado ? ('seats.taken' | translate) : asiento.id + ' · ' + asiento.clase"
                 (click)="toggleSeat(asiento)">
                 {{ asiento.ocupado ? '' : asiento.id }}
               </button>
@@ -156,58 +155,55 @@
         }
       </div>
 
-      <!-- Resumen de la selección -->
-      <aside class="seat-summary-card">
-        <h2 class="summary-title">Tu selección</h2>
-
-        <div class="selected-seat-display">
-          <div class="asientos-progress">
-            Seleccionaste {{ selectedSeats.length }} de
-            {{ seatsNeeded }} asientos
+      <!-- Panel resumen -->
+      <aside class="seat-sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-title">{{ 'seats.progressSeat' | translate }}</div>
+          <div class="seat-counter">
+            {{ selectedSeats.length }} / {{ seatsNeeded }}
           </div>
+        </div>
 
-          <div class="asientos-seleccionados">
+        <div class="selected-seats-badge">
+          <div class="badge-label">{{ 'seats.selected' | translate }}</div>
+          <div class="badge-seats">
             {{ asientosTexto }}
           </div>
         </div>
 
         <div class="seat-legend">
-
-
           <div class="legend-item">
             <div class="legend-dot dot-available"></div>
-            <span>Disponible</span>
+            <span>{{ 'seats.available' | translate }}</span>
           </div>
 
           <div class="legend-item">
             <div class="legend-dot dot-selected"></div>
-            <span>Tu elección</span>
+            <span>{{ 'seats.selected' | translate }}</span>
           </div>
 
           <div class="legend-item">
             <div class="legend-dot dot-taken"></div>
-            <span>Ocupado</span>
+            <span>{{ 'seats.taken' | translate }}</span>
           </div>
         </div>
 
         <div class="price-summary">
           <div class="price-row">
-            <span>Vuelo base</span>
-            <span>{{ basePrice | currency:'ARS':'symbol':'1.0-0':'es-AR' }}</span>
+            <span>{{ 'seats.baseFlight' | translate }}</span>
+            <span>${{ basePrice }}</span>
           </div>
 
           <div class="price-row">
-            <span>Asientos</span>
+            <span>{{ 'seats.extraSeats' | translate }}</span>
             <span>
-              {{ totalExtra > 0
-                ? (totalExtra | currency:'ARS':'symbol':'1.0-0':'es-AR')
-                : 'Sin costo' }}
+              {{ totalExtra > 0 ? ('+$' + totalExtra) : ('seats.noCost' | translate) }}
             </span>
           </div>
 
           <div class="price-total">
-            <span>Total</span>
-            <span>{{ total | currency:'ARS':'symbol':'1.0-0':'es-AR' }}</span>
+            <span>{{ 'seats.total' | translate }}</span>
+            <span>${{ total }}</span>
           </div>
         </div>
 
@@ -215,11 +211,10 @@
           type="button"
           class="btn-continue"
           (click)="continuarPago()">
-          Continuar con la reserva →
+          {{ 'seats.continue' | translate }}
         </button>
       </aside>
 
     </div>
   </div>
 </section>
-

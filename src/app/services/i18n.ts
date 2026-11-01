@@ -50,16 +50,18 @@ export class I18nService {
   /**
    * Traduce una clave con soporte para interpolación opcional de parámetros `{param}` o `{{param}}`.
    */
-  t(key: TranslationKey | string, params?: Record<string, string | number>): string {
+  t(key: TranslationKey | string, params?: Record<string, any>): string {
     const lang = this.idioma();
     const dict = DICTIONARIES[lang] || DICTIONARIES.es;
     let translation = dict[key] ?? DICTIONARIES.es[key] ?? key;
 
     if (params) {
       for (const [paramKey, paramValue] of Object.entries(params)) {
-        translation = translation
-          .replace(new RegExp(`\\{\\{\\s*${paramKey}\\s*\\}\\}`, 'g'), String(paramValue))
-          .replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(paramValue));
+        if (paramValue !== undefined && paramValue !== null) {
+          translation = translation
+            .replace(new RegExp(`\\{\\{\\s*${paramKey}\\s*\\}\\}`, 'g'), String(paramValue))
+            .replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(paramValue));
+        }
       }
     }
 

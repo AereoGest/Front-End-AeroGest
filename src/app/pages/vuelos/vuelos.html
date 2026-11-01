@@ -2,24 +2,24 @@
   <div class="container">
     <form class="search-bar-form" (submit)="onBuscar($event)">
       <fieldset class="field">
-        <input id="v-origen" type="text" class="field-input" placeholder="Ciudad o código IATA"
+        <input id="v-origen" type="text" class="field-input" [placeholder]="'flights.originPlaceholder' | translate"
           [value]="origen()" (input)="origen.set($any($event.target).value)" />
-        <label class="field-label" for="v-origen">Origen</label>
+        <label class="field-label" for="v-origen">{{ 'flights.origin' | translate }}</label>
       </fieldset>
 
       <fieldset class="field">
-        <input id="v-destino" type="text" class="field-input" placeholder="Ciudad o código IATA"
+        <input id="v-destino" type="text" class="field-input" [placeholder]="'flights.destinationPlaceholder' | translate"
           [value]="destino()" (input)="destino.set($any($event.target).value)" />
-        <label class="field-label" for="v-destino">Destino</label>
+        <label class="field-label" for="v-destino">{{ 'flights.destination' | translate }}</label>
       </fieldset>
 
       <fieldset class="field">
         <input id="v-fecha" type="date" class="field-input" placeholder=" "
           [value]="fechaIda()" (input)="fechaIda.set($any($event.target).value)" />
-        <label class="field-label" for="v-fecha">Fecha de ida</label>
+        <label class="field-label" for="v-fecha">{{ 'flights.departureDate' | translate }}</label>
       </fieldset>
 
-      <button type="submit" class="btn btn-dark btn-lg">✈ Buscar vuelos</button>
+      <button type="submit" class="btn btn-dark btn-lg">{{ 'flights.searchBtn' | translate }}</button>
     </form>
   </div>
 </section>
@@ -27,13 +27,13 @@
 <section class="section resultados">
   <div class="container">
     <div class="section-header">
-      <span class="section-eyebrow">Búsqueda de vuelos</span>
-      <h2 class="section-title">Encontrá tu vuelo</h2>
-      <p class="section-subtitle">Filtrá por origen, destino y fecha de salida</p>
+      <span class="section-eyebrow">{{ 'flights.searchTitle' | translate }}</span>
+      <h2 class="section-title">{{ 'flights.findFlight' | translate }}</h2>
+      <p class="section-subtitle">{{ 'flights.searchSubtitle' | translate }}</p>
     </div>
 
     @if (cargando()) {
-      <p class="auth-subtitle" role="status">Buscando vuelos...</p>
+      <p class="auth-subtitle" role="status">{{ 'flights.searching' | translate }}</p>
     }
 
     @if (error()) {
@@ -41,12 +41,12 @@
     }
 
     @if (!cargando() && busquedaRealizada() && vuelos().length === 0 && !error()) {
-      <p class="auth-subtitle">No encontramos vuelos con esos criterios.</p>
+      <p class="auth-subtitle">{{ 'flights.noResults' | translate }}</p>
     }
 
     <div class="destinations-grid">
        @for (vuelo of vuelos(); track vuelo.id) {
-        <div class="dest-card"role="button" tabindex="0" (click)="abrirDetalle(vuelo)" (keydown.enter)="abrirDetalle(vuelo)">
+        <div class="dest-card" role="button" tabindex="0" (click)="abrirDetalle(vuelo)" (keydown.enter)="abrirDetalle(vuelo)">
           <div class="dest-card-body">
 
             <div class="dest-card-city">
@@ -61,19 +61,18 @@
             </div>
 
             <div class="dest-card-country">
-              {{ vuelo.escala ? 'Con escala' : 'Vuelo directo' }} · Estado: {{ vuelo.estado }}
+              {{ vuelo.escala ? ('flights.layover' | translate) : ('flights.direct' | translate) }} · {{ 'flights.status' | translate }}: {{ vuelo.estado }}
             </div>
             
             <div class="dest-card-price">
-              <span class="dest-price-from">Desde</span>
+              <span class="dest-price-from">{{ 'flights.from' | translate }}</span>
               <span class="dest-price-amount">${{ vuelo.precioVuelo }}</span>
             </div>
 
             <div class="carrito-acciones" (click)="$event.stopPropagation()">
-              <button type="button" class="btn btn-dark" id="boton-elegir" (click)="elegirVuelo(vuelo)">Elegir →</button>
-              <button type="button" class="btn btn-primary" title="Agregar al carrito" aria-label="Agregar al carrito"
+              <button type="button" class="btn btn-dark" id="boton-elegir" (click)="elegirVuelo(vuelo)">{{ 'flights.select' | translate }}</button>
+              <button type="button" class="btn btn-primary" [title]="'flights.addToCart' | translate" [attr.aria-label]="'flights.addToCart' | translate"
                 (click)="agregarAlCarrito(vuelo)">🛒</button>
-            
             </div>
           </div>
         </div>
@@ -96,9 +95,9 @@
     <div class="modal-vuelo" role="dialog" aria-modal="true" aria-labelledby="modal-titulo"
       (click)="$event.stopPropagation()">
 
-      <button type="button" class="modal-cerrar" aria-label="Cerrar" (click)="cerrarDetalle()">✕</button>
+      <button type="button" class="modal-cerrar" [attr.aria-label]="'flights.close' | translate" (click)="cerrarDetalle()">✕</button>
 
-      <span class="section-eyebrow">Detalle del vuelo</span>
+      <span class="section-eyebrow">{{ 'flights.flightDetail' | translate }}</span>
       <h3 id="modal-titulo" class="modal-ruta">
         {{ v.aeropuertoOrigen?.ciudad }} ({{ v.aeropuertoOrigen?.codigoIata }})
         →
@@ -106,22 +105,22 @@
       </h3>
 
       <dl class="modal-datos">
-        <div><dt>Fecha</dt><dd>{{ v.fechaSalida }}</dd></div>
-        <div><dt>Tipo</dt><dd>{{ v.escala ? 'Con escala' : 'Vuelo directo' }}</dd></div>
-        <div><dt>Salida</dt><dd>{{ formatearHora(v.horaSalida) }}</dd></div>
-        <div><dt>Llegada</dt><dd>{{ formatearHora(v.horaLlegada) }}</dd></div>
-        <div><dt>Duración</dt><dd>{{ duracion(v) }}</dd></div>
-        <div><dt>Estado</dt><dd>{{ v.estado }}</dd></div>
+        <div><dt>{{ 'flights.date' | translate }}</dt><dd>{{ v.fechaSalida }}</dd></div>
+        <div><dt>{{ 'flights.type' | translate }}</dt><dd>{{ v.escala ? ('flights.layover' | translate) : ('flights.direct' | translate) }}</dd></div>
+        <div><dt>{{ 'flights.departure' | translate }}</dt><dd>{{ formatearHora(v.horaSalida) }}</dd></div>
+        <div><dt>{{ 'flights.arrival' | translate }}</dt><dd>{{ formatearHora(v.horaLlegada) }}</dd></div>
+        <div><dt>{{ 'flights.duration' | translate }}</dt><dd>{{ duracion(v) }}</dd></div>
+        <div><dt>{{ 'flights.status' | translate }}</dt><dd>{{ v.estado }}</dd></div>
       </dl>
 
       <div class="modal-precio">
-        <span class="dest-price-from">Desde</span>
+        <span class="dest-price-from">{{ 'flights.from' | translate }}</span>
         <span class="dest-price-amount">${{ v.precioVuelo }}</span>
       </div>
 
       <div class="modal-acciones">
-        <button type="button" class="btn btn-dark" (click)="elegirDesdeDetalle(v)">Elegir →</button>
-        <button type="button" class="btn btn-primary" (click)="agregarDesdeDetalle(v)">🛒 Agregar al carrito</button>
+        <button type="button" class="btn btn-dark" (click)="elegirDesdeDetalle(v)">{{ 'flights.select' | translate }}</button>
+        <button type="button" class="btn btn-primary" (click)="agregarDesdeDetalle(v)">🛒 {{ 'flights.addToCart' | translate }}</button>
       </div>
     </div>
   </div>

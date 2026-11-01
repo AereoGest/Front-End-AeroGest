@@ -19,6 +19,8 @@ import {
   PasajeroFormulario,
   etiquetaEquipaje
 } from '../../services/checkout-service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { I18nService } from '../../services/i18n';
 
 // Qué salió mal al cargar la página. El texto de cada caso está en el html.
 type ErrorCarga = ErrorCarrito | 'servidor';
@@ -45,13 +47,14 @@ function hoyLocal(): string {
 @Component({
   selector: 'app-reserva',
   standalone: true,
-  imports: [RouterLink, FormField],
+  imports: [RouterLink, FormField, TranslatePipe],
   templateUrl: './reserva.html',
   styleUrl: './reserva.css',
 })
 export class Reserva implements OnInit {
   private readonly checkout = inject(CheckoutService);
   private readonly router = inject(Router);
+  protected readonly i18n = inject(I18nService);
 
   protected readonly tiposDocumento = TIPOS_DOCUMENTO;
   protected readonly etiquetaEquipaje = etiquetaEquipaje;
@@ -73,7 +76,6 @@ export class Reserva implements OnInit {
   protected readonly asientosTexto = this.checkout.asientosTexto;
 
   // Formulario de signals con las validaciones de cada pasajero.
-  // Los mensajes de error se arman en el html según el `kind` de cada error.
   protected readonly formulario = form(this.pasajeros, (pasajeros) => {
     applyEach(pasajeros, (pasajero) => {
       required(pasajero.nombre);
@@ -83,12 +85,11 @@ export class Reserva implements OnInit {
       pattern(pasajero.apellido, SOLO_LETRAS);
 
       required(pasajero.documento);
-      // [formField] pone el atributo maxlength en el input a partir de esta regla.
       maxLength(pasajero.documento, 20);
       validate(pasajero.documento, ({ value, valueOf }) => {
         const documento = normalizarDocumento(value());
         if (!documento) {
-          return undefined; // de esto se encarga required
+          return undefined;
         }
 
         const tipo = valueOf(pasajero.tipoDocumento);
@@ -106,22 +107,16 @@ export class Reserva implements OnInit {
         value() && value() >= hoyLocal() ? { kind: 'fechaFutura' } : undefined
       );
 
-      // Opcional: email() no marca error si el campo está vacío.
       email(pasajero.email);
     });
   });
 
   protected readonly cargando = signal(true);
   protected readonly errorCarga = signal<ErrorCarga | null>(null);
-
-  // Mensaje que manda el backend, si lo hay. Si viene vacío, el html muestra uno propio.
   protected readonly mensajeServidor = signal('');
-
-  // Se pone en true al tocar "Continuar al pago": recién ahí se muestra el aviso general de errores.
   protected readonly intentoContinuar = signal(false);
 
   ngOnInit(): void {
-    // Si vuelve desde la página de pago, tiene que confirmar los pasajeros de nuevo para seguir.
     this.checkout.pasajerosListos.set(false);
     this.cargarDatos();
   }
@@ -140,8 +135,6 @@ export class Reserva implements OnInit {
     }).add(() => this.cargando.set(false));
   }
 
-  // submit() marca todos los campos como tocados (así se ven los errores)
-  // y solo ejecuta la acción si el formulario es válido.
   protected continuarAlPago(): void {
     this.intentoContinuar.set(true);
     submit(this.formulario, async () => {
@@ -158,13 +151,11 @@ export class Reserva implements OnInit {
     });
   }
 
-  // "Sin equipaje" no se desmarca a mano: se desmarca solo cuando se elige algún equipaje.
   protected elegirSinEquipaje(indice: number, casilla: HTMLInputElement): void {
     casilla.checked = true;
     this.actualizarPasajero(indice, (pasajero) => ({ ...pasajero, equipajeIds: [] }));
   }
 
-  // asistenciaId es string porque Signal Forms no admite null: '' = sin asistencia.
   protected elegirAsistencia(indice: number, asistenciaId: number | null): void {
     this.actualizarPasajero(indice, (pasajero) => ({
       ...pasajero,

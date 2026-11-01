@@ -2,49 +2,49 @@
   <div class="progress-steps">
     <div class="progress-step">
       <span class="step-circle completed" aria-hidden="true">✓</span>
-      Vuelo
+      {{ 'seats.progressFlight' | translate }}
     </div>
     <div class="step-line completed-line"></div>
 
     <div class="progress-step">
       <span class="step-circle completed" aria-hidden="true">✓</span>
-      Asiento
+      {{ 'seats.progressSeat' | translate }}
     </div>
     <div class="step-line completed-line"></div>
 
     <div class="progress-step current-label" aria-current="step">
       <span class="step-circle current" aria-hidden="true">3</span>
-      Pasajeros
+      {{ 'seats.progressPassengers' | translate }}
     </div>
     <div class="step-line"></div>
 
     <div class="progress-step">
       <span class="step-circle pending" aria-hidden="true">4</span>
-      Pago
+      {{ 'seats.progressPayment' | translate }}
     </div>
   </div>
 </nav>
 
 <main class="checkout">
-  <h1>Finalizá tu reserva</h1>
+  <h1>{{ 'booking.title' | translate }}</h1>
 
   @if (cargando()) {
-    <p class="muted" role="status">Cargando tu reserva...</p>
+    <p class="muted" role="status">{{ 'booking.loading' | translate }}</p>
   } @else if (errorCarga()) {
     <p class="form-error" role="alert">
       @switch (errorCarga()) {
-        @case ('carritoVacio') { Tu carrito está vacío. Elegí un vuelo para continuar. }
-        @case ('variosVuelos') { Por ahora solo podés reservar un vuelo a la vez. Dejá un único vuelo en el carrito para continuar. }
-        @case ('servidor') { {{ mensajeServidor() || 'No se pudo cargar tu reserva. Intentá nuevamente.' }} }
+        @case ('carritoVacio') { {{ 'booking.cartEmpty' | translate }} }
+        @case ('variosVuelos') { {{ 'booking.singleFlightOnly' | translate }} }
+        @case ('servidor') { {{ mensajeServidor() || ('booking.serverError' | translate) }} }
       }
     </p>
-    <a routerLink="/carrito" class="btn btn-dark">Ir al carrito</a>
+    <a routerLink="/carrito" class="btn btn-dark">{{ 'booking.goToCart' | translate }}</a>
   } @else {
     @if (vuelo(); as vuelo) {
       <p class="flight-summary">
         <strong>{{ vuelo.aeropuertoOrigen.codigoIata }} → {{ vuelo.aeropuertoDestino.codigoIata }}</strong>
-        · Vuelo #{{ vuelo.id }} · {{ formatearFecha(vuelo.fechaSalida) }}
-        · {{ vuelo.horaSalida }} → {{ vuelo.horaLlegada }} · {{ vuelo.escala ? '1 escala' : 'Directo' }}
+        · {{ 'cart.flightNumber' | translate:{ id: vuelo.id } }} · {{ formatearFecha(vuelo.fechaSalida) }}
+        · {{ vuelo.horaSalida }} → {{ vuelo.horaLlegada }} · {{ vuelo.escala ? ('flights.layover' | translate) : ('flights.direct' | translate) }}
       </p>
     }
 
@@ -52,7 +52,7 @@
 
       <section class="checkout-form checkout-section" aria-labelledby="titulo-pasajeros">
         <h2 id="titulo-pasajeros" class="checkout-section-title">
-          <span class="checkout-step-num">1</span> Pasajeros, equipaje y extras
+          <span class="checkout-step-num">1</span> {{ 'booking.stepPassengers' | translate }}
         </h2>
 
         <!-- Un bloque por pasajero con sus datos, su equipaje y su asistencia -->
@@ -61,40 +61,40 @@
 
           <fieldset class="passenger">
             <legend>
-              Pasajero {{ indicePasajero + 1 }}
+              {{ 'booking.passenger' | translate:{ num: indicePasajero + 1 } }}
               @if (pasajero.asiento) {
-                · Asiento {{ pasajero.asiento }}
+                · {{ 'booking.seat' | translate:{ seat: pasajero.asiento } }}
               }
             </legend>
 
             <label class="form-group">
-              <span>Nombre</span>
+              <span>{{ 'booking.firstName' | translate }}</span>
               <input type="text" class="form-control" placeholder="Ej. María" [formField]="campos.nombre" />
               @if (campos.nombre().touched() && campos.nombre().invalid()) {
                 <small class="form-error" role="alert">
                   @switch (campos.nombre().errors()[0].kind) {
-                    @case ('required') { El nombre es obligatorio. }
-                    @case ('pattern') { El nombre solo puede contener letras. }
+                    @case ('required') { {{ 'booking.nameRequired' | translate }} }
+                    @case ('pattern') { {{ 'booking.namePattern' | translate }} }
                   }
                 </small>
               }
             </label>
 
             <label class="form-group">
-              <span>Apellido</span>
+              <span>{{ 'booking.lastName' | translate }}</span>
               <input type="text" class="form-control" placeholder="Ej. González" [formField]="campos.apellido" />
               @if (campos.apellido().touched() && campos.apellido().invalid()) {
                 <small class="form-error" role="alert">
                   @switch (campos.apellido().errors()[0].kind) {
-                    @case ('required') { El apellido es obligatorio. }
-                    @case ('pattern') { El apellido solo puede contener letras. }
+                    @case ('required') { {{ 'booking.lastNameRequired' | translate }} }
+                    @case ('pattern') { {{ 'booking.lastNamePattern' | translate }} }
                   }
                 </small>
               }
             </label>
 
             <label class="form-group">
-              <span>Tipo de documento</span>
+              <span>{{ 'booking.docType' | translate }}</span>
               <select class="form-control" [formField]="campos.tipoDocumento">
                 @for (tipo of tiposDocumento; track tipo.valor) {
                   <option [value]="tipo.valor">{{ tipo.etiqueta }}</option>
@@ -103,49 +103,49 @@
             </label>
 
             <label class="form-group">
-              <span>Documento</span>
+              <span>{{ 'booking.docNumber' | translate }}</span>
               <input type="text" class="form-control" placeholder="Ej. 35123456"
                 [formField]="campos.documento" />
               @if (campos.documento().touched() && campos.documento().invalid()) {
                 <small class="form-error" role="alert">
                   @switch (campos.documento().errors()[0].kind) {
-                    @case ('required') { El documento es obligatorio. }
-                    @case ('dni') { El DNI debe tener entre 7 y 8 dígitos. }
-                    @case ('pasaporte') { El pasaporte debe tener entre 6 y 20 letras o números. }
+                    @case ('required') { {{ 'booking.docRequired' | translate }} }
+                    @case ('dni') { {{ 'booking.dniPattern' | translate }} }
+                    @case ('pasaporte') { {{ 'booking.passportPattern' | translate }} }
                   }
                 </small>
               }
             </label>
 
             <label class="form-group">
-              <span>Fecha de nacimiento</span>
+              <span>{{ 'booking.birthDate' | translate }}</span>
               <input type="date" class="form-control" [formField]="campos.fechaNacimiento"
                 (click)="$any($event.target).showPicker?.()" />
               @if (campos.fechaNacimiento().touched() && campos.fechaNacimiento().invalid()) {
                 <small class="form-error" role="alert">
                   @switch (campos.fechaNacimiento().errors()[0].kind) {
-                    @case ('required') { La fecha de nacimiento es obligatoria. }
-                    @case ('fechaFutura') { Ingresá una fecha de nacimiento válida. }
+                    @case ('required') { {{ 'booking.birthDateRequired' | translate }} }
+                    @case ('fechaFutura') { {{ 'booking.birthDateFuture' | translate }} }
                   }
                 </small>
               }
             </label>
 
             <label class="form-group">
-              <span>Email (opcional)</span>
+              <span>{{ 'booking.emailOptional' | translate }}</span>
               <input type="email" class="form-control" placeholder="correo@ejemplo.com" [formField]="campos.email" />
               @if (campos.email().touched() && campos.email().invalid()) {
-                <small class="form-error" role="alert">El email no es válido.</small>
+                <small class="form-error" role="alert">{{ 'booking.emailInvalid' | translate }}</small>
               }
             </label>
 
             @if (equipajes().length > 0) {
               <fieldset class="checkout-section">
-                <legend>Equipaje</legend>
+                <legend>{{ 'booking.luggage' | translate }}</legend>
                 <label class="extra-opcion">
                   <input type="checkbox" [checked]="pasajero.equipajeIds.length === 0"
                     (change)="elegirSinEquipaje(indicePasajero, $any($event.target))" />
-                  <span class="extra-nombre">Sin equipaje</span>
+                  <span class="extra-nombre">{{ 'booking.noLuggage' | translate }}</span>
                 </label>
                 @for (equipaje of equipajes(); track equipaje.id) {
                   <label class="extra-opcion">
@@ -160,12 +160,12 @@
 
             @if (asistencias().length > 0) {
               <fieldset class="checkout-section">
-                <legend>Asistencia al viajero</legend>
+                <legend>{{ 'booking.travelAssistance' | translate }}</legend>
                 <label class="extra-opcion">
                   <input type="radio" [name]="'asistencia-' + indicePasajero"
                     [checked]="pasajero.asistenciaId === ''"
                     (change)="elegirAsistencia(indicePasajero, null)" />
-                  <span class="extra-nombre">Sin asistencia al viajero</span>
+                  <span class="extra-nombre">{{ 'booking.noAssistance' | translate }}</span>
                 </label>
                 @for (asistencia of asistencias(); track asistencia.id) {
                   <label class="extra-opcion">
@@ -186,15 +186,15 @@
       </section>
 
       <aside class="order-summary" aria-labelledby="titulo-resumen">
-        <h2 id="titulo-resumen">Resumen de tu reserva</h2>
+        <h2 id="titulo-resumen">{{ 'booking.summaryTitle' | translate }}</h2>
         <dl class="summary-line-list">
           <div class="summary-line">
-            <dt class="summary-line-label">Tarifa base ({{ pasajeros().length }} pasaje(s))</dt>
+            <dt class="summary-line-label">{{ 'booking.baseFare' | translate:{ count: pasajeros().length } }}</dt>
             <dd>{{ formatearPrecio(tarifaBase()) }}</dd>
           </div>
           <div class="summary-line">
-            <dt class="summary-line-label">Asientos {{ asientosTexto() }}</dt>
-            <dd>Sin cargo</dd>
+            <dt class="summary-line-label">{{ 'seats.extraSeats' | translate }} {{ asientosTexto() }}</dt>
+            <dd>{{ 'booking.freeOfCharge' | translate }}</dd>
           </div>
           @for (linea of lineasExtras(); track $index) {
             <div class="summary-line">
@@ -203,25 +203,25 @@
             </div>
           }
           <div class="summary-line">
-            <dt class="summary-line-label">Impuestos y tasas ({{ formatearPorcentaje(tarifas().tasaImpuesto) }})</dt>
+            <dt class="summary-line-label">{{ 'booking.taxesAndFees' | translate:{ rate: formatearPorcentaje(tarifas().tasaImpuesto) } }}</dt>
             <dd>{{ formatearPrecio(impuestos()) }}</dd>
           </div>
           <div class="summary-line">
-            <dt class="summary-line-label">Tarifa por servicio ({{ formatearPorcentaje(tarifas().tasaServicio) }})</dt>
+            <dt class="summary-line-label">{{ 'booking.serviceFee' | translate:{ rate: formatearPorcentaje(tarifas().tasaServicio) } }}</dt>
             <dd>{{ formatearPrecio(servicio()) }}</dd>
           </div>
         </dl>
         <p class="summary-total">
-          <span class="summary-total-label">Total a pagar</span>
+          <span class="summary-total-label">{{ 'booking.totalToPay' | translate }}</span>
           <strong class="summary-total-amount">{{ formatearPrecio(total()) }}</strong>
         </p>
 
         @if (intentoContinuar() && formulario().invalid()) {
-          <p class="form-error" role="alert">Revisá los datos marcados de los pasajeros.</p>
+          <p class="form-error" role="alert">{{ 'booking.checkPassengerData' | translate }}</p>
         }
 
         <button type="button" class="btn btn-dark btn-reservar" (click)="continuarAlPago()">
-          Continuar al pago →
+          {{ 'booking.continueToPayment' | translate }}
         </button>
       </aside>
     </section>

@@ -21,6 +21,8 @@ import {
 } from '@angular/forms/signals';
 import { PagoRequest, PagoResponse, SituacionFiscal } from '../../Models/Pago';
 import { CheckoutService } from '../../services/checkout-service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { I18nService } from '../../services/i18n';
 
 // Lo carga el script del SDK de Mercado Pago en index.html.
 declare const MercadoPago: any;
@@ -63,12 +65,13 @@ function soloDigitosCuil(cuil: string): string {
 @Component({
   selector: 'app-pago',
   standalone: true,
-  imports: [RouterLink, FormField],
+  imports: [RouterLink, FormField, TranslatePipe],
   templateUrl: './pago.html',
   styleUrl: './pago.css',
 })
 export class Pago implements OnDestroy {
   private readonly checkout = inject(CheckoutService);
+  protected readonly i18n = inject(I18nService);
 
   // <form #formularioPago> del html, donde se monta el SDK de Mercado Pago.
   private readonly formularioPago = viewChild<ElementRef<HTMLFormElement>>('formularioPago');
@@ -91,7 +94,6 @@ export class Pago implements OnDestroy {
   protected readonly asientosTexto = this.checkout.asientosTexto;
 
   // Formulario de facturación con signals.
-  // Los datos de la tarjeta no van acá: esos inputs los maneja el SDK de Mercado Pago.
   protected readonly datosFacturacion = signal<Facturacion>({
     email: '',
     telefono: '',
@@ -111,7 +113,6 @@ export class Pago implements OnDestroy {
     });
 
     required(datos.cuil);
-    // [formField] pone el atributo maxlength en el input a partir de esta regla.
     maxLength(datos.cuil, 13);
     validate(datos.cuil, ({ value }) => {
       const cuil = soloDigitosCuil(value());
@@ -119,21 +120,15 @@ export class Pago implements OnDestroy {
     });
   });
 
-  // Se pone en true al tocar "Pagar": recién ahí se muestra el aviso general de errores.
   protected readonly intentoPagar = signal(false);
-
   protected readonly errorTarjeta = signal<ErrorTarjeta | null>(null);
-
-  // Resultado del último intento de pago contra el back.
   protected readonly estadoPago = signal<EstadoPago | null>(null);
-  // Mensaje que manda el back, si lo hay. Si viene vacío, el html muestra uno propio.
   protected readonly mensajeServidor = signal('');
   protected readonly codigoReserva = signal('');
 
   private readonly generandoToken = signal(false);
   private readonly procesando = signal(false);
 
-  // Evita doble click entre que se genera el token y termina el pago
   protected readonly ocupado = computed(() => this.generandoToken() || this.procesando());
 
   private formularioTarjeta: any = null;
@@ -141,8 +136,6 @@ export class Pago implements OnDestroy {
   private montoTarjeta = 0;
 
   constructor() {
-    // El SDK necesita los inputs en el DOM, por eso se monta después de renderizar.
-    // Se vuelve a montar cuando cambia el total, porque las cuotas dependen del monto.
     afterRenderEffect(() => {
       if (this.formularioPago() && this.publicKey()) {
         this.montarFormularioTarjeta(this.total());
@@ -171,9 +164,6 @@ export class Pago implements OnDestroy {
     });
   }
 
-  // Lo llama el SDK de Mercado Pago al enviar el formulario (ver callbacks.onSubmit).
-  // submit() marca todos los campos de facturación como tocados (así se ven los errores)
-  // y solo sigue si son válidos.
   private enviar(): void {
     this.intentoPagar.set(true);
     this.errorTarjeta.set(null);
@@ -187,7 +177,6 @@ export class Pago implements OnDestroy {
 
       this.generandoToken.set(true);
 
-      // Primero se valida la tarjeta generando el token, así no se crea la reserva si los datos están mal.
       try {
         const token = (await this.formularioTarjeta.createCardToken()) as { id: string };
         this.pagar(this.armarPago(token.id));
@@ -223,7 +212,6 @@ export class Pago implements OnDestroy {
     } else if (respuesta.status === 'rejected') {
       this.estadoPago.set('rechazado');
     } else {
-      // in_process / pending: la reserva queda PROCESANDO hasta que Mercado Pago confirme el pago.
       this.estadoPago.set('enProceso');
     }
   }
@@ -255,7 +243,6 @@ export class Pago implements OnDestroy {
 
     const mercadoPago = new MercadoPago(this.publicKey(), { locale: 'es-AR' });
 
-    // Los ids tienen que coincidir con los del html.
     this.formularioTarjeta = mercadoPago.cardForm({
       amount: String(monto),
       autoMount: true,
