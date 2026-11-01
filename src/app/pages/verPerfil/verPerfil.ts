@@ -45,6 +45,8 @@ export class VerPerfil {
   protected readonly mensajeError = signal('');
   protected readonly perfilIncompleto = computed(() => this.perfil()?.role === 'ROLE_INCOMPLETO');
   protected readonly cuentaSinVerificar = computed(() => this.perfil()?.isVerified === false);
+  protected readonly reenviando = signal(false);
+  protected readonly mensajeVerificacion = signal('');
 
   private readonly datos = signal<DatosPerfil>({ ...DATOS_VACIOS });
 
@@ -132,6 +134,19 @@ export class VerPerfil {
       });
       return null as any;
     });
+  }
+
+  protected reenviarEmailVerificacion(): void {
+    this.reenviando.set(true);
+    this.mensajeVerificacion.set('');
+    this.auth.reenviarVerificacion(this.perfil()?.email).subscribe({
+      next: (res) => {
+        this.mensajeVerificacion.set(res.message || 'Se ha enviado un nuevo enlace de verificación a tu correo.');
+      },
+      error: (error: HttpErrorResponse) => {
+        this.mensajeVerificacion.set(error.error?.message || 'No se pudo reenviar el correo de verificación.');
+      }
+    }).add(() => this.reenviando.set(false));
   }
 
   protected toggleDosFactores(): void {

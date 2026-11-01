@@ -39,6 +39,7 @@ export interface AuthResponse {
   perfilCompleto: boolean;
   requires2fa: boolean;
   role?: Rol;
+  isVerified?: boolean;
 }
 
 export const TIPOS_DOCUMENTO: Opcion<TipoDocumento>[] = [
