@@ -8,7 +8,7 @@
         <ul>
             <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">{{ 'nav.home' | translate }}</a></li>
             <li><a routerLink="/vuelos" routerLinkActive="active">{{ 'nav.flights' | translate }}</a></li>
-            <li><a routerLink="/">{{ 'nav.destinations' | translate }}</a></li>
+            <li><a routerLink="/" fragment="destinos">{{ 'nav.destinations' | translate }}</a></li>
         </ul>
     </nav>
 
