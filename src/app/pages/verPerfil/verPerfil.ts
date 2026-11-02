@@ -14,6 +14,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DatosPerfil, GENEROS, Perfil, TIPOS_DOCUMENTO } from '../../Models/Perfil';
 import { Auth } from '../../services/auth';
 
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
 const SOLO_LETRAS = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/;
 const SOLO_DIGITOS = /^\d+$/;
 
@@ -29,7 +31,7 @@ const DATOS_VACIOS: DatosPerfil = {
 
 @Component({
   selector: 'app-ver-perfil',
-  imports: [FormField],
+  imports: [FormField, TranslatePipe],
   templateUrl: './verPerfil.html',
   styleUrl: './verPerfil.css',
 })

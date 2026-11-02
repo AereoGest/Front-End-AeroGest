@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, forkJoin, map, of, switchMap } from 'rxjs';
@@ -6,6 +6,8 @@ import { Carrito, CarritoItem, ClaseVuelo } from '../../Models/Carrito';
 import { Vuelo } from '../../Models/Vuelo';
 import { CarritoService } from '../../services/carritoService';
 import { VueloService } from '../../services/vuelo';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { I18nService } from '../../services/i18n';
 
 // El carrito solo trae el id del vuelo; acá se le suman los datos del vuelo para mostrarlos.
 interface ItemConVuelo extends CarritoItem {
@@ -22,11 +24,15 @@ const ETIQUETAS_CLASE: Record<ClaseVuelo, string> = {
 @Component({
   selector: 'app-carrito',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './carrito.html',
   styleUrl: './carrito.css',
 })
 export class MiCarrito implements OnInit {
+  private readonly carritoService = inject(CarritoService);
+  private readonly vueloService = inject(VueloService);
+  protected readonly i18n = inject(I18nService);
+
   protected readonly carrito = signal<Carrito | null>(null);
   protected readonly items = signal<ItemConVuelo[]>([]);
   protected readonly cargando = signal(true);
@@ -37,11 +43,6 @@ export class MiCarrito implements OnInit {
   protected readonly total = computed(() =>
     this.items().reduce((suma, item) => suma + this.subtotalItem(item), 0)
   );
-
-  constructor(
-    private carritoService: CarritoService,
-    private vueloService: VueloService
-  ) {}
 
   ngOnInit(): void {
     this.cargarCarrito();
@@ -60,7 +61,7 @@ export class MiCarrito implements OnInit {
       next: (items) => this.items.set(items),
       error: (error: HttpErrorResponse) => {
         this.items.set([]);
-        this.error.set(error.error?.message || 'No se pudo cargar el carrito. Intentá nuevamente.');
+        this.error.set(error.error?.message || this.i18n.t('common.error'));
       }
     }).add(() => this.cargando.set(false));
   }
@@ -76,7 +77,7 @@ export class MiCarrito implements OnInit {
     this.carritoService.actualizarCantidad(item.id, nuevaCantidad).subscribe({
       next: () => this.cargarCarrito(),
       error: (error: HttpErrorResponse) => {
-        this.mostrarMensaje(this.mensajeError, error.error?.message || 'No se pudo actualizar la cantidad.');
+        this.mostrarMensaje(this.mensajeError, error.error?.message || this.i18n.t('common.error'));
       }
     });
   }
@@ -86,18 +87,18 @@ export class MiCarrito implements OnInit {
 
     this.carritoService.eliminarItem(item.id).subscribe({
       next: () => {
-        this.mostrarMensaje(this.mensajeExito, 'Vuelo eliminado del carrito.');
+        this.mostrarMensaje(this.mensajeExito, this.i18n.t('common.success'));
         this.cargarCarrito();
       },
       error: (error: HttpErrorResponse) => {
-        this.mostrarMensaje(this.mensajeError, error.error?.message || 'No se pudo eliminar el vuelo.');
+        this.mostrarMensaje(this.mensajeError, error.error?.message || this.i18n.t('common.error'));
       }
     });
   }
 
   protected vaciarCarrito(): void {
     const carrito = this.carrito();
-    if (!carrito || !confirm('¿Vaciar todo el carrito?')) {
+    if (!carrito) {
       return;
     }
 
@@ -105,11 +106,11 @@ export class MiCarrito implements OnInit {
 
     this.carritoService.vaciar(carrito.id).subscribe({
       next: () => {
-        this.mostrarMensaje(this.mensajeExito, 'Carrito vaciado.');
+        this.mostrarMensaje(this.mensajeExito, this.i18n.t('common.success'));
         this.cargarCarrito();
       },
       error: (error: HttpErrorResponse) => {
-        this.mostrarMensaje(this.mensajeError, error.error?.message || 'No se pudo vaciar el carrito.');
+        this.mostrarMensaje(this.mensajeError, error.error?.message || this.i18n.t('common.error'));
       }
     });
   }
@@ -142,7 +143,6 @@ export class MiCarrito implements OnInit {
     );
   }
 
-  // Los mensajes se muestran como toast y se ocultan solos a los 4 segundos.
   private mostrarMensaje(mensaje: typeof this.mensajeExito, texto: string): void {
     mensaje.set(texto);
     setTimeout(() => mensaje.set(''), 4000);

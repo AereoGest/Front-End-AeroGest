@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { I18nService } from '../../services/i18n';
 
 interface Destino {
   ciudad: string;
@@ -13,49 +15,51 @@ interface Destino {
 }
 
 @Component({
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, TranslatePipe],
   selector: 'app-home',
   styleUrl: './home.css',
   templateUrl: './home.html',
 })
-
 export class Home {
+  private readonly router = inject(Router);
+  protected readonly i18n = inject(I18nService);
+
   // Buscador
   origen = 'Buenos Aires (EZE)';
   destino = '';
   fechaIda = '';
-  pasajeros = '1 pasajero';
+  pasajeros = '1';
   clase = 'Económica';
 
-  opcionesPasajeros = ['1 pasajero', '2 pasajeros', '3 pasajeros', '4+ pasajeros'];
+  opcionesPasajeros = ['1', '2', '3', '4+'];
   opcionesClase = ['Económica', 'Económica premium', 'Ejecutiva', 'Primera clase'];
 
   stats = [
-    { valor: '150+', etiqueta: 'Destinos' },
-    { valor: '2M+', etiqueta: 'Pasajeros' },
-    { valor: '98%', etiqueta: 'Satisfacción' },
+    { valor: '150+', etiquetaKey: 'home.statDestinations' },
+    { valor: '2M+', etiquetaKey: 'home.statPassengers' },
+    { valor: '98%', etiquetaKey: 'home.statSatisfaction' },
   ];
 
   beneficios = [
     {
       icono: '🛡️',
-      titulo: 'Seguridad ante todo',
-      desc: 'Certificados internacionales IATA. Flota moderna con estándares de seguridad de primer nivel.',
+      tituloKey: 'home.whySecurity',
+      descKey: 'home.whySecurityDesc',
     },
     {
       icono: '💺',
-      titulo: 'Máximo confort',
-      desc: 'Asientos amplios, entretenimiento a bordo y gastronomía de calidad en todos los vuelos.',
+      tituloKey: 'home.whyComfort',
+      descKey: 'home.whyComfortDesc',
     },
     {
       icono: '⏰',
-      titulo: 'Puntualidad',
-      desc: '95% de vuelos a tiempo. Tu tiempo es valioso y lo respetamos en cada operación.',
+      tituloKey: 'home.whyPunctuality',
+      descKey: 'home.whyPunctualityDesc',
     },
     {
       icono: '🎁',
-      titulo: 'Programa de puntos',
-      desc: 'Acumulá millas en cada vuelo y canjealas por pasajes, upgrades y beneficios exclusivos.',
+      tituloKey: 'home.whyPoints',
+      descKey: 'home.whyPointsDesc',
     },
   ];
 
@@ -71,8 +75,6 @@ export class Home {
     { ciudad: 'Tokio', pais: 'Japón • Asia', desde: '$1.100', icono: '⛩️', opacidad: 0.15,
       gradiente: 'linear-gradient(160deg,#ad1457,#c2185b,#e91e63)' },
   ];
-
-  constructor(private router: Router) {}
 
   swapAirports() {
     [this.origen, this.destino] = [this.destino, this.origen];

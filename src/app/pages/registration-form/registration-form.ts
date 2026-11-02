@@ -1,5 +1,4 @@
-
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import {
   form,
   FormField,
@@ -11,17 +10,22 @@ import {
 } from '@angular/forms/signals';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { User } from '../../Models/User';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { I18nService } from '../../services/i18n';
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/;
 
 @Component({
   selector: 'app-registro',
   standalone: true,
-  imports: [FormField],
+  imports: [FormField, TranslatePipe],
   templateUrl: './registration-form.html',
   styleUrl: './registration-form.css'
 })
 export class RegistrationForm {
+  private readonly http = inject(HttpClient);
+  protected readonly i18n = inject(I18nService);
+
   datos = signal<User>({
     email: '',
     password: ''
@@ -41,8 +45,6 @@ export class RegistrationForm {
   registroExitoso = signal(false);
   errorRegistro = signal(false);
   mensajeError = signal('');
-
-  constructor(private http: HttpClient) {}
 
   registrar(event: SubmitEvent): void {
     event.preventDefault();
@@ -72,7 +74,7 @@ export class RegistrationForm {
             error: (error: HttpErrorResponse) => {
               this.errorRegistro.set(true);
               this.mensajeError.set(
-                error.error?.message || 'No se pudo crear la cuenta. Intentá nuevamente.'
+                error.error?.message || this.i18n.t('auth.registerErrorDefault')
               );
               resolve();
             }

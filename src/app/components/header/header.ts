@@ -1,10 +1,12 @@
 import { Component, ElementRef, HostListener, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Auth } from '../../services/auth';
+import { I18nService } from '../../services/i18n';
 import { ThemeService } from '../../services/theme';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, TranslatePipe],
   selector: 'app-header',
   styleUrl: './header.css',
   templateUrl: './header.html',
@@ -12,6 +14,7 @@ import { ThemeService } from '../../services/theme';
 export class Header {
   protected readonly auth = inject(Auth);
   protected readonly theme = inject(ThemeService);
+  protected readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
@@ -19,9 +22,10 @@ export class Header {
 
   protected readonly nombreCorto = computed(() => {
     const email = this.auth.emailUsuario();
-    if (!email) return 'Mi cuenta';
+    const fallback = this.i18n.t('nav.myAccount');
+    if (!email) return fallback;
     const localPart = email.split('@')[0];
-    return localPart || 'Mi cuenta';
+    return localPart || fallback;
   });
 
   protected readonly inicialUsuario = computed(() => {

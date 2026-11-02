@@ -1,5 +1,4 @@
-
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   FormField,
@@ -7,15 +6,19 @@ import {
   required
 } from '@angular/forms/signals';
 import { Auth } from '../../services/auth';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [FormField, RouterLink],
+  imports: [FormField, RouterLink, TranslatePipe],
   templateUrl: './reset-password.html',
   styleUrl: './reset-password.css'
 })
 export class ResetPassword {
+  private readonly auth = inject(Auth);
+  private readonly route = inject(ActivatedRoute);
+
   token = '';
 
   datos = signal({
@@ -35,10 +38,7 @@ export class ResetPassword {
   contrasenasDistintas = signal(false);
   errorServidor = signal(false);
 
-  constructor(
-    private auth: Auth,
-    private route: ActivatedRoute
-  ) {
+  constructor() {
     this.route.queryParamMap.subscribe(params => {
       this.token = params.get('token') ?? '';
       this.tokenInvalido.set(!this.token);
@@ -80,12 +80,7 @@ export class ResetPassword {
         this.exitoso.set(true);
         this.cargando.set(false);
       },
-      error: (error) => {
-        console.error(
-          'Error al restablecer la contraseña:',
-          error
-        );
-
+      error: () => {
         this.errorServidor.set(true);
         this.cargando.set(false);
       }

@@ -1,4 +1,3 @@
-
 <main class="section">
   <div class="auth-container-log">
     <div class="auth-card animate">
@@ -6,17 +5,17 @@
       <div class="auth-header">
         <h2 class="auth-title">
           @if (!paso2FA()) {
-            Iniciar <em>Sesión</em>
+            {{ 'auth.loginTitle' | translate }} <em>{{ 'auth.loginTitleEm' | translate }}</em>
           } @else {
-            Verificar <em>Código</em>
+            {{ 'auth.verifyCodeTitle' | translate }} <em>{{ 'auth.verifyCodeTitleEm' | translate }}</em>
           }
         </h2>
 
         <p class="auth-subtitle">
           @if (!paso2FA()) {
-            Qué bueno verte de nuevo. ¡Prepará tu próximo viaje!
+            {{ 'auth.loginSubtitle' | translate }}
           } @else {
-            Ingresá el código de verificación que enviamos a tu email.
+            {{ 'auth.verifyCodeSubtitle' | translate }}
           }
         </p>
       </div>
@@ -25,13 +24,13 @@
         <form class="auth-form" (submit)="iniciarSesion($event)">
 
           <div class="form-group">
-            <label for="login-email">Correo electrónico</label>
+            <label for="login-email">{{ 'auth.email' | translate }}</label>
 
             <input
               id="login-email"
               type="email"
               class="form-control"
-              placeholder="ejemplo@correo.com"
+              [placeholder]="'auth.emailPlaceholder' | translate"
               autocomplete="email"
               [formField]="loginForm.email"
             />
@@ -43,9 +42,9 @@
               @for (error of loginForm.email().errors(); track error.kind) {
                 <p class="mensaje-error">
                   @if (error.kind === 'required') {
-                    El correo electrónico es obligatorio.
+                    {{ 'auth.emailRequired' | translate }}
                   } @else if (error.kind === 'email') {
-                    Ingresá un correo electrónico válido.
+                    {{ 'auth.emailInvalid' | translate }}
                   }
                 </p>
               }
@@ -53,13 +52,13 @@
           </div>
 
           <div class="form-group">
-            <label for="login-password">Contraseña</label>
+            <label for="login-password">{{ 'auth.password' | translate }}</label>
 
             <input
               id="login-password"
               type="password"
               class="form-control"
-              placeholder="Ingresá tu contraseña"
+              [placeholder]="'auth.passwordPlaceholder' | translate"
               autocomplete="current-password"
               [formField]="loginForm.password"
             />
@@ -69,7 +68,7 @@
               loginForm.password().invalid()
             ) {
               <p class="mensaje-error">
-                La contraseña es obligatoria.
+                {{ 'auth.passwordRequired' | translate }}
               </p>
             }
           </div>
@@ -78,25 +77,22 @@
             <p class="mensaje-error" role="alert">{{ mensajeError() }}</p>
           }
           <div class="auth-actions">
-          @if (mensajeError()) {
-            <p class="mensaje-error" role="alert">{{ mensajeError() }}</p>
-            @if (mostrarReenviarVerificacion()) {
+            @if (mensajeError() && mostrarReenviarVerificacion()) {
               <button
                 type="button"
                 class="btn btn-outline btn-sm"
                 style="margin-bottom: 0.75rem;"
                 (click)="reenviarVerificacion()"
                 [disabled]="reenviando()">
-                {{ reenviando() ? 'Enviando...' : 'Reenviar email de verificación' }}
+                {{ reenviando() ? ('auth.resending' | translate) : ('auth.resendVerification' | translate) }}
               </button>
             }
-          }
-          @if (mensajeInfo()) {
-            <p class="mensaje-success" role="status">{{ mensajeInfo() }}</p>
-          }
+            @if (mensajeInfo()) {
+              <p class="mensaje-success" role="status">{{ mensajeInfo() }}</p>
+            }
 
             <a [routerLink]="['/forgot-password']" class="auth-forgot">
-              ¿Olvidaste tu contraseña?
+              {{ 'auth.forgotPassword' | translate }}
             </a>
 
             <button
@@ -104,7 +100,7 @@
               class="btn btn-primary btn-lg btn-block auth-btn-accent"
               [disabled]="cargando()"
             >
-              {{ cargando() ? 'Ingresando...' : 'Ingresar' }}
+              {{ cargando() ? ('auth.loggingIn' | translate) : ('auth.loginBtn' | translate) }}
             </button>
           </div>
 
@@ -113,13 +109,13 @@
         <form class="auth-form" (submit)="verificarCodigo($event)">
 
           <div class="form-group">
-            <label for="login-2fa">Código de verificación</label>
+            <label for="login-2fa">{{ 'auth.verificationCode' | translate }}</label>
 
             <input
               id="login-2fa"
               type="text"
               class="form-control"
-              placeholder="Ingresá el código"
+              [placeholder]="'auth.codePlaceholder' | translate"
               autocomplete="one-time-code"
               [formField]="form2FA.code"
             />
@@ -129,7 +125,7 @@
               form2FA.code().invalid()
             ) {
               <p class="mensaje-error">
-                El código de verificación es obligatorio.
+                {{ 'auth.codeRequired' | translate }}
               </p>
             }
           </div>
@@ -143,7 +139,7 @@
               class="btn btn-primary btn-lg btn-block auth-btn-accent"
               [disabled]="cargando()"
             >
-              {{ cargando() ? 'Verificando...' : 'Verificar código' }}
+              {{ cargando() ? ('auth.verifying' | translate) : ('auth.verifyBtn' | translate) }}
             </button>
 
             <button
@@ -152,7 +148,7 @@
               (click)="paso2FA.set(false)"
               [disabled]="cargando()"
             >
-              Volver al inicio de sesión
+              {{ 'auth.backToLogin' | translate }}
             </button>
           </div>
 

@@ -1,25 +1,25 @@
-
-import { Component, OnInit, inject, ChangeDetectorRef  } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import FilaAsientos from '../../Models/FilaAsientos';
 import AsientoVista from '../../Models/AsientoVista';
 import AsientoModel from '../../Models/AsientoModel';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { I18nService } from '../../services/i18n';
 
 @Component({
   selector: 'app-asientos',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './asientos.html',
   styleUrl: './asientos.css'
 })
 export class Asientos implements OnInit {
-
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
-  
+  protected readonly i18n = inject(I18nService);
 
   basePrice = 689;
   seatsNeeded = 1;
@@ -118,50 +118,45 @@ export class Asientos implements OnInit {
     return filas;
   }
 
-  
-
-toggleSeat(asiento: AsientoVista): void {
-  if (asiento.ocupado) {
-    alert('No se puede seleccionar: asiento ocupado');
-    return;
-  }
-
-  const yaSeleccionado = this.estaSeleccionado(asiento.id);
-
-  if (yaSeleccionado) {
-    this.selectedSeats = this.selectedSeats.filter(
-      (seleccionado) => seleccionado.id !== asiento.id
-    );
-  } else {
-    if (this.selectedSeats.length >= this.seatsNeeded) {
-      alert('No se puede seleccionar: se alcanzó el límite');
+  toggleSeat(asiento: AsientoVista): void {
+    if (asiento.ocupado) {
       return;
     }
 
-    this.selectedSeats = [
-      ...this.selectedSeats,
-      {
-        id: asiento.id,
-        clase: asiento.clase,
-        precio: this.seatPrices[asiento.clase] ?? 0
+    const yaSeleccionado = this.estaSeleccionado(asiento.id);
+
+    if (yaSeleccionado) {
+      this.selectedSeats = this.selectedSeats.filter(
+        (seleccionado) => seleccionado.id !== asiento.id
+      );
+    } else {
+      if (this.selectedSeats.length >= this.seatsNeeded) {
+        return;
       }
-    ];
+
+      this.selectedSeats = [
+        ...this.selectedSeats,
+        {
+          id: asiento.id,
+          clase: asiento.clase,
+          precio: this.seatPrices[asiento.clase] ?? 0
+        }
+      ];
+    }
+
+    sessionStorage.setItem(
+      'asientos_seleccionados',
+      JSON.stringify(this.selectedSeats)
+    );
+
+    this.cdr.detectChanges();
   }
 
-  sessionStorage.setItem(
-    'asientos_seleccionados',
-    JSON.stringify(this.selectedSeats)
-  );
-
-  this.cdr.detectChanges();
-}
-
-
-estaSeleccionado(id: string): boolean {
-  return this.selectedSeats.some(
-    (asiento) => asiento.id === id
-  );
-}
+  estaSeleccionado(id: string): boolean {
+    return this.selectedSeats.some(
+      (asiento) => asiento.id === id
+    );
+  }
 
   get totalExtra(): number {
     return this.selectedSeats.reduce(
@@ -174,21 +169,17 @@ estaSeleccionado(id: string): boolean {
     return this.basePrice * this.seatsNeeded + this.totalExtra;
   }
 
-
   get asientosTexto(): string {
     return this.selectedSeats.length
       ? this.selectedSeats.map((asiento) => asiento.id).join(', ')
-      : 'Ninguno aún';
+      : '—';
   }
 
- continuarPago(): void {
-  console.log('click en continuar');
-
-  sessionStorage.setItem(
-    'asientos_seleccionados',
-    JSON.stringify(this.selectedSeats)
-  );
-
-  this.router.navigate(['/checkoutReserva']);
-}
+  continuarPago(): void {
+    sessionStorage.setItem(
+      'asientos_seleccionados',
+      JSON.stringify(this.selectedSeats)
+    );
+    this.router.navigate(['/checkoutReserva']);
+  }
 }
