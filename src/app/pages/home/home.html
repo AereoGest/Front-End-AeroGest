@@ -118,23 +118,38 @@
     </div>
     <div class="destinations-grid">
       @for (d of destinos; track d.ciudad) {
-        <div class="dest-card" [class.dest-card-featured]="d.destacado" (click)="irADestino(d.ciudad)">
-          <div class="dest-bg" [style.background]="d.gradiente">
-            <div class="dest-icon" [style.opacity]="d.opacidad" [style.font-size.px]="d.destacado ? 80 : 60">
-              {{ d.icono }}
-            </div>
-            <div class="dest-card-overlay"></div>
-            <div class="dest-card-body">
-              <div class="dest-card-city">{{ d.ciudad }}</div>
-              <div class="dest-card-country">{{ d.pais }}</div>
-              <div class="dest-card-price">
-                <span class="dest-price-from">{{ 'home.from' | translate }}</span>
-                <span class="dest-price-amount">{{ d.desde }}</span>
-              </div>
-            </div>
+  <div class="dest-card" [class.dest-card-featured]="d.destacado"
+    (click)="irADestino(d.ciudad)"
+    (mouseenter)="iniciarCarrusel(d)"
+    (mouseleave)="detenerCarrusel(d)">
+
+    <div class="dest-bg" [style.background]="d.gradiente">
+
+      @if (d.imagen?.length) {
+        @for (img of d.imagen; track img; let i = $index) {
+          <div class="dest-img"
+            [style.background-image]="'url(' + img + ')'"
+            [class.activa]="i === (indices()[d.ciudad] ?? 0)">
           </div>
+        }
+      } @else {
+        <div class="dest-icon" [style.opacity]="d.opacidad" [style.font-size.px]="d.destacado ? 80 : 60">
+          {{ d.icono }}
         </div>
       }
+
+      <div class="dest-card-overlay"></div>
+      <div class="dest-card-body">
+        <div class="dest-card-city">{{ d.ciudad }}</div>
+        <div class="dest-card-country">{{ d.pais }}</div>
+        <div class="dest-card-price">
+          <span class="dest-price-from">{{ 'home.from' | translate }}</span>
+          <span class="dest-price-amount">{{ d.desde }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+}
     </div>
   </div>
 </section>
