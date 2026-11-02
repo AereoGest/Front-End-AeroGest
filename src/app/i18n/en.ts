@@ -347,6 +347,17 @@ export const en: Record<TranslationKey, string> = {
   'myBookings.statusPending': 'Pending',
   'myBookings.statusConfirmed': 'Confirmed',
   'myBookings.statusCanceled': 'Canceled',
+  'myBookings.filterAll': 'All',
+  'myBookings.filterFrom': 'From',
+  'myBookings.filterTo': 'To',
+  'myBookings.sortBy': 'Sort by',
+  'myBookings.sortRecent': 'Most recent',
+  'myBookings.sortOldest': 'Oldest',
+  'myBookings.sortHighest': 'Highest amount',
+  'myBookings.sortLowest': 'Lowest amount',
+  'myBookings.clearFilters': 'Clear filters',
+  'myBookings.noFilterResults': 'No bookings match your filters.',
+  'myBookings.resultsCount': '{count} booking(s)',
 
   // Admin panel - Flights (VuelosAdmin)
   'adminFlights.eyebrow': 'Admin panel',

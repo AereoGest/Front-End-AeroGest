@@ -5,7 +5,7 @@ import { VerPerfil } from './pages/verPerfil/verPerfil';
 import { LoginForm } from './pages/login-form/login-form';
 import { Vuelos } from './pages/vuelos/vuelos';
 import { Verify } from './pages/verify/verify';
-import { Reservas } from './pages/reservas/reservas';
+import { Reservas } from './pages/historialReservas/reservas';
 import { MiCarrito } from './pages/carrito/carrito';
 import { authGuard } from './guards/auth.guard';
 import { ForgotPassword } from './pages/forgot-password/forgot-password';
