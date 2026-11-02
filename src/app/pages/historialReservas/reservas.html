@@ -29,27 +29,78 @@
 
     <nav class="search-card-header" aria-label="Tipo de reservas">
       <button type="button" class="search-tab" [class.active]="pestania() === 'activas'"
-        [attr.aria-pressed]="pestania() === 'activas'" (click)="pestania.set('activas')">
+        [attr.aria-pressed]="pestania() === 'activas'" (click)="cambiarPestania('activas')">
         {{ 'myBookings.upcomingFlights' | translate }}
       </button>
       <button type="button" class="search-tab" [class.active]="pestania() === 'historial'"
-        [attr.aria-pressed]="pestania() === 'historial'" (click)="pestania.set('historial')">
+        [attr.aria-pressed]="pestania() === 'historial'" (click)="cambiarPestania('historial')">
         {{ 'myBookings.history' | translate }}
       </button>
     </nav>
 
-    <div class="field buscador">
-      <input id="buscar-reserva" type="search" class="field-input" [placeholder]="'myBookings.searchPlaceholder' | translate"
-        [value]="busqueda()" (input)="busqueda.set($any($event.target).value)" />
-      <label class="field-label" for="buscar-reserva">{{ 'myBookings.search' | translate }}</label>
+    <div class="filtros" role="search">
+      <div class="field filtro-busqueda">
+        <input id="buscar-reserva" type="search" class="field-input" [placeholder]="'myBookings.searchPlaceholder' | translate"
+          [value]="busqueda()" (input)="busqueda.set($any($event.target).value)" />
+        <label class="field-label" for="buscar-reserva">{{ 'myBookings.search' | translate }}</label>
+      </div>
+
+      @if (pestania() === 'activas') {
+        <div class="field">
+          <select id="filtro-estado" class="field-input" [value]="filtroEstado()"
+            (change)="filtroEstado.set($any($event.target).value)">
+            <option value="TODOS">{{ 'myBookings.filterAll' | translate }}</option>
+            <option value="CONFIRMADO">{{ 'myBookings.statusConfirmed' | translate }}</option>
+            <option value="PENDIENTE">{{ 'myBookings.statusPending' | translate }}</option>
+          </select>
+          <label class="field-label" for="filtro-estado">{{ 'myBookings.status' | translate }}</label>
+        </div>
+      }
+
+      <div class="field">
+        <input id="filtro-desde" type="date" class="field-input" placeholder=" "
+          [value]="fechaDesde()" [attr.max]="fechaHasta() || null"
+          (input)="fechaDesde.set($any($event.target).value)" />
+        <label class="field-label" for="filtro-desde">{{ 'myBookings.filterFrom' | translate }}</label>
+      </div>
+
+      <div class="field">
+        <input id="filtro-hasta" type="date" class="field-input" placeholder=" "
+          [value]="fechaHasta()" [attr.min]="fechaDesde() || null"
+          (input)="fechaHasta.set($any($event.target).value)" />
+        <label class="field-label" for="filtro-hasta">{{ 'myBookings.filterTo' | translate }}</label>
+      </div>
+
+      <div class="field">
+        <select id="filtro-orden" class="field-input" [value]="orden()"
+          (change)="orden.set($any($event.target).value)">
+          <option value="recientes">{{ 'myBookings.sortRecent' | translate }}</option>
+          <option value="antiguas">{{ 'myBookings.sortOldest' | translate }}</option>
+          <option value="mayorValor">{{ 'myBookings.sortHighest' | translate }}</option>
+          <option value="menorValor">{{ 'myBookings.sortLowest' | translate }}</option>
+        </select>
+        <label class="field-label" for="filtro-orden">{{ 'myBookings.sortBy' | translate }}</label>
+      </div>
     </div>
+
+    @if (!cargando() && !error() && hayFiltros()) {
+      <div class="filtros-resumen">
+        <span role="status">{{ 'myBookings.resultsCount' | translate:{ count: reservasVisibles().length } }}</span>
+        <button type="button" class="btn-limpiar" (click)="limpiarFiltros()">{{ 'myBookings.clearFilters' | translate }}</button>
+      </div>
+    }
 
     @if (cargando()) {
       <p class="estado-lista" role="status">{{ 'myBookings.loading' | translate }}</p>
     } @else if (error()) {
       <p class="estado-lista error" role="alert">{{ error() }}</p>
     } @else if (reservasVisibles().length === 0) {
-      @if (pestania() === 'activas') {
+      @if (hayFiltros()) {
+        <div class="estado-lista">
+          <p>{{ 'myBookings.noFilterResults' | translate }}</p>
+          <button type="button" class="btn btn-dark" (click)="limpiarFiltros()">{{ 'myBookings.clearFilters' | translate }}</button>
+        </div>
+      } @else if (pestania() === 'activas') {
         <div class="estado-lista">
           <p class="estado-titulo">{{ 'myBookings.emptyActiveTitle' | translate }}</p>
           <p>{{ 'myBookings.emptyActiveSubtitle' | translate }}</p>

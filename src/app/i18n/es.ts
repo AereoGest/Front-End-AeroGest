@@ -345,6 +345,17 @@ export const es = {
   'myBookings.statusPending': 'Pendiente',
   'myBookings.statusConfirmed': 'Confirmada',
   'myBookings.statusCanceled': 'Cancelada',
+  'myBookings.filterAll': 'Todos',
+  'myBookings.filterFrom': 'Desde',
+  'myBookings.filterTo': 'Hasta',
+  'myBookings.sortBy': 'Ordenar por',
+  'myBookings.sortRecent': 'Más recientes',
+  'myBookings.sortOldest': 'Más antiguas',
+  'myBookings.sortHighest': 'Mayor valor',
+  'myBookings.sortLowest': 'Menor valor',
+  'myBookings.clearFilters': 'Limpiar filtros',
+  'myBookings.noFilterResults': 'No hay reservas que coincidan con los filtros.',
+  'myBookings.resultsCount': '{count} reserva(s)',
 
   // Panel de administración - Vuelos (VuelosAdmin)
   'adminFlights.eyebrow': 'Panel de administración',
