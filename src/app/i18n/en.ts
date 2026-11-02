@@ -348,6 +348,28 @@ export const en: Record<TranslationKey, string> = {
   'myBookings.statusConfirmed': 'Confirmed',
   'myBookings.statusCanceled': 'Canceled',
 
+  // Admin panel - Flights (VuelosAdmin)
+  'adminFlights.eyebrow': 'Admin panel',
+  'adminFlights.title': 'Flight management',
+  'adminFlights.subtitle': 'Review active and inactive flights in the system',
+  'adminFlights.departureDate': 'Departure date',
+  'adminFlights.clearFilters': 'Clear filters',
+  'adminFlights.filterByStatus': 'Filter by status',
+  'adminFlights.tabActive': 'Active',
+  'adminFlights.tabInactive': 'Inactive',
+  'adminFlights.tabAll': 'All',
+  'adminFlights.loading': 'Loading flights...',
+  'adminFlights.loadError': 'Could not load flights. Please try again.',
+  'adminFlights.retry': 'Retry',
+  'adminFlights.noResults': 'No flights to show with these filters.',
+  'adminFlights.active': 'Active',
+  'adminFlights.inactive': 'Inactive',
+  'adminFlights.flightId': 'ID #{id}',
+  'adminFlights.flightDetail': 'Flight details #{id}',
+  'adminFlights.departureDateShort': 'Departure date',
+  'adminFlights.arrivalDateShort': 'Arrival date',
+  'adminFlights.price': 'Price',
+
   // Common & Utilities
   'common.loading': 'Loading...',
   'common.error': 'An unexpected error occurred.',

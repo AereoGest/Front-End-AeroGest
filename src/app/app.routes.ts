@@ -14,6 +14,7 @@ import { Reserva } from './pages/reserva/reserva';
 import { Asientos } from './pages/asientos/asientos';
 import { Pago } from './pages/pago/pago';
 import { checkoutPagoGuard } from './guards/checkoutPagoGuard';
+import { VuelosAdmin } from './pages/Admin/vuelos-admin/vuelos-admin';
 
 export const routes: Routes = [
     { path: "", component: Home },
@@ -21,6 +22,7 @@ export const routes: Routes = [
     { path: "perfil", component: VerPerfil, canActivate: [authGuard] },
     { path: "login", component: LoginForm },
     { path: "vuelos", component: Vuelos },
+    {path: "vuelosAdmin", component: VuelosAdmin, canActivate: [authGuard]},
     { path: "verify", component: Verify },
     { path: "checkoutReserva", component: Reserva, canActivate: [authGuard] },
     {path: "checkoutReserva/pago", component: Pago, canActivate: [checkoutPagoGuard, authGuard] },

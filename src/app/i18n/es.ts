@@ -346,6 +346,28 @@ export const es = {
   'myBookings.statusConfirmed': 'Confirmada',
   'myBookings.statusCanceled': 'Cancelada',
 
+  // Panel de administración - Vuelos (VuelosAdmin)
+  'adminFlights.eyebrow': 'Panel de administración',
+  'adminFlights.title': 'Gestión de vuelos',
+  'adminFlights.subtitle': 'Consultá los vuelos activos e inactivos del sistema',
+  'adminFlights.departureDate': 'Fecha de salida',
+  'adminFlights.clearFilters': 'Limpiar filtros',
+  'adminFlights.filterByStatus': 'Filtrar por estado',
+  'adminFlights.tabActive': 'Activos',
+  'adminFlights.tabInactive': 'Inactivos',
+  'adminFlights.tabAll': 'Todos',
+  'adminFlights.loading': 'Cargando vuelos...',
+  'adminFlights.loadError': 'No se pudieron obtener los vuelos. Intentá nuevamente.',
+  'adminFlights.retry': 'Reintentar',
+  'adminFlights.noResults': 'No hay vuelos para mostrar con estos filtros.',
+  'adminFlights.active': 'Activo',
+  'adminFlights.inactive': 'Inactivo',
+  'adminFlights.flightId': 'ID #{id}',
+  'adminFlights.flightDetail': 'Detalle del vuelo #{id}',
+  'adminFlights.departureDateShort': 'Fecha salida',
+  'adminFlights.arrivalDateShort': 'Fecha llegada',
+  'adminFlights.price': 'Precio',
+
   // Común y utilidades
   'common.loading': 'Cargando...',
   'common.error': 'Ocurrió un error inesperado.',

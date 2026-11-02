@@ -1,0 +1,138 @@
+<section class="flight-search-bar">
+  <div class="container">
+    <form class="search-bar-form" (submit)="onBuscar($event)">
+      <fieldset class="field">
+        <input id="a-origen" type="text" class="field-input" [placeholder]="'flights.originPlaceholder' | translate"
+          [value]="origen()" (input)="origen.set($any($event.target).value)" />
+        <label class="field-label" for="a-origen">{{ 'flights.origin' | translate }}</label>
+      </fieldset>
+
+      <fieldset class="field">
+        <input id="a-destino" type="text" class="field-input" [placeholder]="'flights.destinationPlaceholder' | translate"
+          [value]="destino()" (input)="destino.set($any($event.target).value)" />
+        <label class="field-label" for="a-destino">{{ 'flights.destination' | translate }}</label>
+      </fieldset>
+
+      <fieldset class="field">
+        <input id="a-fecha" type="date" class="field-input" placeholder=" "
+          [value]="fechaIda()" (input)="fechaIda.set($any($event.target).value)" />
+        <label class="field-label" for="a-fecha">{{ 'adminFlights.departureDate' | translate }}</label>
+      </fieldset>
+
+      <button type="button" class="btn btn-dark btn-lg" (click)="limpiarFiltros()">
+        {{ 'adminFlights.clearFilters' | translate }}
+      </button>
+    </form>
+  </div>
+</section>
+
+<section class="section resultados">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-eyebrow">{{ 'adminFlights.eyebrow' | translate }}</span>
+      <h2 class="section-title">{{ 'adminFlights.title' | translate }}</h2>
+      <p class="section-subtitle">{{ 'adminFlights.subtitle' | translate }}</p>
+    </div>
+
+    <div class="tabs-estado" role="tablist" [attr.aria-label]="'adminFlights.filterByStatus' | translate">
+      <button type="button" role="tab" class="tab" [class.activa]="filtroEstado() === 'ACTIVOS'"
+        [attr.aria-selected]="filtroEstado() === 'ACTIVOS'" (click)="filtroEstado.set('ACTIVOS')">
+        {{ 'adminFlights.tabActive' | translate }} <span class="tab-contador">{{ cantidadActivos() }}</span>
+      </button>
+      <button type="button" role="tab" class="tab" [class.activa]="filtroEstado() === 'INACTIVOS'"
+        [attr.aria-selected]="filtroEstado() === 'INACTIVOS'" (click)="filtroEstado.set('INACTIVOS')">
+        {{ 'adminFlights.tabInactive' | translate }} <span class="tab-contador">{{ cantidadInactivos() }}</span>
+      </button>
+      <button type="button" role="tab" class="tab" [class.activa]="filtroEstado() === 'TODOS'"
+        [attr.aria-selected]="filtroEstado() === 'TODOS'" (click)="filtroEstado.set('TODOS')">
+        {{ 'adminFlights.tabAll' | translate }} <span class="tab-contador">{{ cantidadActivos() + cantidadInactivos() }}</span>
+      </button>
+    </div>
+
+    @if (cargando()) {
+      <p class="auth-subtitle" role="status">{{ 'adminFlights.loading' | translate }}</p>
+    }
+
+    @if (error() !== null) {
+      <p class="mensaje-error" role="alert">
+        {{ error() || ('adminFlights.loadError' | translate) }}
+        <button type="button" class="btn-reintentar" (click)="cargar()">{{ 'adminFlights.retry' | translate }}</button>
+      </p>
+    }
+
+    @if (!cargando() && error() === null && vuelosFiltrados().length === 0) {
+      <p class="auth-subtitle">{{ 'adminFlights.noResults' | translate }}</p>
+    }
+
+    <div class="destinations-grid">
+      @for (vuelo of vuelosFiltrados(); track vuelo.id) {
+        <div class="dest-card" [class.inactivo]="!esActivo(vuelo)" role="button" tabindex="0"
+          (click)="abrirDetalle(vuelo)" (keydown.enter)="abrirDetalle(vuelo)">
+          <div class="dest-card-body">
+
+            <div class="dest-card-city">
+              {{ vuelo.aeropuertoOrigen?.ciudad }} ({{ vuelo.aeropuertoOrigen?.codigoIata }})
+              →
+              {{ vuelo.aeropuertoDestino?.ciudad }} ({{ vuelo.aeropuertoDestino?.codigoIata }})
+            </div>
+
+            <div class="dest-card-country">
+              {{ vuelo.fechaSalida }} · {{ formatearHora(vuelo.horaSalida) }} -
+              {{ formatearHora(vuelo.horaLlegada) }} · {{ duracion(vuelo) }}
+            </div>
+
+            <div class="dest-card-country">
+              {{ (vuelo.escala ? 'flights.layover' : 'flights.direct') | translate }} ·
+              {{ 'adminFlights.flightId' | translate: { id: vuelo.id } }}
+            </div>
+
+            <div class="dest-card-price">
+              <span class="badge-estado" [class.badge-inactivo]="!esActivo(vuelo)">
+                {{ (esActivo(vuelo) ? 'adminFlights.active' : 'adminFlights.inactive') | translate }}
+              </span>
+              <span class="dest-price-amount">${{ vuelo.precioVuelo }}</span>
+              <span class="estado-detalle">{{ vuelo.estado }}</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+@if (vueloDetalle(); as v) {
+  <div class="modal-overlay" [class.cerrando]="cerrando()" (click)="cerrarDetalle()">
+    <div class="modal-vuelo" role="dialog" aria-modal="true" aria-labelledby="modal-titulo"
+      (click)="$event.stopPropagation()">
+
+      <button type="button" class="modal-cerrar" [attr.aria-label]="'flights.close' | translate"
+        (click)="cerrarDetalle()">✕</button>
+
+      <span class="section-eyebrow">{{ 'adminFlights.flightDetail' | translate: { id: v.id } }}</span>
+      <h3 id="modal-titulo" class="modal-ruta">
+        {{ v.aeropuertoOrigen?.ciudad }} ({{ v.aeropuertoOrigen?.codigoIata }})
+        →
+        {{ v.aeropuertoDestino?.ciudad }} ({{ v.aeropuertoDestino?.codigoIata }})
+      </h3>
+
+      <span class="badge-estado" [class.badge-inactivo]="!esActivo(v)">
+        {{ (esActivo(v) ? 'adminFlights.active' : 'adminFlights.inactive') | translate }}
+      </span>
+
+      <dl class="modal-datos">
+        <div><dt>{{ 'adminFlights.departureDateShort' | translate }}</dt><dd>{{ v.fechaSalida }}</dd></div>
+        <div><dt>{{ 'adminFlights.arrivalDateShort' | translate }}</dt><dd>{{ v.fechaLlegada }}</dd></div>
+        <div><dt>{{ 'flights.departure' | translate }}</dt><dd>{{ formatearHora(v.horaSalida) }}</dd></div>
+        <div><dt>{{ 'flights.arrival' | translate }}</dt><dd>{{ formatearHora(v.horaLlegada) }}</dd></div>
+        <div><dt>{{ 'flights.duration' | translate }}</dt><dd>{{ duracion(v) }}</dd></div>
+        <div><dt>{{ 'flights.type' | translate }}</dt><dd>{{ (v.escala ? 'flights.layover' : 'flights.direct') | translate }}</dd></div>
+        <div><dt>{{ 'flights.status' | translate }}</dt><dd>{{ v.estado }}</dd></div>
+        <div><dt>{{ 'adminFlights.price' | translate }}</dt><dd>${{ v.precioVuelo }}</dd></div>
+      </dl>
+
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-dark" (click)="cerrarDetalle()">{{ 'flights.close' | translate }}</button>
+      </div>
+    </div>
+  </div>
+}
