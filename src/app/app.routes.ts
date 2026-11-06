@@ -15,6 +15,7 @@ import { Asientos } from './pages/asientos/asientos';
 import { Pago } from './pages/pago/pago';
 import { checkoutPagoGuard } from './guards/checkoutPagoGuard';
 import { VuelosAdmin } from './pages/Admin/vuelos-admin/vuelos-admin';
+import { Favoritos } from './pages/favoritos/favoritos';
 
 export const routes: Routes = [
     { path: "", component: Home },
@@ -28,6 +29,7 @@ export const routes: Routes = [
     {path: "checkoutReserva/pago", component: Pago, canActivate: [checkoutPagoGuard, authGuard] },
     { path: "reservas", component: Reservas, canActivate: [authGuard] },
     { path: "carrito", component: MiCarrito, canActivate: [authGuard] },
+    {path: "favoritos", component: Favoritos, canActivate: [authGuard]},
     {path: "forgot-password", component: ForgotPassword},
     {path: "reset-password", component: ResetPassword},
     {path: "asientos", component: Asientos},

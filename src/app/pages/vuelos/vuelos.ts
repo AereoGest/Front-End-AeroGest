@@ -8,6 +8,8 @@ import { CarritoService } from '../../services/carritoService';
 import { Auth } from '../../services/auth';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { I18nService } from '../../services/i18n';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-vuelos',
@@ -36,12 +38,17 @@ export class Vuelos implements OnInit {
   protected readonly destino = signal('');
   protected readonly fechaIda = signal('');
 
+  private http = inject(HttpClient);
+ favoritosIds = signal<number[]>([]);
+
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
       this.origen.set(this.limpiarCiudad(params['origen'] ?? ''));
       this.destino.set(this.limpiarCiudad(params['destino'] ?? ''));
       this.fechaIda.set(params['fecha'] ?? '');
       this.buscar();
+      this.cargarFavoritos();
+
     });
   }
 
@@ -161,6 +168,87 @@ export class Vuelos implements OnInit {
     this.agregarAlCarrito(vuelo);
     this.cerrarDetalle();
   }
+
+  async cargarFavoritos(): Promise<void> {
+  try {
+    const favoritos = await firstValueFrom(
+      this.http.get<any[]>('/api/favoritos')
+    );
+
+    this.favoritosIds.set(
+      favoritos.map(f => f.vueloId)
+    );
+
+  } catch (error) {
+    console.error('Error al cargar favoritos:', error);
+  }
+}
+
+esFavorito(vueloId: string | number | undefined): boolean {
+  if (vueloId === undefined) return false;
+
+  return this.favoritosIds().includes(Number(vueloId));
+}
+
+async toggleFavorito(vuelo: any): Promise<void> {
+
+  if (vuelo.id === undefined) return;
+
+  const vueloId = Number(vuelo.id);
+
+  try {
+
+    if (this.esFavorito(vueloId)) {
+
+      // Obtener la lista de favoritos
+      const favoritos = await firstValueFrom(
+        this.http.get<any[]>('/api/favoritos')
+      );
+
+      // Buscar el favorito que corresponde al vuelo
+      const favorito = favoritos.find(
+        f => Number(f.vueloId) === vueloId
+      );
+
+      if (!favorito) return;
+
+      // Eliminar favorito
+      await firstValueFrom(
+        this.http.delete(`/api/favoritos/${favorito.id}`)
+      );
+
+      this.favoritosIds.update(ids =>
+        ids.filter(id => id !== vueloId)
+      );
+
+      this.mensajeExito.set('Vuelo eliminado de favoritos');
+
+    } else {
+
+      // Agregar favorito usando el endpoint correcto
+      await firstValueFrom(
+        this.http.post(
+          `/api/favoritos/vuelos/${vueloId}`,
+          null
+        )
+      );
+
+      this.favoritosIds.update(ids => [...ids, vueloId]);
+
+      this.mensajeExito.set('Vuelo agregado a favoritos');
+    }
+
+  } catch (error: any) {
+
+    console.error('Error al modificar favoritos:', error);
+
+    this.mensajeError.set(
+      error.error?.message || 'No se pudo modificar favoritos'
+    );
+
+  }
+
+}
 
   @HostListener('document:keydown.escape')
   onEscape() {

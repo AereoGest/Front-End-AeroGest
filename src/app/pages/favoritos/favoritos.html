@@ -1,0 +1,168 @@
+<section class="booking-dashboard" style="margin-top: 72px">
+
+  <div class="container">
+
+    <div class="dashboard-header">
+      <h1 class="dashboard-welcome">{{ 'favorites.title' | translate }}</h1>
+
+      <p class="dashboard-subtitle">
+        {{ 'favorites.subtitle' | translate }}
+      </p>
+    </div>
+
+    <!-- Mensajes -->
+    @if (mensaje()) {
+      <div class="mensaje"
+           [class.mensaje-error]="tipoMensaje() === 'error'"
+           [class.mensaje-success]="tipoMensaje() === 'success'">
+        {{ mensaje() | translate }}
+        @if (mensaje() === 'favorites.messages.addedToCart') {
+          <a class="mensaje-link" (click)="router.navigate(['/carrito'])">
+            {{ 'favorites.viewCart' | translate }}
+          </a>
+        }
+      </div>
+    }
+
+    <!-- Cargando -->
+    @if (cargando()) {
+
+      <div class="estado-vacio">
+        {{ 'favorites.loading' | translate }}
+      </div>
+
+    } @else {
+
+      <!-- Sin favoritos -->
+      @if (favoritos().length === 0) {
+
+        <div class="estado-vacio">
+
+          <div class="corazon-vacio">♡</div>
+
+          <p class="titulo-vacio">
+            {{ 'favorites.empty.title' | translate }}
+          </p>
+
+          <p>
+            {{ 'favorites.empty.text' | translate }}
+          </p>
+
+          <button class="btn btn-primary"
+                  (click)="router.navigate(['/vuelos'])">
+            {{ 'favorites.empty.cta' | translate }}
+          </button>
+
+        </div>
+
+      } @else {
+
+        <!-- Listado de favoritos -->
+        <div class="flight-list">
+
+          @for (favorito of favoritos(); track favorito.id; let i = $index) {
+
+            @if (vuelos()[i]; as vuelo) {
+
+              <div class="flight-card">
+
+                <div class="flight-info">
+
+                  <div class="flight-airline">
+                    AeroGest
+                  </div>
+
+                  <div class="flight-route">
+
+                    <!-- Origen -->
+                    <div>
+                      <div class="flight-time">
+                        {{ vuelo.horaSalida?.slice(0, 5) || '—' }}
+                      </div>
+
+                      <div class="flight-city">
+                        {{ vuelo.aeropuertoOrigen?.ciudad || '—' }}
+                      </div>
+                    </div>
+
+                    <!-- Recorrido -->
+                    <div class="flight-line">
+
+                      <div class="flight-line-bar"></div>
+
+                      <div class="flight-stops"
+                           [class.direct]="!vuelo.escala">
+
+                        {{ (vuelo.escala ? 'favorites.oneStop' : 'favorites.direct') | translate }}
+
+                      </div>
+
+                    </div>
+
+                    <!-- Destino -->
+                    <div>
+                      <div class="flight-time">
+                        {{ vuelo.horaLlegada?.slice(0, 5) || '—' }}
+                      </div>
+
+                      <div class="flight-city">
+                        {{ vuelo.aeropuertoDestino?.ciudad || '—' }}
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <div class="fecha-guardado">
+                    {{ 'favorites.savedOn' | translate }}
+                    {{ favorito.fechaAgregado | date:'dd/MM/yyyy' }}
+                  </div>
+
+                </div>
+
+                <!-- Precio -->
+                <div class="flight-class">
+
+                  <div class="flight-price">
+                    {{ vuelo.precioVuelo | currency:'ARS':'symbol':'1.0-0':'es-AR' }}
+                  </div>
+
+                  <div class="flight-price-label">
+                    {{ 'favorites.perPerson' | translate }}
+                  </div>
+
+                </div>
+
+                <!-- Acciones -->
+                <div class="acciones-favorito">
+
+                  <button
+                    class="btn btn-dark btn-carrito"
+                    [disabled]="agregandoId() === favorito.vueloId"
+                    (click)="agregarAlCarrito(favorito.vueloId)">
+                    {{ (agregandoId() === favorito.vueloId ? 'favorites.adding' : 'favorites.addToCart') | translate }}
+                  </button>
+
+                  <button
+                    class="btn btn-eliminar"
+                    [title]="'favorites.removeTitle' | translate"
+                    (click)="eliminarFavorito(favorito.id)">
+                    {{ 'favorites.remove' | translate }}
+                  </button>
+
+                </div>
+
+              </div>
+
+            }
+
+          }
+
+        </div>
+
+      }
+
+    }
+
+  </div>
+
+</section>

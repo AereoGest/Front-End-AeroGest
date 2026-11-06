@@ -1,3 +1,5 @@
+
+
 import type { TranslationKey } from './es';
 
 export const en: Record<TranslationKey, string> = {
@@ -11,6 +13,7 @@ export const en: Record<TranslationKey, string> = {
   'nav.loggedIn': 'Signed in',
   'nav.profile': 'My profile',
   'nav.cart': 'Cart',
+  'nav.favorites': 'Favorites',
   'nav.purchases': 'Purchases',
   'nav.logout': 'Sign out',
   'nav.langLabel': 'Language',
@@ -380,6 +383,28 @@ export const en: Record<TranslationKey, string> = {
   'adminFlights.departureDateShort': 'Departure date',
   'adminFlights.arrivalDateShort': 'Arrival date',
   'adminFlights.price': 'Price',
+
+  // Favorites
+  'favorites.title': 'My Favorites',
+  'favorites.subtitle': 'The flights you saved to keep an eye on',
+  'favorites.loading': 'Loading favorites...',
+  'favorites.empty.title': "You don't have any favorite flights",
+  'favorites.empty.text': 'Save the flights you like to find them easily',
+  'favorites.empty.cta': 'Browse flights',
+  'favorites.direct': 'Direct',
+  'favorites.oneStop': '1 stop',
+  'favorites.savedOn': 'Saved on',
+  'favorites.perPerson': 'per person',
+  'favorites.addToCart': '🛒 Add to cart',
+  'favorites.adding': 'Adding...',
+  'favorites.remove': '♥ Remove',
+  'favorites.removeTitle': 'Remove from favorites',
+  'favorites.viewCart': 'View cart →',
+  'favorites.messages.addedToCart': 'Flight added to cart',
+  'favorites.messages.removed': 'Removed from favorites',
+  'favorites.messages.loadError': "Couldn't load your favorites",
+  'favorites.messages.removeError': "Couldn't remove the favorite",
+  'favorites.messages.cartError': "Couldn't add the flight to the cart",
 
   // Common & Utilities
   'common.loading': 'Loading...',
