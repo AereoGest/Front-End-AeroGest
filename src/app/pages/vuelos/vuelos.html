@@ -71,7 +71,19 @@
 
             <div class="carrito-acciones" (click)="$event.stopPropagation()">
               <button type="button" class="btn btn-dark" id="boton-elegir" (click)="elegirVuelo(vuelo)">{{ 'flights.select' | translate }}</button>
-              <button type="button" class="btn btn-primary" [title]="'flights.addToCart' | translate" [attr.aria-label]="'flights.addToCart' | translate"
+              <!-- Agregar o quitar de favoritos -->
+          <button
+            type="button"
+            class="btn btn-favorito"
+            [class.activo]="esFavorito(vuelo.id)"
+            [attr.aria-label]="esFavorito(vuelo.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'"
+            [title]="esFavorito(vuelo.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'"
+            (click)="toggleFavorito(vuelo)">
+
+            {{ esFavorito(vuelo.id) ? '♥' : '♡' }}
+
+          </button>
+            <button type="button" class="btn btn-primary" [title]="'flights.addToCart' | translate" [attr.aria-label]="'flights.addToCart' | translate"
                 (click)="agregarAlCarrito(vuelo)">🛒</button>
             </div>
           </div>

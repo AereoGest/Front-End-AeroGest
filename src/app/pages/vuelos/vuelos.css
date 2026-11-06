@@ -186,9 +186,10 @@
 .resultados .carrito-acciones {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  /* Las dos primeras columnas vacías espejan a favorito + carrito,
+     así "Elegir" queda centrado de verdad. */
+  grid-template-columns: 42px 46px 1fr minmax(180px, 2fr) 1fr 42px 46px;
   align-items: center;
-  justify-content: center;
   gap: 12px;
   margin-top: 12px;
   padding-top: 16px;
@@ -196,7 +197,7 @@
 }
 
 .resultados .carrito-acciones .btn-primary {
-  grid-column: 4;
+  grid-column: 7;
   align-items: center;
   justify-content: center;
   background-color: var(--accent-soft);
@@ -213,7 +214,7 @@
 }
 
 .resultados .carrito-acciones .btn-dark {
-  grid-column: 2;
+  grid-column: 4;
   align-items: center;
   justify-content: center;
   min-width: 120px;
@@ -281,9 +282,19 @@
     font-size: 25px;
   }
 
+  /* En celular: Elegir ocupa el ancho y los dos íconos quedan a la derecha */
   .resultados .carrito-acciones {
     grid-column: 1;
-    justify-content: flex-end;
+    grid-template-columns: 1fr 42px 46px;
+  }
+
+  .resultados .carrito-acciones .btn-dark {
+    grid-column: 1;
+    min-width: 0;
+  }
+
+  .resultados .carrito-acciones .btn-primary {
+    grid-column: 3;
   }
 }
 
@@ -439,6 +450,75 @@
   background-color: var(--accent);
   color: var(--accent-contrast);
 }
+
+
+/* ── Botón de favoritos ──
+   Mismo tamaño y forma que el botón del carrito, a su izquierda.
+   Usa los tokens del tema, así se ve bien en claro y oscuro. */
+.resultados .carrito-acciones > .btn-favorito,
+.resultados .carrito-acciones > app-boton-favorito {
+  grid-column: 6;
+  justify-self: end;
+}
+
+.btn-favorito {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xlg);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    transform var(--transition),
+    background-color var(--transition),
+    border-color var(--transition),
+    color var(--transition),
+    box-shadow var(--transition);
+}
+
+.btn-favorito:hover {
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
+  transform: translateY(-1px);
+}
+
+.btn-favorito.activo {
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.btn-favorito.activo:hover {
+  border-color: var(--danger);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-favorito:active {
+  transform: scale(0.92);
+}
+
+.btn-favorito:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Va después de la regla de arriba para poder pisarla en celular */
+@media (max-width: 768px) {
+  .resultados .carrito-acciones > .btn-favorito,
+  .resultados .carrito-acciones > app-boton-favorito {
+    grid-column: 2;
+  }
+}
+
 
 @media (max-width: 480px) {
   .modal-vuelo {
