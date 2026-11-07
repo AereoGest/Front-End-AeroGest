@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Reserva, ReservaRequest } from '../Models/Reserva';
+import { CheckInResponse, Reserva, ReservaRequest } from '../Models/Reserva';
 import { PagoRequest, PagoResponse } from '../Models/Pago';
 
 @Injectable({
@@ -28,4 +28,8 @@ export class ReservaService {
   cancelar(id: number): Observable<string> {
     return this.http.patch(`${this.baseUrl}/cancelar/${id}`, {}, { responseType: 'text' });
   }
+
+  checkIn(id: number): Observable<CheckInResponse> {
+  return this.http.post<CheckInResponse>(`${this.baseUrl}/mis-reservas/${id}/check-in`, {});
+}
 }

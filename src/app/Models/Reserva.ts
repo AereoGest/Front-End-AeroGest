@@ -14,6 +14,7 @@ export interface Reserva {
   cantidadPasajes: number;
   estadoReserva: EstadoReserva;
   fechaReserva: string;
+  fechaCheckIn?: string | null;
 }
 
 /** Datos de un pasajero para POST /api/reservas/mis-reservas. */
@@ -35,4 +36,17 @@ export interface ReservaRequest {
   vueloId: number;
   cantidadPasajes: number;
   pasajes: PasajeRequest[];
+}
+
+/** Respuesta de POST /api/reservas/mis-reservas/{id}/check-in. */
+export interface CheckInResponse {
+  reservaId: number;
+  fechaCheckIn: string;
+  pasajes: {
+    pasajeId: number;
+    pasajero: string;
+    vueloId: number;
+    asiento: string;
+    asignadoAutomaticamente: boolean;
+  }[];
 }

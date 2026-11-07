@@ -45,6 +45,8 @@ export class Reservas implements OnInit {
   protected readonly fechaHasta = signal('');
   protected readonly orden = signal<Orden>('recientes');
   protected readonly seleccionada = signal<Reserva | null>(null);
+  // id de la reserva cuyo check-in se está procesando (para deshabilitar el botón)
+  protected readonly checkInEnCurso = signal<number | null>(null);
 
   protected readonly cantidadActivas = computed(
     () => this.reservas().filter((reserva) => ESTADOS_ACTIVOS.includes(reserva.estadoReserva)).length
@@ -159,6 +161,31 @@ export class Reservas implements OnInit {
         this.mostrarMensaje(this.mensajeError, error.error?.message || this.i18n.t('common.error'));
       }
     });
+  }
+
+  protected hacerCheckIn(reserva: Reserva): void {
+    if (reserva.fechaCheckIn || this.checkInEnCurso() !== null) return;
+
+    this.limpiarMensajes();
+    this.checkInEnCurso.set(reserva.id);
+
+    this.reservaService.checkIn(reserva.id).subscribe({
+      next: (respuesta) => {
+        // Marcar la reserva como "check-in hecho" sin recargar toda la lista
+        this.reservas.update((reservas) =>
+          reservas.map((r) => (r.id === reserva.id ? { ...r, fechaCheckIn: respuesta.fechaCheckIn } : r))
+        );
+
+        const asientos = respuesta.pasajes.map((p) => p.asiento).join(', ');
+        const texto = this.i18n.isSpanish()
+          ? `Check-in realizado · Asiento${respuesta.pasajes.length > 1 ? 's' : ''}: ${asientos}`
+          : `Check-in completed · Seat${respuesta.pasajes.length > 1 ? 's' : ''}: ${asientos}`;
+        this.mostrarMensaje(this.mensajeExito, texto);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.mostrarMensaje(this.mensajeError, error.error?.message || this.i18n.t('common.error'));
+      }
+    }).add(() => this.checkInEnCurso.set(null));
   }
 
   protected proximamente(funcion: string): void {
