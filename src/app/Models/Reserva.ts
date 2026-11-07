@@ -6,6 +6,7 @@ export type EstadoReserva = 'ACTIVO' | 'CANCELADA' | 'PROCESANDO' | 'CONFIRMADO'
 /** Pasaje tal como viene dentro de cada reserva en GET /api/reservas/mis-reservas. */
 export interface PasajeReserva {
   id: number;
+  codigoReserva: string | null; 
   codigoPasaje: string;
   clasesVuelo: ClaseVuelo;
   nombre: string;
@@ -42,6 +43,7 @@ export interface PasajeReserva {
 /** Reserva tal como la devuelve GET /api/reservas/mis-reservas. */
 export interface Reserva {
   id: number;
+  codigoReserva: string | null; 
   persona: {
     nombre: string;
     apellido: string;
