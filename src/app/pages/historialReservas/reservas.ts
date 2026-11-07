@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { EstadoReserva, Reserva } from '../../Models/Reserva';
+import { EstadoReserva, PasajeReserva, Reserva } from '../../Models/Reserva';
 import { ReservaService } from '../../services/reservaService';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { I18nService } from '../../services/i18n';
@@ -216,6 +216,35 @@ export class Reservas implements OnInit {
   protected formatearFecha(fecha: string): string {
     const locale = this.i18n.currentLang() === 'es' ? 'es-AR' : 'en-US';
     return new Date(fecha).toLocaleDateString(locale);
+  }
+
+  // Fecha de vuelo "yyyy-mm-dd" (LocalDate del back). Se arma a mano porque
+  // new Date('2026-11-20') la toma como UTC y en Argentina mostraría el día anterior.
+  protected formatearFechaVuelo(fecha: string): string {
+    const [anio, mes, dia] = fecha.split('-').map(Number);
+    const locale = this.i18n.currentLang() === 'es' ? 'es-AR' : 'en-US';
+    return new Date(anio, mes - 1, dia).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  // "14:30:00" -> "14:30"
+  protected formatearHora(hora: string): string {
+    return hora?.slice(0, 5) ?? '';
+  }
+
+  protected etiquetaClase(clase: string): string {
+    if (clase === 'BUSINESS') return this.i18n.t('seats.businessClass');
+    if (clase === 'PRIMERA') return this.i18n.t('seats.firstClass');
+    return this.i18n.t('seats.economyClass');
+  }
+
+  protected describirEquipajes(pasaje: PasajeReserva): string {
+    const es = this.i18n.isSpanish();
+    const nombres: Record<string, string> = es
+      ? { CABINA: 'Cabina', BODEGA: 'Bodega', MANO: 'De mano' }
+      : { CABINA: 'Cabin', BODEGA: 'Checked', MANO: 'Carry-on' };
+    return pasaje.equipajes
+      .map((e) => `${nombres[e.tipo] ?? e.tipo}${e.peso ? ` (${e.peso} kg)` : ''}`)
+      .join(', ');
   }
 
   // Fecha local en formato yyyy-mm-dd, para comparar con los <input type="date">

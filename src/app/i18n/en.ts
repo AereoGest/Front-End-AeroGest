@@ -337,6 +337,8 @@ export const en: Record<TranslationKey, string> = {
   'myBookings.ticketsCount': '{count} ticket(s)',
   'myBookings.checkin': 'Check-in',
   'myBookings.checkinDone': 'Checked in',
+  'myBookings.ticketCode': 'Ticket code',
+  'myBookings.seatPending': 'Assigned at check-in',
   'myBookings.view': 'View',
   'myBookings.bookingCode': 'Booking code',
   'myBookings.passenger': 'Passenger',

@@ -176,6 +176,65 @@
       </div>
     </dl>
 
+    @if (reserva.pasajes?.length) {
+      <section class="detalle-pasajes" aria-labelledby="detalle-pasajes-titulo">
+        <h3 id="detalle-pasajes-titulo">{{ 'myBookings.tickets' | translate }}</h3>
+        <ul class="pasajes-lista">
+          @for (pasaje of reserva.pasajes; track pasaje.id) {
+            <li class="pasaje">
+              <div class="pasaje-ruta">
+                <span class="pasaje-iata">{{ pasaje.vuelo.aeropuertoOrigen.codigoIata }}</span>
+                <span class="pasaje-flecha" aria-hidden="true">→</span>
+                <span class="pasaje-iata">{{ pasaje.vuelo.aeropuertoDestino.codigoIata }}</span>
+                <span class="pasaje-salida">
+                  {{ formatearFechaVuelo(pasaje.vuelo.fechaSalida) }} · {{ formatearHora(pasaje.vuelo.horaSalida) }}
+                </span>
+              </div>
+
+              <dl class="pasaje-datos">
+                <div>
+                  <dt>{{ 'myBookings.passenger' | translate }}</dt>
+                  <dd>{{ pasaje.nombre }} {{ pasaje.apellido }}</dd>
+                </div>
+                <div>
+                  <dt>{{ 'booking.docNumber' | translate }}</dt>
+                  <dd>{{ pasaje.tipoDocumento }} {{ pasaje.documento }}</dd>
+                </div>
+                <div>
+                  <dt>{{ 'seats.progressSeat' | translate }}</dt>
+                  <dd>
+                    @if (pasaje.asiento) {
+                      <strong>{{ pasaje.asiento.codigo }}</strong>
+                    } @else {
+                      <span class="pasaje-pendiente">{{ 'myBookings.seatPending' | translate }}</span>
+                    }
+                  </dd>
+                </div>
+                <div>
+                  <dt>{{ 'cart.class' | translate }}</dt>
+                  <dd>{{ etiquetaClase(pasaje.clasesVuelo) }}</dd>
+                </div>
+                <div>
+                  <dt>{{ 'booking.luggage' | translate }}</dt>
+                  <dd>
+                    @if (pasaje.equipajes.length) {
+                      {{ describirEquipajes(pasaje) }}
+                    } @else {
+                      {{ 'booking.noLuggage' | translate }}
+                    }
+                  </dd>
+                </div>
+                <div>
+                  <dt>{{ 'myBookings.ticketCode' | translate }}</dt>
+                  <dd>{{ pasaje.codigoPasaje }}</dd>
+                </div>
+              </dl>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
     <div class="detalle-acciones">
       <button type="button" class="btn btn-primary" (click)="proximamente('Boarding pass')">{{ 'myBookings.boardingPass' | translate }}</button>
       @if (reserva.estadoReserva !== 'CANCELADA') {

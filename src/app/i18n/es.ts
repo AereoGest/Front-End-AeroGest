@@ -335,6 +335,8 @@ export const es = {
   'myBookings.ticketsCount': '{count} pasaje(s)',
   'myBookings.checkin': 'Check-in',
   'myBookings.checkinDone': 'Check-in hecho',
+  'myBookings.ticketCode': 'Código de pasaje',
+  'myBookings.seatPending': 'Se asigna en el check-in',
   'myBookings.view': 'Ver',
   'myBookings.bookingCode': 'Código de reserva',
   'myBookings.passenger': 'Pasajero',
