@@ -1,14 +1,13 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
-import { TranslatePipe } from '../../pipes/translate.pipe'; // ajustar al nombre y path de su pipe de i18n
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { environment } from '../../../environments/environment'; // ajustar el path como en CarritoService
+import { TranslatePipe } from '../../pipes/translate.pipe'; // ajustar al path real
 import { Vuelo } from '../../Models/Vuelo';
 import { Favorito } from '../../Models/Favorito';
 import { ClaseVuelo } from '../../Models/Carrito';
-import { CarritoService } from '../../services/carritoService'; // ajustar al path real
+import { CarritoService } from '../../services/carritoService';   // ajustar al path real
+import { FavoritoService } from '../../services/favorito-service'; // ajustar al path real
 
 @Component({
   selector: 'app-favoritos',
@@ -19,13 +18,11 @@ import { CarritoService } from '../../services/carritoService'; // ajustar al pa
 })
 export class Favoritos implements OnInit {
 
-  private http = inject(HttpClient);
+  private favoritoService = inject(FavoritoService);
   private carritoService = inject(CarritoService);
   protected router = inject(Router); // protected: el template usa router.navigate
 
-  private readonly apiUrl = environment.apiUrl;
-
-  // Signals: Angular se entera solo cuando cambian, aunque sea después de un await
+  // Estado de la pantalla
   favoritos = signal<Favorito[]>([]);
   vuelos = signal<(Vuelo | null)[]>([]);
   cargando = signal(true);
@@ -35,7 +32,6 @@ export class Favoritos implements OnInit {
   /** Id del vuelo que se está mandando al carrito, para deshabilitar su botón. */
   agregandoId = signal<number | null>(null);
 
-  // Clase con la que se manda al carrito. Tiene que ser un valor válido de ClaseVuelo.
   private readonly claseDefault = 'ECONOMICA' as ClaseVuelo;
 
   ngOnInit(): void {
@@ -46,30 +42,15 @@ export class Favoritos implements OnInit {
     this.cargando.set(true);
 
     try {
-      const favoritos = await firstValueFrom(
-        this.http.get<Favorito[]>(`${this.apiUrl}/favoritos`)
+      const { favoritos, vuelos } = await firstValueFrom(
+        this.favoritoService.obtenerFavoritosConVuelos()
       );
-
-      const vuelos = await Promise.all(
-        favoritos.map(async (favorito) => {
-          try {
-            return await firstValueFrom(
-              this.http.get<Vuelo>(`${this.apiUrl}/vuelos/${favorito.vueloId}`)
-            );
-          } catch {
-            return null;
-          }
-        })
-      );
-
       this.favoritos.set(favoritos);
       this.vuelos.set(vuelos);
 
     } catch (error: any) {
       console.error('Error cargando favoritos', error);
-      // Si el backend manda un mensaje, se muestra tal cual; si no, la clave de traducción
-      this.mensaje.set(error.error?.message || 'favorites.messages.loadError');
-      this.tipoMensaje.set('error');
+      this.mostrarError(error, 'favorites.messages.loadError');
     } finally {
       this.cargando.set(false);
     }
@@ -77,21 +58,17 @@ export class Favoritos implements OnInit {
 
   async eliminarFavorito(favoritoId: number): Promise<void> {
     try {
-      await firstValueFrom(
-        this.http.delete(`${this.apiUrl}/favoritos/${favoritoId}`)
-      );
+      await firstValueFrom(this.favoritoService.eliminarFavorito(favoritoId));
 
       // Lo saco de la lista local sin volver a pedir todo al backend
       const indice = this.favoritos().findIndex(f => f.id === favoritoId);
       this.favoritos.update(lista => lista.filter((_, i) => i !== indice));
       this.vuelos.update(lista => lista.filter((_, i) => i !== indice));
 
-      this.mensaje.set('favorites.messages.removed');
-      this.tipoMensaje.set('success');
+      this.mostrarExito('favorites.messages.removed');
 
     } catch (error: any) {
-      this.mensaje.set(error.error?.message || 'favorites.messages.removeError');
-      this.tipoMensaje.set('error');
+      this.mostrarError(error, 'favorites.messages.removeError');
     }
   }
 
@@ -102,15 +79,24 @@ export class Favoritos implements OnInit {
       await firstValueFrom(
         this.carritoService.agregarItem(vueloId, 1, this.claseDefault)
       );
-
-      this.mensaje.set('favorites.messages.addedToCart');
-      this.tipoMensaje.set('success');
+      this.mostrarExito('favorites.messages.addedToCart');
 
     } catch (error: any) {
-      this.mensaje.set(error.error?.message || 'favorites.messages.cartError');
-      this.tipoMensaje.set('error');
+      this.mostrarError(error, 'favorites.messages.cartError');
     } finally {
       this.agregandoId.set(null);
     }
+  }
+
+  // Helpers de mensajes
+  private mostrarExito(clave: string): void {
+    this.mensaje.set(clave);
+    this.tipoMensaje.set('success');
+  }
+
+  private mostrarError(error: any, claveDefault: string): void {
+    // Si el backend manda un mensaje, se muestra tal cual; si no, la clave de traducción
+    this.mensaje.set(error?.error?.message || claveDefault);
+    this.tipoMensaje.set('error');
   }
 }
