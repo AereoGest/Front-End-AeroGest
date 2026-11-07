@@ -409,3 +409,47 @@
 .toast.error {
   border-left-color: var(--danger);
 }
+
+
+/* Aviso de check-in realizado dentro del detalle */
+.detalle-exito {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--success-border);
+  border-radius: var(--radius-md);
+  background: var(--success-soft);
+  color: var(--success);
+  animation: fadeInUp 0.35s ease both;
+}
+.detalle-exito strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+}
+.detalle-exito p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.detalle-exito-icono {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--success);
+  color: var(--bg-elevated);
+  font-weight: 700;
+}
+
+/* Marca de asiento asignado por el sistema */
+.pasaje-auto {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-subtle);
+}

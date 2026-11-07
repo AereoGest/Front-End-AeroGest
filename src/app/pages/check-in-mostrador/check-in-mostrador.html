@@ -1,0 +1,155 @@
+<section class="checkin">
+  <header class="checkin-header">
+    <span class="section-eyebrow">{{ 'counterCheckin.eyebrow' | translate }}</span>
+    <h2 class="checkin-title">{{ 'counterCheckin.title' | translate }}</h2>
+    <p class="checkin-ayuda">{{ 'counterCheckin.help' | translate }}</p>
+  </header>
+
+  @if (!resultado()) {
+    <form [formGroup]="form" (ngSubmit)="buscar()" class="checkin-buscador">
+      <div class="field">
+        <input
+          id="codigoReserva"
+          class="field-input"
+          formControlName="codigoReserva"
+          placeholder="AC-2026-XXXX"
+          autocomplete="off"
+          [attr.aria-invalid]="form.controls.codigoReserva.touched && form.controls.codigoReserva.invalid"
+        />
+        <label class="field-label" for="codigoReserva">{{ 'myBookings.bookingCode' | translate }}</label>
+        @if (form.controls.codigoReserva.touched && form.controls.codigoReserva.invalid) {
+          <p class="field-error">{{ 'counterCheckin.codeRequired' | translate }}</p>
+        }
+      </div>
+
+      <div class="field">
+        <input
+          id="documento"
+          class="field-input"
+          formControlName="documento"
+          placeholder="12345678"
+          autocomplete="off"
+          [attr.aria-invalid]="form.controls.documento.touched && form.controls.documento.invalid"
+        />
+        <label class="field-label" for="documento">{{ 'counterCheckin.document' | translate }}</label>
+        @if (form.controls.documento.touched && form.controls.documento.invalid) {
+          <p class="field-error">{{ 'counterCheckin.documentRequired' | translate }}</p>
+        }
+      </div>
+
+      <button type="submit" class="btn btn-dark checkin-buscar" [disabled]="cargando()">
+        {{ (cargando() && !reserva() ? 'counterCheckin.searching' : 'counterCheckin.search') | translate }}
+      </button>
+    </form>
+  }
+
+  @if (error()) {
+    <div class="checkin-alerta checkin-alerta--error" role="alert">{{ error() }}</div>
+  }
+
+  @if (reserva(); as r) {
+    @if (!resultado()) {
+      <article class="checkin-card">
+        <header class="checkin-card-header">
+          <div>
+            <span class="checkin-label">{{ 'myBookings.booking' | translate }}</span>
+            <strong class="checkin-codigo">{{ r.codigoReserva }}</strong>
+          </div>
+          <span [class]="'checkin-estado checkin-estado--' + r.estado.toLowerCase()">
+            @switch (r.estado) {
+              @case ('CONFIRMADO') { {{ 'myBookings.statusConfirmed' | translate }} }
+              @case ('CANCELADA') { {{ 'myBookings.statusCanceled' | translate }} }
+              @default { {{ 'myBookings.statusPending' | translate }} }
+            }
+          </span>
+        </header>
+
+        <p class="checkin-titular">
+          <span class="checkin-label">{{ 'counterCheckin.holder' | translate }}</span> {{ r.titular }}
+        </p>
+
+        <div class="checkin-tabla-wrap">
+          <table class="checkin-tabla">
+            <thead>
+              <tr>
+                <th>{{ 'myBookings.passenger' | translate }}</th>
+                <th>{{ 'booking.docNumber' | translate }}</th>
+                <th>{{ 'seats.progressFlight' | translate }}</th>
+                <th>{{ 'flights.departure' | translate }}</th>
+                <th>{{ 'seats.progressSeat' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of r.pasajes; track p.pasajeId) {
+                <tr>
+                  <td>{{ p.pasajero }}</td>
+                  <td>{{ p.documento }}</td>
+                  <td>{{ p.origen }} → {{ p.destino }}</td>
+                  <td>{{ p.fechaSalida | date: 'dd/MM/yyyy' }} {{ p.horaSalida.slice(0, 5) }}</td>
+                  <td>
+                    @if (p.asiento) {
+                      <span class="checkin-asiento">{{ p.asiento }}</span>
+                    } @else {
+                      <span class="checkin-pendiente">{{ 'counterCheckin.assignOnConfirm' | translate }}</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (motivoNoDisponible(); as motivo) {
+          <div class="checkin-alerta checkin-alerta--aviso">{{ motivo | translate }}</div>
+        }
+
+        <footer class="checkin-acciones">
+          <button type="button" class="btn" (click)="nuevoCheckin()">{{ 'common.cancel' | translate }}</button>
+          <button type="button" class="btn btn-dark" (click)="confirmar()" [disabled]="!puedeConfirmar() || cargando()">
+            {{ (cargando() ? 'counterCheckin.confirming' : 'myBookings.confirmCheckin') | translate }}
+          </button>
+        </footer>
+      </article>
+    }
+  }
+
+  @if (resultado(); as res) {
+    <article class="checkin-card checkin-card--exito">
+      <header class="checkin-card-header">
+        <div>
+          <span class="checkin-label">{{ 'counterCheckin.done' | translate }}</span>
+          <strong class="checkin-codigo">{{ reserva()?.codigoReserva }}</strong>
+        </div>
+        <span class="checkin-fecha">{{ res.fechaCheckIn | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </header>
+
+      <div class="checkin-tabla-wrap">
+        <table class="checkin-tabla">
+          <thead>
+            <tr>
+              <th>{{ 'myBookings.passenger' | translate }}</th>
+              <th>{{ 'seats.progressSeat' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of res.pasajes; track p.pasajeId) {
+              <tr>
+                <td>{{ p.pasajero }}</td>
+                <td>
+                  <span class="checkin-asiento">{{ p.asiento }}</span>
+                  @if (p.asignadoAutomaticamente) {
+                    <span class="checkin-auto">{{ 'myBookings.autoAssigned' | translate }}</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="checkin-acciones">
+        <button type="button" class="btn btn-dark" (click)="nuevoCheckin()">{{ 'counterCheckin.newCheckin' | translate }}</button>
+      </footer>
+    </article>
+  }
+</section>

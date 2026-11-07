@@ -17,14 +17,7 @@
         <dt>{{ 'myBookings.completedFlights' | translate }}</dt>
         <dd></dd>
       </div>
-      <div class="stat animate delay-2">
-        <dt>{{ 'myBookings.miles' | translate }}</dt>
-        <dd></dd>
-      </div>
-      <div class="stat animate delay-3">
-        <dt>{{ 'myBookings.tier' | translate }}</dt>
-        <dd></dd>
-      </div>
+  
     </dl>
 
     <nav class="search-card-header" aria-label="Tipo de reservas">
@@ -127,7 +120,7 @@
                 @if (reserva.estadoReserva === 'CONFIRMADO') {
                   <button type="button" class="btn btn-dark"
                     [disabled]="!!reserva.fechaCheckIn || checkInEnCurso() === reserva.id"
-                    (click)="hacerCheckIn(reserva)">
+                    (click)="abrirCheckIn(reserva)">
                     {{ (reserva.fechaCheckIn ? 'myBookings.checkinDone' : 'myBookings.checkin') | translate }}
                   </button>
                 }
@@ -141,16 +134,26 @@
   </div>
 </section>
 
-<dialog #detalle class="detalle" aria-labelledby="detalle-titulo" (close)="seleccionada.set(null)">
+<dialog #detalle class="detalle print-area" aria-labelledby="detalle-titulo" (close)="alCerrarDetalle()">
   @if (seleccionada(); as reserva) {
     <header class="detalle-header">
-      <h2 id="detalle-titulo">{{ 'myBookings.bookingItem' | translate:{ id: reserva.id } }}</h2>
-      <button type="button" class="detalle-cerrar" [attr.aria-label]="'flights.close' | translate" (click)="cerrarDetalle()">×</button>
+      <h2 id="detalle-titulo">{{ 'myBookings.booking' | translate }} {{ codigo(reserva) }}</h2>
+      <button type="button" class="detalle-cerrar no-print" [attr.aria-label]="'flights.close' | translate" (click)="cerrarDetalle()">×</button>
     </header>
+
+      @if (reserva.fechaCheckIn)  {
+      <div class="detalle-exito no-print" role="status">
+        <span class="detalle-exito-icono" aria-hidden="true">✓</span>
+        <div>
+          <strong>{{ 'myBookings.checkinSuccessTitle' | translate }}</strong>
+          <p>{{ 'myBookings.checkinSuccessSubtitle' | translate }}</p>
+        </div>
+      </div>
+    }
 
     <p class="detalle-codigo">
       <span>{{ 'myBookings.bookingCode' | translate }}</span>
-      <strong>#{{ reserva.id }}</strong>
+      <strong>{{ codigo(reserva) }}</strong>
     </p>
 
     <dl class="detalle-datos">
@@ -205,6 +208,9 @@
                   <dd>
                     @if (pasaje.asiento) {
                       <strong>{{ pasaje.asiento.codigo }}</strong>
+                      @if (asientosAutomaticos().includes(pasaje.id)) {
+                        <small class="pasaje-auto">{{ 'myBookings.autoAssigned' | translate }}</small>
+                      }
                     } @else {
                       <span class="pasaje-pendiente">{{ 'myBookings.seatPending' | translate }}</span>
                     }
@@ -235,14 +241,28 @@
       </section>
     }
 
-    <div class="detalle-acciones">
-      <button type="button" class="btn btn-primary" (click)="proximamente('Boarding pass')">{{ 'myBookings.boardingPass' | translate }}</button>
+    <div class="detalle-acciones no-print">
+       @if (reserva.fechaCheckIn) {
+        <button type="button" class="btn btn-primary" (click)="imprimirPasajes()">
+          {{ 'myBookings.print' | translate }}
+        </button>
+      }
       @if (reserva.estadoReserva !== 'CANCELADA') {
         <button type="button" class="btn btn-dark" (click)="cancelarReserva(reserva)">{{ 'myBookings.cancelBooking' | translate }}</button>
       }
     </div>
   }
 </dialog>
+
+@if (reservaCheckin(); as r) {
+  <app-checkin-confirmacion
+    [reserva]="r"
+    [cargando]="checkInEnCurso() === r.id"
+    [error]="errorCheckin()"
+    (confirmar)="confirmarCheckIn()"
+    (cancelar)="cerrarConfirmacion()"
+  />
+}
 
 @if (mensajeExito()) {
   <p class="toast" role="status">{{ mensajeExito() }}</p>

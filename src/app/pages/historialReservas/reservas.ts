@@ -1,10 +1,11 @@
 import { Component, ElementRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { EstadoReserva, PasajeReserva, Reserva } from '../../Models/Reserva';
+import { CheckInResponse, EstadoReserva, PasajeReserva, Reserva } from '../../Models/Reserva';
 import { ReservaService } from '../../services/reservaService';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { I18nService } from '../../services/i18n';
+import { Checkinonline } from '../check-in-online/check-in-online';
 
 const ESTADOS_ACTIVOS: EstadoReserva[] = ['CONFIRMADO', 'PROCESANDO', 'ACTIVO'];
 
@@ -23,7 +24,7 @@ const ETIQUETAS_ESTADO: Record<EstadoReserva, string> = {
 @Component({
   selector: 'app-reservas',
   standalone: true,
-  imports: [RouterLink, TranslatePipe],
+  imports: [RouterLink, TranslatePipe, Checkinonline],
   templateUrl: './reservas.html',
   styleUrl: './reservas.css',
 })
@@ -45,8 +46,15 @@ export class Reservas implements OnInit {
   protected readonly fechaHasta = signal('');
   protected readonly orden = signal<Orden>('recientes');
   protected readonly seleccionada = signal<Reserva | null>(null);
+
+  // ── Check-in ──
   // id de la reserva cuyo check-in se está procesando (para deshabilitar el botón)
   protected readonly checkInEnCurso = signal<number | null>(null);
+  // Reserva para la que está abierto el modal de confirmación de check-in
+  protected readonly reservaCheckin = signal<Reserva | null>(null);
+  protected readonly errorCheckin = signal('');
+  // Pasajes a los que el sistema les asignó asiento al azar en el último check-in
+  protected readonly asientosAutomaticos = signal<number[]>([]);
 
   protected readonly cantidadActivas = computed(
     () => this.reservas().filter((reserva) => ESTADOS_ACTIVOS.includes(reserva.estadoReserva)).length
@@ -72,10 +80,11 @@ export class Reservas implements OnInit {
     const filtradas = this.reservas()
       // Pestaña: activas / historial (canceladas)
       .filter((reserva) => (reserva.estadoReserva === 'CANCELADA') === verHistorial)
-      // Búsqueda: número de reserva, estado del backend o etiqueta traducida
+      // Búsqueda: código o número de reserva, estado del backend o etiqueta traducida
       .filter((reserva) =>
         !texto ||
         String(reserva.id).includes(texto) ||
+        (reserva.codigoReserva ?? '').toLowerCase().includes(texto) ||
         reserva.estadoReserva.toLowerCase().includes(texto) ||
         this.etiquetaEstado(reserva.estadoReserva).toLowerCase().includes(texto)
       )
@@ -135,6 +144,8 @@ export class Reservas implements OnInit {
     this.orden.set('recientes');
   }
 
+  // ===================== Detalle =====================
+
   protected abrirDetalle(reserva: Reserva): void {
     this.seleccionada.set(reserva);
     this.detalle().nativeElement.showModal();
@@ -142,6 +153,17 @@ export class Reservas implements OnInit {
 
   protected cerrarDetalle(): void {
     this.detalle().nativeElement.close();
+  }
+
+  // Se llama cuando el <dialog> del detalle se cierra, por cualquier motivo
+  protected alCerrarDetalle(): void {
+    this.seleccionada.set(null);
+    this.asientosAutomaticos.set([]);
+  }
+
+  // Imprime solo el detalle de la reserva (ver estilos de impresión en styles.css)
+  protected imprimirPasajes(): void {
+    window.print();
   }
 
   protected cancelarReserva(reserva: Reserva): void {
@@ -163,34 +185,66 @@ export class Reservas implements OnInit {
     });
   }
 
-  protected hacerCheckIn(reserva: Reserva): void {
-    if (reserva.fechaCheckIn || this.checkInEnCurso() !== null) return;
+  // ===================== Check-in online =====================
 
+  protected abrirCheckIn(reserva: Reserva): void {
+    if (reserva.fechaCheckIn || this.checkInEnCurso() !== null) return;
     this.limpiarMensajes();
+    this.errorCheckin.set('');
+    this.reservaCheckin.set(reserva);
+  }
+
+  protected cerrarConfirmacion(): void {
+    if (this.checkInEnCurso() !== null) return; // no cerrar mientras se procesa
+    this.reservaCheckin.set(null);
+  }
+
+  protected confirmarCheckIn(): void {
+    const reserva = this.reservaCheckin();
+    if (!reserva || this.checkInEnCurso() !== null) return;
+
+    this.errorCheckin.set('');
     this.checkInEnCurso.set(reserva.id);
 
     this.reservaService.checkIn(reserva.id).subscribe({
       next: (respuesta) => {
-        // Marcar la reserva como "check-in hecho" sin recargar toda la lista
-        this.reservas.update((reservas) =>
-          reservas.map((r) => (r.id === reserva.id ? { ...r, fechaCheckIn: respuesta.fechaCheckIn } : r))
-        );
+        const actualizada = this.aplicarCheckIn(reserva, respuesta);
+        this.reservas.update((reservas) => reservas.map((r) => (r.id === reserva.id ? actualizada : r)));
 
-        const asientos = respuesta.pasajes.map((p) => p.asiento).join(', ');
-        const texto = this.i18n.isSpanish()
-          ? `Check-in realizado · Asiento${respuesta.pasajes.length > 1 ? 's' : ''}: ${asientos}`
-          : `Check-in completed · Seat${respuesta.pasajes.length > 1 ? 's' : ''}: ${asientos}`;
-        this.mostrarMensaje(this.mensajeExito, texto);
+        this.checkInEnCurso.set(null);
+        this.reservaCheckin.set(null);
+
+        // Abrir el detalle con los asientos ya asignados
+        this.asientosAutomaticos.set(
+          respuesta.pasajes.filter((p) => p.asignadoAutomaticamente).map((p) => p.pasajeId)
+        );
+        this.abrirDetalle(actualizada);
       },
       error: (error: HttpErrorResponse) => {
-        this.mostrarMensaje(this.mensajeError, error.error?.message || this.i18n.t('common.error'));
+        this.checkInEnCurso.set(null);
+        this.errorCheckin.set(error.error?.message || this.i18n.t('common.error'));
       }
-    }).add(() => this.checkInEnCurso.set(null));
+    });
   }
 
-  protected proximamente(funcion: string): void {
-    this.limpiarMensajes();
-    this.mostrarMensaje(this.mensajeExito, `${funcion} - ${this.i18n.isSpanish() ? 'Próximamente disponible' : 'Coming soon'}`);
+  // Copia en la reserva la fecha de check-in y los asientos que devolvió el back.
+  // El id 0 del asiento no se usa (el detalle solo muestra el código); al recargar viene el real.
+  private aplicarCheckIn(reserva: Reserva, respuesta: CheckInResponse): Reserva {
+    return {
+      ...reserva,
+      fechaCheckIn: respuesta.fechaCheckIn,
+      pasajes: reserva.pasajes?.map((pasaje) => {
+        const r = respuesta.pasajes.find((x) => x.pasajeId === pasaje.id);
+        if (!r?.asiento || pasaje.asiento) return pasaje;
+        return { ...pasaje, asiento: { id: 0, codigo: r.asiento, precioExtra: null } };
+      }),
+    };
+  }
+
+  // ===================== Formato =====================
+
+  protected codigo(reserva: Reserva): string {
+    return reserva.codigoReserva ?? `#${reserva.id}`;
   }
 
   protected etiquetaEstado(estado: EstadoReserva): string {
@@ -246,6 +300,8 @@ export class Reservas implements OnInit {
       .map((e) => `${nombres[e.tipo] ?? e.tipo}${e.peso ? ` (${e.peso} kg)` : ''}`)
       .join(', ');
   }
+
+  // ===================== Auxiliares =====================
 
   // Fecha local en formato yyyy-mm-dd, para comparar con los <input type="date">
   private diaReserva(fecha: string): string {

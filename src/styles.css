@@ -787,3 +787,46 @@ select.field-input + .field-label,
     transition-duration: 0.01ms;
   }
 }
+
+/* ==========================================================================
+   Impresión: solo se imprime lo que está dentro de .print-area
+   ========================================================================== */
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .no-print {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #ffffff !important;
+  }
+
+  /* El <dialog> del detalle: sin límite de alto ni scroll, para que entren todos los pasajes */
+  dialog.print-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    overflow: visible;
+    border: none;
+    box-shadow: none;
+  }
+  dialog::backdrop {
+    background: none;
+  }
+  .print-area .pasaje {
+    break-inside: avoid;
+  }
+}

@@ -1,0 +1,53 @@
+<div class="cc-overlay" (click)="cancelar.emit()">
+  <div class="cc-modal" role="dialog" aria-modal="true" aria-labelledby="cc-titulo" (click)="$event.stopPropagation()">
+    <button type="button" class="cc-cerrar" [attr.aria-label]="'flights.close' | translate" (click)="cancelar.emit()">×</button>
+
+    <span class="section-eyebrow">{{ 'myBookings.checkinEyebrow' | translate }}</span>
+    <h2 id="cc-titulo" class="cc-titulo">{{ 'myBookings.checkinConfirmTitle' | translate }}</h2>
+
+    @if (vuelo(); as v) {
+      <div class="cc-vuelo">
+        <div>
+          <strong>{{ v.aeropuertoOrigen.codigoIata }}</strong>
+          <span>{{ v.aeropuertoOrigen.ciudad }}</span>
+        </div>
+        <span class="cc-flecha" aria-hidden="true">✈</span>
+        <div>
+          <strong>{{ v.aeropuertoDestino.codigoIata }}</strong>
+          <span>{{ v.aeropuertoDestino.ciudad }}</span>
+        </div>
+        <p class="cc-fecha">{{ formatearFechaVuelo(v.fechaSalida) }} · {{ v.horaSalida.slice(0, 5) }}</p>
+      </div>
+    }
+
+    <ul class="cc-pasajeros">
+      @for (p of pasajes(); track p.id) {
+        <li>
+          <span>{{ p.nombre }} {{ p.apellido }}</span>
+          @if (p.asiento) {
+            <span class="cc-asiento">{{ p.asiento.codigo }}</span>
+          } @else {
+            <span class="cc-azar">{{ 'myBookings.randomSeat' | translate }}</span>
+          }
+        </li>
+      }
+    </ul>
+
+    @if (haySinAsiento()) {
+      <div class="cc-aviso">{{ 'myBookings.randomSeatWarning' | translate }}</div>
+    }
+
+    @if (error()) {
+      <div class="cc-error" role="alert">{{ error() }}</div>
+    }
+
+    <div class="cc-acciones">
+      <button type="button" class="btn" [disabled]="cargando()" (click)="cancelar.emit()">
+        {{ 'myBookings.cancel' | translate }}
+      </button>
+      <button type="button" class="btn btn-dark" [disabled]="cargando()" (click)="confirmar.emit()">
+        {{ (cargando() ? 'myBookings.processing' : 'myBookings.confirmCheckin') | translate }}
+      </button>
+    </div>
+  </div>
+</div>
