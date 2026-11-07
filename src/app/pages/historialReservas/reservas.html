@@ -124,7 +124,13 @@
             </time>
             @if (reserva.estadoReserva !== 'CANCELADA') {
               <div class="booking-actions">
-                <button type="button" class="btn btn-dark" (click)="proximamente('Check-in')">{{ 'myBookings.checkin' | translate }}</button>
+                @if (reserva.estadoReserva === 'CONFIRMADO') {
+                  <button type="button" class="btn btn-dark"
+                    [disabled]="!!reserva.fechaCheckIn || checkInEnCurso() === reserva.id"
+                    (click)="hacerCheckIn(reserva)">
+                    {{ (reserva.fechaCheckIn ? 'myBookings.checkinDone' : 'myBookings.checkin') | translate }}
+                  </button>
+                }
                 <button type="button" class="btn btn-dark" (click)="abrirDetalle(reserva)">{{ 'myBookings.view' | translate }}</button>
               </div>
             }

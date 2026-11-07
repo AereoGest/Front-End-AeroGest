@@ -1,5 +1,3 @@
-
-
 import type { TranslationKey } from './es';
 
 export const en: Record<TranslationKey, string> = {
@@ -338,6 +336,7 @@ export const en: Record<TranslationKey, string> = {
   'myBookings.bookingItem': 'Booking #{id}',
   'myBookings.ticketsCount': '{count} ticket(s)',
   'myBookings.checkin': 'Check-in',
+  'myBookings.checkinDone': 'Checked in',
   'myBookings.view': 'View',
   'myBookings.bookingCode': 'Booking code',
   'myBookings.passenger': 'Passenger',
