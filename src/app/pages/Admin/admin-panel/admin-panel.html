@@ -53,10 +53,7 @@
             </div>
 
             <div class="admin-module-actions">
-              <button
-                type="button"
-                class="btn btn-dark"
-                (click)="seleccionarSeccion(modulo.id)">
+              <button type="button" class="btn btn-dark" (click)="seleccionarSeccion(modulo.id)">
                 {{ modulo.ctaKey | translate }}
               </button>
               @if (modulo.rutaDirecta) {
@@ -68,6 +65,7 @@
           </article>
         }
       </div>
+
     } @else if (seccionActiva() === 'VUELOS') {
       <div class="admin-embedded-header">
         <button type="button" class="btn-back-overview" (click)="seleccionarSeccion('RESUMEN')">
@@ -78,6 +76,7 @@
         </a>
       </div>
       <app-vuelos-admin></app-vuelos-admin>
+
     } @else if (seccionActiva() === 'RESERVAS') {
       <div class="admin-embedded-header">
         <button type="button" class="btn-back-overview" (click)="seleccionarSeccion('RESUMEN')">
@@ -88,6 +87,7 @@
         </a>
       </div>
       <app-reservas-admin></app-reservas-admin>
+
     } @else if (seccionActiva() === 'PASAJES') {
       <div class="admin-embedded-header">
         <button type="button" class="btn-back-overview" (click)="seleccionarSeccion('RESUMEN')">
@@ -98,28 +98,17 @@
         </a>
       </div>
       <app-pasajes-admin></app-pasajes-admin>
-    } @else if (moduloSeleccionado(); as mod) {
+
+    } @else if (seccionActiva() === 'ASIGNACIONES') {
       <div class="admin-embedded-header">
         <button type="button" class="btn-back-overview" (click)="seleccionarSeccion('RESUMEN')">
           {{ 'adminPanel.backToOverview' | translate }}
         </button>
+        <a routerLink="/asignacionesAdmin" class="admin-module-link">
+          {{ 'adminPanel.openSection' | translate }}
+        </a>
       </div>
-
-      <article class="admin-module-stage" role="region" [attr.aria-label]="mod.tituloKey | translate">
-        <span class="section-eyebrow">{{ 'adminPanel.activeSection' | translate }}</span>
-        <h2 class="section-title">{{ mod.tituloKey | translate }}</h2>
-        <p class="section-subtitle">{{ mod.descripcionKey | translate }}</p>
-
-        <div class="admin-stage-box">
-          <strong>{{ 'adminPanel.moduleReadyTitle' | translate }}</strong>
-          <p>{{ 'adminPanel.moduleReadyDesc' | translate }}</p>
-          <div class="admin-stage-actions">
-            <button type="button" class="btn btn-dark" (click)="seleccionarSeccion('VUELOS')">
-              {{ 'adminPanel.flights.cta' | translate }}
-            </button>
-          </div>
-        </div>
-      </article>
+      <app-asignaciones-admin></app-asignaciones-admin>
     }
   </div>
 </section>

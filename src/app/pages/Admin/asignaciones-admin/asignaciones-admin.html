@@ -1,0 +1,132 @@
+<section class="admin-asig container">
+  <header class="admin-asig__header">
+    <span class="section-eyebrow">{{ 'adminAssignments.eyebrow' | translate }}</span>
+    <h1 class="section-title">{{ 'adminAssignments.title' | translate }}</h1>
+    <p class="admin-asig__subtitle">{{ 'adminAssignments.subtitle' | translate }}</p>
+  </header>
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <div class="field filtros__busqueda">
+      <input id="f-busqueda" class="field-input" type="text"
+             [value]="busqueda()"
+             (input)="busqueda.set(valor($event))"
+             [placeholder]="'adminAssignments.searchPlaceholder' | translate" />
+      <label class="field-label" for="f-busqueda">{{ 'adminAssignments.search' | translate }}</label>
+    </div>
+
+    <div class="field">
+      <select id="f-empleado" class="field-input" [value]="empleadoId() ?? ''" (change)="onEmpleado($event)">
+        <option value="">{{ 'adminAssignments.all' | translate }}</option>
+        @for (e of empleados(); track e.id) {
+          <option [value]="e.id">{{ e.nombre }}</option>
+        }
+      </select>
+      <label class="field-label" for="f-empleado">{{ 'adminAssignments.employee' | translate }}</label>
+    </div>
+
+    <div class="field">
+      <select id="f-rol" class="field-input" [value]="rol()" (change)="rol.set(valor($event))">
+        <option value="">{{ 'adminAssignments.all' | translate }}</option>
+        @for (r of roles; track r) {
+          <option [value]="r">{{ rolKey(r) | translate }}</option>
+        }
+      </select>
+      <label class="field-label" for="f-rol">{{ 'adminAssignments.role' | translate }}</label>
+    </div>
+
+    <div class="field">
+      <select id="f-estado" class="field-input" [value]="estado()" (change)="estado.set(valor($event))">
+        <option value="">{{ 'adminAssignments.all' | translate }}</option>
+        @for (e of estados; track e) {
+          <option [value]="e">{{ estadoKey(e) | translate }}</option>
+        }
+      </select>
+      <label class="field-label" for="f-estado">{{ 'adminAssignments.flightStatus' | translate }}</label>
+    </div>
+
+    <div class="field">
+      <input id="f-desde" class="field-input" type="date" [value]="desde()" (change)="desde.set(valor($event))" />
+      <label class="field-label" for="f-desde">{{ 'adminAssignments.from' | translate }}</label>
+    </div>
+
+    <div class="field">
+      <input id="f-hasta" class="field-input" type="date" [value]="hasta()" (change)="hasta.set(valor($event))" />
+      <label class="field-label" for="f-hasta">{{ 'adminAssignments.to' | translate }}</label>
+    </div>
+
+    @if (hayFiltros()) {
+      <button type="button" class="btn filtros__limpiar" (click)="limpiarFiltros()">
+        {{ 'adminAssignments.clearFilters' | translate }}
+      </button>
+    }
+  </div>
+
+  <!-- Pestañas -->
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" class="tab" [class.active]="pestania() === 'proximas'" (click)="pestania.set('proximas')">
+      {{ 'adminAssignments.tabUpcoming' | translate }} <span class="tab__count">{{ proximas().length }}</span>
+    </button>
+    <button type="button" role="tab" class="tab" [class.active]="pestania() === 'historial'" (click)="pestania.set('historial')">
+      {{ 'adminAssignments.tabHistory' | translate }} <span class="tab__count">{{ historial().length }}</span>
+    </button>
+    <button type="button" role="tab" class="tab" [class.active]="pestania() === 'todas'" (click)="pestania.set('todas')">
+      {{ 'adminAssignments.tabAll' | translate }} <span class="tab__count">{{ filtradas().length }}</span>
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <p class="estado-msg">{{ 'adminAssignments.loading' | translate }}</p>
+  } @else if (error()) {
+    <div class="estado-msg">
+      <p class="mensaje-error">{{ 'adminAssignments.loadError' | translate }}</p>
+      <button type="button" class="btn btn-dark" (click)="cargar()">{{ 'adminAssignments.retry' | translate }}</button>
+    </div>
+  } @else if (visibles().length === 0) {
+    <p class="estado-msg">{{ 'adminAssignments.noResults' | translate }}</p>
+  } @else {
+    <div class="tabla-wrap">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>{{ 'adminAssignments.colFlight' | translate }}</th>
+            <th>{{ 'adminAssignments.colRoute' | translate }}</th>
+            <th>{{ 'adminAssignments.colDeparture' | translate }}</th>
+            <th>{{ 'adminAssignments.colEmployee' | translate }}</th>
+            <th>{{ 'adminAssignments.colRole' | translate }}</th>
+            <th>{{ 'adminAssignments.colStatus' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of visibles(); track a.id) {
+            <tr [class.fila--cancelada]="a.vuelo.estado === 'CANCELADO'">
+              <td>
+                <strong>#{{ a.vuelo.id }}</strong>
+                <small>{{ a.vuelo.avion.identificador }}</small>
+              </td>
+              <td>
+                <strong class="ruta">{{ a.vuelo.aeropuertoOrigen.codigoIata }} → {{ a.vuelo.aeropuertoDestino.codigoIata }}</strong>
+                <small>{{ a.vuelo.aeropuertoOrigen.ciudad }} – {{ a.vuelo.aeropuertoDestino.ciudad }}</small>
+              </td>
+              <td>
+                <strong>{{ salida(a) | date: 'dd/MM/yyyy' }}</strong>
+                <small>{{ hora(a.vuelo.horaSalida) }} → {{ hora(a.vuelo.horaLlegada) }}</small>
+              </td>
+              <td>
+                <strong>{{ nombreEmpleado(a) }}</strong>
+                <small>{{ a.empleado?.numeroIdentificador }}</small>
+              </td>
+              <td>
+                <span class="badge rol--{{ a.rolEmpleado.toLowerCase() }}">{{ rolKey(a.rolEmpleado) | translate }}</span>
+              </td>
+              <td>
+                <span class="badge estado--{{ a.vuelo.estado.toLowerCase() }}">{{ estadoKey(a.vuelo.estado) | translate }}</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="contador">{{ 'adminAssignments.resultsCount' | translate: { count: visibles().length } }}</p>
+  }
+</section>

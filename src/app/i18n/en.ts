@@ -17,6 +17,16 @@ export const en: Record<TranslationKey, string> = {
   'nav.langLabel': 'Language',
   'nav.userMenu': 'User menu',
   'nav.switchLang': 'Change language',
+  'nav.myAssignments': 'My assignments',
+  'nav.adminPanel': 'Admin panel',
+  'nav.roleLabel': 'Role',
+  'nav.adminAssignments': 'Assignments',
+
+  // User roles
+  'role.ROLE_ADMIN': 'Administrator',
+  'role.ROLE_EMPLEADO': 'Employee',
+  'role.ROLE_USUARIO': 'User',
+  'role.ROLE_INCOMPLETO': 'Incomplete profile',
 
   // Footer
   'footer.brandDesc': 'Connecting destinations and people. We fly with excellence, punctuality, and the service you deserve.',
@@ -39,7 +49,7 @@ export const en: Record<TranslationKey, string> = {
   'footer.privacy': 'Privacy',
   'footer.terms': 'Terms',
 
-  // Auth - Login & 2FA
+  // Auth (login, 2FA & registration)
   'auth.loginTitle': 'Sign',
   'auth.loginTitleEm': 'In',
   'auth.verifyCodeTitle': 'Verify',
@@ -64,8 +74,6 @@ export const en: Record<TranslationKey, string> = {
   'auth.verifyBtn': 'Verify code',
   'auth.verifying': 'Verifying...',
   'auth.backToLogin': 'Back to login',
-
-  // Auth - Registration
   'auth.registerTitle': 'Create',
   'auth.registerTitleEm': 'Account',
   'auth.registerSubtitle': 'Sign up in seconds and start earning miles.',
@@ -80,7 +88,7 @@ export const en: Record<TranslationKey, string> = {
   'auth.registerBtn': 'Sign Up',
   'auth.registering': 'Creating account...',
 
-  // Account Verification
+  // Account verification
   'verify.title': 'Account',
   'verify.titleEm': 'verification',
   'verify.subtitle': 'We are validating your email to activate your account.',
@@ -123,7 +131,7 @@ export const en: Record<TranslationKey, string> = {
   'profile.enable2FA': 'Enable 2FA',
   'profile.disable2FA': 'Disable 2FA',
 
-  // Forgot Password
+  // Forgot password
   'forgot.title': 'Recover',
   'forgot.titleEm': 'password',
   'forgot.subtitle': 'Enter your email address and we will send you instructions to reset your password.',
@@ -133,7 +141,7 @@ export const en: Record<TranslationKey, string> = {
   'forgot.success': 'If the email exists, you will receive instructions to reset your password.',
   'forgot.serverError': 'Could not process request. Please try again.',
 
-  // Reset Password
+  // Reset password
   'reset.title': 'Reset',
   'reset.titleEm': 'password',
   'reset.subtitle': 'Enter your new password to regain access to your account.',
@@ -150,7 +158,7 @@ export const en: Record<TranslationKey, string> = {
   'reset.submitting': 'Resetting...',
   'reset.remembered': 'Remember your password?',
 
-  // Home Page
+  // Home page
   'home.heroEyebrow': 'The airline that takes you further',
   'home.heroTitle': 'Fly towards your next',
   'home.heroTitleEm': 'adventure',
@@ -186,7 +194,7 @@ export const en: Record<TranslationKey, string> = {
   'home.whereToSubtitle': 'Explore our most popular destinations at the best rates',
   'home.from': 'From',
 
-  // Flights (Vuelos)
+  // Flight search & list
   'flights.searchTitle': 'Flight search',
   'flights.findFlight': 'Find your flight',
   'flights.searchSubtitle': 'Filter by origin, destination and departure date',
@@ -212,7 +220,7 @@ export const en: Record<TranslationKey, string> = {
   'flights.duration': 'Duration',
   'flights.close': 'Close',
 
-  // Shopping Cart (Carrito)
+  // Cart
   'cart.title': 'My Cart',
   'cart.subtitle': 'Review your selected flights before confirming',
   'cart.clearCart': 'Clear cart',
@@ -228,7 +236,7 @@ export const en: Record<TranslationKey, string> = {
   'cart.total': 'Total',
   'cart.checkout': 'Book now',
 
-  // Seat Selection (Asientos)
+  // Seat selection
   'seats.progressFlight': 'Flight',
   'seats.progressSeat': 'Seat',
   'seats.progressPassengers': 'Passengers',
@@ -248,7 +256,7 @@ export const en: Record<TranslationKey, string> = {
   'seats.total': 'Total',
   'seats.continue': 'Continue booking →',
 
-  // Booking / Checkout (Reserva)
+  // Booking / checkout
   'booking.title': 'Complete your booking',
   'booking.loading': 'Loading your booking...',
   'booking.cartEmpty': 'Your cart is empty. Choose a flight to continue.',
@@ -287,7 +295,7 @@ export const en: Record<TranslationKey, string> = {
   'booking.birthDateFuture': 'Enter a valid date of birth.',
   'booking.emailInvalid': 'Email is not valid.',
 
-  // Payment (Pago)
+  // Payment
   'payment.title': 'Pay for your booking',
   'payment.backToPassengers': '← Back to passengers',
   'payment.billingInfo': 'Billing information',
@@ -317,7 +325,7 @@ export const en: Record<TranslationKey, string> = {
   'payment.viewBookings': 'View my bookings',
   'payment.home': 'Home',
 
-  // My Bookings (Reservas)
+  // My bookings
   'myBookings.title': 'My bookings',
   'myBookings.subtitle': 'Manage your flights, download documents and check-in online',
   'myBookings.newBooking': '+ New booking',
@@ -376,28 +384,6 @@ export const en: Record<TranslationKey, string> = {
   'myBookings.checkinSuccessSubtitle': 'Your seats are ready. Use the Print button to print your tickets or save them as PDF.',
   'myBookings.autoAssigned': 'Automatically assigned',
 
-  // Admin panel - Flights (VuelosAdmin)
-  'adminFlights.eyebrow': 'Admin panel',
-  'adminFlights.title': 'Flight management',
-  'adminFlights.subtitle': 'Review active and inactive flights in the system',
-  'adminFlights.departureDate': 'Departure date',
-  'adminFlights.clearFilters': 'Clear filters',
-  'adminFlights.filterByStatus': 'Filter by status',
-  'adminFlights.tabActive': 'Active',
-  'adminFlights.tabInactive': 'Inactive',
-  'adminFlights.tabAll': 'All',
-  'adminFlights.loading': 'Loading flights...',
-  'adminFlights.loadError': 'Could not load flights. Please try again.',
-  'adminFlights.retry': 'Retry',
-  'adminFlights.noResults': 'No flights to show with these filters.',
-  'adminFlights.active': 'Active',
-  'adminFlights.inactive': 'Inactive',
-  'adminFlights.flightId': 'ID #{id}',
-  'adminFlights.flightDetail': 'Flight details #{id}',
-  'adminFlights.departureDateShort': 'Departure date',
-  'adminFlights.arrivalDateShort': 'Arrival date',
-  'adminFlights.price': 'Price',
-
   // Favorites
   'favorites.title': 'My Favorites',
   'favorites.subtitle': 'The flights you saved to keep an eye on',
@@ -440,24 +426,33 @@ export const en: Record<TranslationKey, string> = {
   'counterCheckin.connectionError': 'Could not connect to the server.',
   'counterCheckin.forbidden': "You don't have permission to check in other passengers.",
 
-  // Common & Utilities
-  'common.loading': 'Loading...',
-  'common.error': 'An unexpected error occurred.',
-  'common.success': 'Operation successful.',
-  'common.cancel': 'Cancel',
-  'common.confirm': 'Confirm',
-  'common.back': 'Back',
-  'common.save': 'Save',
-  'common.close': 'Close',
-
-    // My assignments (employee)
-  'nav.myAssignments': 'My assignments',
-  'nav.adminPanel': 'Admin panel',
-  'nav.roleLabel': 'Role',
-  'role.ROLE_ADMIN': 'Administrator',
-  'role.ROLE_EMPLEADO': 'Employee',
-  'role.ROLE_USUARIO': 'User',
-  'role.ROLE_INCOMPLETO': 'Incomplete profile',
+  // My assignments (employee)
+  'myAssignments.title': 'My assignments',
+  'myAssignments.subtitle': 'Flights you are scheduled to work on',
+  'myAssignments.loading': 'Loading assignments...',
+  'myAssignments.loadError': 'Could not load your assignments.',
+  'myAssignments.retry': 'Retry',
+  'myAssignments.nextFlight': 'Your next flight',
+  'myAssignments.tabUpcoming': 'Upcoming',
+  'myAssignments.tabHistory': 'History',
+  'myAssignments.emptyUpcoming': 'You have no assigned flights for now.',
+  'myAssignments.emptyHistory': 'You have no completed or canceled flights yet.',
+  'myAssignments.time': '{time}',
+  'myAssignments.departs': 'Departs {time}',
+  'myAssignments.arrives': 'Arrives {time}',
+  'myAssignments.flightNumber': 'Flight #{id}',
+  'myAssignments.inProgress': 'in progress',
+  'myAssignments.inMinutes': 'in {n} min',
+  'myAssignments.inHours': 'in {n} h',
+  'myAssignments.inDays': 'in {n} days',
+  'myAssignments.role.PILOTO': 'Pilot',
+  'myAssignments.role.COPILOTO': 'Co-pilot',
+  'myAssignments.role.AZAFATA': 'Flight attendant',
+  'myAssignments.status.PROGRAMADO': 'Scheduled',
+  'myAssignments.status.BOARDING': 'Boarding',
+  'myAssignments.status.ACTIVO': 'In flight',
+  'myAssignments.status.CANCELADO': 'Canceled',
+  'myAssignments.status.REPROGRAMADO': 'Rescheduled',
 
   // Admin panel (AdminPanel)
   'adminPanel.eyebrow': 'AeroGest Administration',
@@ -486,34 +481,30 @@ export const en: Record<TranslationKey, string> = {
   'adminPanel.assignmentFilters.cta': 'Explore assignments',
   'adminPanel.moduleReadyTitle': 'Administrative module ready',
   'adminPanel.moduleReadyDesc': 'Select a module to operate or use the direct access to flight management.',
-  'myAssignments.title': 'My assignments',
-  'myAssignments.subtitle': 'Flights you are scheduled to work on',
-  'myAssignments.loading': 'Loading assignments...',
-  'myAssignments.loadError': 'Could not load your assignments.',
-  'myAssignments.retry': 'Retry',
-  'myAssignments.nextFlight': 'Your next flight',
-  'myAssignments.tabUpcoming': 'Upcoming',
-  'myAssignments.tabHistory': 'History',
-  'myAssignments.emptyUpcoming': 'You have no assigned flights for now.',
-  'myAssignments.emptyHistory': 'You have no completed or canceled flights yet.',
-  'myAssignments.time': '{time}',
-  'myAssignments.departs': 'Departs {time}',
-  'myAssignments.arrives': 'Arrives {time}',
-  'myAssignments.flightNumber': 'Flight #{id}',
-  'myAssignments.inProgress': 'in progress',
-  'myAssignments.inMinutes': 'in {n} min',
-  'myAssignments.inHours': 'in {n} h',
-  'myAssignments.inDays': 'in {n} days',
-  'myAssignments.role.PILOTO': 'Pilot',
-  'myAssignments.role.COPILOTO': 'Co-pilot',
-  'myAssignments.role.AZAFATA': 'Flight attendant',
-  'myAssignments.status.PROGRAMADO': 'Scheduled',
-  'myAssignments.status.BOARDING': 'Boarding',
-  'myAssignments.status.ACTIVO': 'In flight',
-  'myAssignments.status.CANCELADO': 'Canceled',
-  'myAssignments.status.REPROGRAMADO': 'Rescheduled',
 
-  // Admin booking management (ReservasAdmin)
+  // Admin - Flights (VuelosAdmin)
+  'adminFlights.eyebrow': 'Admin panel',
+  'adminFlights.title': 'Flight management',
+  'adminFlights.subtitle': 'Review active and inactive flights in the system',
+  'adminFlights.departureDate': 'Departure date',
+  'adminFlights.clearFilters': 'Clear filters',
+  'adminFlights.filterByStatus': 'Filter by status',
+  'adminFlights.tabActive': 'Active',
+  'adminFlights.tabInactive': 'Inactive',
+  'adminFlights.tabAll': 'All',
+  'adminFlights.loading': 'Loading flights...',
+  'adminFlights.loadError': 'Could not load flights. Please try again.',
+  'adminFlights.retry': 'Retry',
+  'adminFlights.noResults': 'No flights to show with these filters.',
+  'adminFlights.active': 'Active',
+  'adminFlights.inactive': 'Inactive',
+  'adminFlights.flightId': 'ID #{id}',
+  'adminFlights.flightDetail': 'Flight details #{id}',
+  'adminFlights.departureDateShort': 'Departure date',
+  'adminFlights.arrivalDateShort': 'Arrival date',
+  'adminFlights.price': 'Price',
+
+  // Admin - Bookings (ReservasAdmin)
   'adminBookings.eyebrow': 'Administration Panel',
   'adminBookings.title': 'Booking management',
   'adminBookings.subtitle': 'Create, update, and logically cancel bookings registered in the system.',
@@ -589,7 +580,7 @@ export const en: Record<TranslationKey, string> = {
   'adminBookings.validationDuplicateSeat': 'The same seat cannot be assigned to two passengers.',
   'adminBookings.validationValueInvalid': 'Please enter a valid total amount greater than or equal to 0.',
 
-  // Admin ticket management by booking (PasajesAdmin)
+  // Admin - Tickets by booking (PasajesAdmin)
   'adminTickets.eyebrow': 'Administration Panel',
   'adminTickets.title': 'Tickets by booking',
   'adminTickets.subtitle': 'Update passenger details and services or cancel tickets associated with a booking while keeping seats and totals consistent.',
@@ -626,4 +617,42 @@ export const en: Record<TranslationKey, string> = {
   'adminTickets.updatedSuccess': 'Ticket updated and booking recalculated successfully.',
   'adminTickets.canceledSuccess': 'Ticket canceled and booking updated successfully.',
   'adminTickets.validationFields': 'Please enter a valid first name, last name, document number, and past birth date.',
+
+  // Admin - Assignments (AsignacionesAdmin)
+  'adminAssignments.eyebrow': 'Admin panel',
+  'adminAssignments.title': 'Crew assignments',
+  'adminAssignments.subtitle': 'See which employees are assigned to each flight',
+  'adminAssignments.search': 'Search',
+  'adminAssignments.searchPlaceholder': 'Employee, ID, flight no., city or IATA',
+  'adminAssignments.employee': 'Employee',
+  'adminAssignments.role': 'Role',
+  'adminAssignments.flightStatus': 'Flight status',
+  'adminAssignments.from': 'From',
+  'adminAssignments.to': 'To',
+  'adminAssignments.all': 'All',
+  'adminAssignments.clearFilters': 'Clear filters',
+  'adminAssignments.tabUpcoming': 'Upcoming',
+  'adminAssignments.tabHistory': 'History',
+  'adminAssignments.tabAll': 'All',
+  'adminAssignments.loading': 'Loading assignments...',
+  'adminAssignments.loadError': 'Could not load assignments. Please try again.',
+  'adminAssignments.retry': 'Retry',
+  'adminAssignments.noResults': 'No assignments to show with these filters.',
+  'adminAssignments.colFlight': 'Flight',
+  'adminAssignments.colRoute': 'Route',
+  'adminAssignments.colDeparture': 'Departure',
+  'adminAssignments.colEmployee': 'Employee',
+  'adminAssignments.colRole': 'Role',
+  'adminAssignments.colStatus': 'Status',
+  'adminAssignments.resultsCount': '{count} assignment(s)',
+
+  // Common & utilities
+  'common.loading': 'Loading...',
+  'common.error': 'An unexpected error occurred.',
+  'common.success': 'Operation successful.',
+  'common.cancel': 'Cancel',
+  'common.confirm': 'Confirm',
+  'common.back': 'Back',
+  'common.save': 'Save',
+  'common.close': 'Close',
 };

@@ -15,6 +15,16 @@ export const es = {
   'nav.langLabel': 'Idioma',
   'nav.userMenu': 'Menú de usuario',
   'nav.switchLang': 'Cambiar idioma',
+  'nav.myAssignments': 'Mis asignaciones',
+  'nav.adminPanel': 'Panel de administración',
+  'nav.roleLabel': 'Rol',
+  'nav.adminAssignments': 'Asignaciones',
+
+  // Roles de usuario
+  'role.ROLE_ADMIN': 'Administrador',
+  'role.ROLE_EMPLEADO': 'Empleado',
+  'role.ROLE_USUARIO': 'Usuario',
+  'role.ROLE_INCOMPLETO': 'Perfil incompleto',
 
   // Pie de página
   'footer.brandDesc': 'Conectamos destinos y personas. Volamos con excelencia, puntualidad y el servicio que merecés.',
@@ -37,7 +47,7 @@ export const es = {
   'footer.privacy': 'Privacidad',
   'footer.terms': 'Términos',
 
-  // Autenticación - Login y 2FA
+  // Autenticación (login, 2FA y registro)
   'auth.loginTitle': 'Iniciar',
   'auth.loginTitleEm': 'Sesión',
   'auth.verifyCodeTitle': 'Verificar',
@@ -62,8 +72,6 @@ export const es = {
   'auth.verifyBtn': 'Verificar código',
   'auth.verifying': 'Verificando...',
   'auth.backToLogin': 'Volver al inicio de sesión',
-
-  // Autenticación - Registro
   'auth.registerTitle': 'Crear',
   'auth.registerTitleEm': 'Cuenta',
   'auth.registerSubtitle': 'Registrate en segundos y empezá a acumular millas.',
@@ -121,7 +129,7 @@ export const es = {
   'profile.enable2FA': 'Activar 2FA',
   'profile.disable2FA': 'Desactivar 2FA',
 
-  // Recuperar contraseña (Forgot Password)
+  // Recuperar contraseña
   'forgot.title': 'Recuperar',
   'forgot.titleEm': 'contraseña',
   'forgot.subtitle': 'Ingresá tu correo electrónico y te enviaremos las instrucciones para restablecer tu contraseña.',
@@ -131,7 +139,7 @@ export const es = {
   'forgot.success': 'Si el correo existe, recibirás las instrucciones para restablecer tu contraseña.',
   'forgot.serverError': 'No se pudo procesar la solicitud. Intentá nuevamente.',
 
-  // Restablecer contraseña (Reset Password)
+  // Restablecer contraseña
   'reset.title': 'Restablecer',
   'reset.titleEm': 'contraseña',
   'reset.subtitle': 'Ingresá tu nueva contraseña para recuperar el acceso a tu cuenta.',
@@ -148,7 +156,7 @@ export const es = {
   'reset.submitting': 'Restableciendo...',
   'reset.remembered': '¿Recordaste tu contraseña?',
 
-  // Página de Inicio (Home)
+  // Página de inicio
   'home.heroEyebrow': 'La aerolínea que te lleva más lejos',
   'home.heroTitle': 'Volá hacia tu próxima',
   'home.heroTitleEm': 'aventura',
@@ -184,7 +192,7 @@ export const es = {
   'home.whereToSubtitle': 'Explorá nuestros destinos más buscados con las mejores tarifas',
   'home.from': 'Desde',
 
-  // Búsqueda y listado de vuelos (Vuelos)
+  // Búsqueda y listado de vuelos
   'flights.searchTitle': 'Búsqueda de vuelos',
   'flights.findFlight': 'Encontrá tu vuelo',
   'flights.searchSubtitle': 'Filtrá por origen, destino y fecha de salida',
@@ -210,7 +218,7 @@ export const es = {
   'flights.duration': 'Duración',
   'flights.close': 'Cerrar',
 
-  // Carrito de compras (Carrito)
+  // Carrito
   'cart.title': 'Mi Carrito',
   'cart.subtitle': 'Revisá los vuelos que seleccionaste antes de confirmar',
   'cart.clearCart': 'Vaciar carrito',
@@ -226,7 +234,7 @@ export const es = {
   'cart.total': 'Total',
   'cart.checkout': 'Reservar',
 
-  // Selección de asientos (Asientos)
+  // Selección de asientos
   'seats.progressFlight': 'Vuelo',
   'seats.progressSeat': 'Asiento',
   'seats.progressPassengers': 'Pasajeros',
@@ -246,7 +254,7 @@ export const es = {
   'seats.total': 'Total',
   'seats.continue': 'Continuar con la reserva →',
 
-  // Proceso de Reserva / Checkout (Reserva)
+  // Reserva / checkout
   'booking.title': 'Finalizá tu reserva',
   'booking.loading': 'Cargando tu reserva...',
   'booking.cartEmpty': 'Tu carrito está vacío. Elegí un vuelo para continuar.',
@@ -285,7 +293,7 @@ export const es = {
   'booking.birthDateFuture': 'Ingresá una fecha de nacimiento válida.',
   'booking.emailInvalid': 'El email no es válido.',
 
-  // Pago (Pago)
+  // Pago
   'payment.title': 'Pagá tu reserva',
   'payment.backToPassengers': '← Volver a los pasajeros',
   'payment.billingInfo': 'Datos de facturación',
@@ -315,7 +323,7 @@ export const es = {
   'payment.viewBookings': 'Ver mis reservas',
   'payment.home': 'Inicio',
 
-  // Mis Reservas (Reservas)
+  // Mis reservas
   'myBookings.title': 'Mis reservas',
   'myBookings.subtitle': 'Gestioná tus vuelos, descargá documentos y hacé el check-in online',
   'myBookings.newBooking': '+ Nueva reserva',
@@ -360,28 +368,19 @@ export const es = {
   'myBookings.clearFilters': 'Limpiar filtros',
   'myBookings.noFilterResults': 'No hay reservas que coincidan con los filtros.',
   'myBookings.resultsCount': '{count} reserva(s)',
-
-  // Panel de administración - Vuelos (VuelosAdmin)
-  'adminFlights.eyebrow': 'Panel de administración',
-  'adminFlights.title': 'Gestión de vuelos',
-  'adminFlights.subtitle': 'Consultá los vuelos activos e inactivos del sistema',
-  'adminFlights.departureDate': 'Fecha de salida',
-  'adminFlights.clearFilters': 'Limpiar filtros',
-  'adminFlights.filterByStatus': 'Filtrar por estado',
-  'adminFlights.tabActive': 'Activos',
-  'adminFlights.tabInactive': 'Inactivos',
-  'adminFlights.tabAll': 'Todos',
-  'adminFlights.loading': 'Cargando vuelos...',
-  'adminFlights.loadError': 'No se pudieron obtener los vuelos. Intentá nuevamente.',
-  'adminFlights.retry': 'Reintentar',
-  'adminFlights.noResults': 'No hay vuelos para mostrar con estos filtros.',
-  'adminFlights.active': 'Activo',
-  'adminFlights.inactive': 'Inactivo',
-  'adminFlights.flightId': 'ID #{id}',
-  'adminFlights.flightDetail': 'Detalle del vuelo #{id}',
-  'adminFlights.departureDateShort': 'Fecha salida',
-  'adminFlights.arrivalDateShort': 'Fecha llegada',
-  'adminFlights.price': 'Precio',
+  'myBookings.booking': 'Reserva',
+  'myBookings.print': 'Imprimir',
+  'myBookings.boardingPassNeedsCheckin': 'Hacé el check-in para imprimir tus pasajes',
+  'myBookings.checkinEyebrow': 'Check-in online',
+  'myBookings.checkinConfirmTitle': 'Confirmá tu check-in',
+  'myBookings.randomSeat': 'Asiento al azar',
+  'myBookings.randomSeatWarning': 'Los pasajeros sin asiento elegido van a recibir uno libre al azar.',
+  'myBookings.cancel': 'Cancelar',
+  'myBookings.processing': 'Procesando...',
+  'myBookings.confirmCheckin': 'Confirmar check-in',
+  'myBookings.checkinSuccessTitle': '¡Check-in realizado!',
+  'myBookings.checkinSuccessSubtitle': 'Ya tenés tus asientos. Con el botón Imprimir podés imprimir tus pasajes o guardarlos como PDF.',
+  'myBookings.autoAssigned': 'Asignado automáticamente',
 
   // Favoritos
   'favorites.title': 'Mis Favoritos',
@@ -405,30 +404,6 @@ export const es = {
   'favorites.messages.removeError': 'Error al eliminar el favorito',
   'favorites.messages.cartError': 'No se pudo agregar al carrito',
 
-  // Común y utilidades
-  'common.loading': 'Cargando...',
-  'common.error': 'Ocurrió un error inesperado.',
-  'common.success': 'Operación exitosa.',
-  'common.cancel': 'Cancelar',
-  'common.confirm': 'Confirmar',
-  'common.back': 'Volver',
-  'common.save': 'Guardar',
-  'common.close': 'Cerrar',
-
-    'myBookings.booking': 'Reserva',
-  'myBookings.print': 'Imprimir',
-  'myBookings.boardingPassNeedsCheckin': 'Hacé el check-in para imprimir tus pasajes',
-  'myBookings.checkinEyebrow': 'Check-in online',
-  'myBookings.checkinConfirmTitle': 'Confirmá tu check-in',
-  'myBookings.randomSeat': 'Asiento al azar',
-  'myBookings.randomSeatWarning': 'Los pasajeros sin asiento elegido van a recibir uno libre al azar.',
-  'myBookings.cancel': 'Cancelar',
-  'myBookings.processing': 'Procesando...',
-  'myBookings.confirmCheckin': 'Confirmar check-in',
-  'myBookings.checkinSuccessTitle': '¡Check-in realizado!',
-  'myBookings.checkinSuccessSubtitle': 'Ya tenés tus asientos. Con el botón Imprimir podés imprimir tus pasajes o guardarlos como PDF.',
-  'myBookings.autoAssigned': 'Asignado automáticamente',
-
   // Check-in en mostrador (empleado / admin)
   'counterCheckin.eyebrow': 'Mostrador',
   'counterCheckin.title': 'Check-in de pasajeros',
@@ -448,14 +423,34 @@ export const es = {
   'counterCheckin.notPaid': 'La reserva todavía no está pagada.',
   'counterCheckin.connectionError': 'No se pudo conectar con el servidor.',
   'counterCheckin.forbidden': 'No tenés permisos para hacer check-in de otras personas.',
-    // Mis asignaciones (empleado)
-  'nav.myAssignments': 'Mis asignaciones',
-  'nav.adminPanel': 'Panel de administración',
-  'nav.roleLabel': 'Rol',
-  'role.ROLE_ADMIN': 'Administrador',
-  'role.ROLE_EMPLEADO': 'Empleado',
-  'role.ROLE_USUARIO': 'Usuario',
-  'role.ROLE_INCOMPLETO': 'Perfil incompleto',
+
+  // Mis asignaciones (empleado)
+  'myAssignments.title': 'Mis asignaciones',
+  'myAssignments.subtitle': 'Vuelos en los que tenés que trabajar',
+  'myAssignments.loading': 'Cargando asignaciones...',
+  'myAssignments.loadError': 'No se pudieron cargar tus asignaciones.',
+  'myAssignments.retry': 'Reintentar',
+  'myAssignments.nextFlight': 'Tu próximo vuelo',
+  'myAssignments.tabUpcoming': 'Próximas',
+  'myAssignments.tabHistory': 'Historial',
+  'myAssignments.emptyUpcoming': 'No tenés vuelos asignados por ahora.',
+  'myAssignments.emptyHistory': 'Todavía no tenés vuelos realizados ni cancelados.',
+  'myAssignments.time': '{time} hs',
+  'myAssignments.departs': 'Sale {time} hs',
+  'myAssignments.arrives': 'Llega {time} hs',
+  'myAssignments.flightNumber': 'Vuelo #{id}',
+  'myAssignments.inProgress': 'en curso',
+  'myAssignments.inMinutes': 'en {n} min',
+  'myAssignments.inHours': 'en {n} h',
+  'myAssignments.inDays': 'en {n} días',
+  'myAssignments.role.PILOTO': 'Piloto',
+  'myAssignments.role.COPILOTO': 'Copiloto',
+  'myAssignments.role.AZAFATA': 'Azafata',
+  'myAssignments.status.PROGRAMADO': 'Programado',
+  'myAssignments.status.BOARDING': 'Embarcando',
+  'myAssignments.status.ACTIVO': 'En vuelo',
+  'myAssignments.status.CANCELADO': 'Cancelado',
+  'myAssignments.status.REPROGRAMADO': 'Reprogramado',
 
   // Panel de administración (AdminPanel)
   'adminPanel.eyebrow': 'Administración AeroGest',
@@ -484,34 +479,30 @@ export const es = {
   'adminPanel.assignmentFilters.cta': 'Explorar asignaciones',
   'adminPanel.moduleReadyTitle': 'Módulo administrativo preparado',
   'adminPanel.moduleReadyDesc': 'Seleccioná un módulo para operar o utilizá el acceso directo a la gestión de vuelos.',
-  'myAssignments.title': 'Mis asignaciones',
-  'myAssignments.subtitle': 'Vuelos en los que tenés que trabajar',
-  'myAssignments.loading': 'Cargando asignaciones...',
-  'myAssignments.loadError': 'No se pudieron cargar tus asignaciones.',
-  'myAssignments.retry': 'Reintentar',
-  'myAssignments.nextFlight': 'Tu próximo vuelo',
-  'myAssignments.tabUpcoming': 'Próximas',
-  'myAssignments.tabHistory': 'Historial',
-  'myAssignments.emptyUpcoming': 'No tenés vuelos asignados por ahora.',
-  'myAssignments.emptyHistory': 'Todavía no tenés vuelos realizados ni cancelados.',
-  'myAssignments.time': '{time} hs',
-  'myAssignments.departs': 'Sale {time} hs',
-  'myAssignments.arrives': 'Llega {time} hs',
-  'myAssignments.flightNumber': 'Vuelo #{id}',
-  'myAssignments.inProgress': 'en curso',
-  'myAssignments.inMinutes': 'en {n} min',
-  'myAssignments.inHours': 'en {n} h',
-  'myAssignments.inDays': 'en {n} días',
-  'myAssignments.role.PILOTO': 'Piloto',
-  'myAssignments.role.COPILOTO': 'Copiloto',
-  'myAssignments.role.AZAFATA': 'Azafata',
-  'myAssignments.status.PROGRAMADO': 'Programado',
-  'myAssignments.status.BOARDING': 'Embarcando',
-  'myAssignments.status.ACTIVO': 'En vuelo',
-  'myAssignments.status.CANCELADO': 'Cancelado',
-  'myAssignments.status.REPROGRAMADO': 'Reprogramado',
 
-  // Gestión administrativa de reservas (ReservasAdmin)
+  // Admin - Vuelos (VuelosAdmin)
+  'adminFlights.eyebrow': 'Panel de administración',
+  'adminFlights.title': 'Gestión de vuelos',
+  'adminFlights.subtitle': 'Consultá los vuelos activos e inactivos del sistema',
+  'adminFlights.departureDate': 'Fecha de salida',
+  'adminFlights.clearFilters': 'Limpiar filtros',
+  'adminFlights.filterByStatus': 'Filtrar por estado',
+  'adminFlights.tabActive': 'Activos',
+  'adminFlights.tabInactive': 'Inactivos',
+  'adminFlights.tabAll': 'Todos',
+  'adminFlights.loading': 'Cargando vuelos...',
+  'adminFlights.loadError': 'No se pudieron obtener los vuelos. Intentá nuevamente.',
+  'adminFlights.retry': 'Reintentar',
+  'adminFlights.noResults': 'No hay vuelos para mostrar con estos filtros.',
+  'adminFlights.active': 'Activo',
+  'adminFlights.inactive': 'Inactivo',
+  'adminFlights.flightId': 'ID #{id}',
+  'adminFlights.flightDetail': 'Detalle del vuelo #{id}',
+  'adminFlights.departureDateShort': 'Fecha salida',
+  'adminFlights.arrivalDateShort': 'Fecha llegada',
+  'adminFlights.price': 'Precio',
+
+  // Admin - Reservas (ReservasAdmin)
   'adminBookings.eyebrow': 'Panel de administración',
   'adminBookings.title': 'Gestión de reservas',
   'adminBookings.subtitle': 'Administrá el alta, baja lógica y modificación de las reservas registradas en el sistema.',
@@ -587,7 +578,7 @@ export const es = {
   'adminBookings.validationDuplicateSeat': 'No se puede asignar el mismo asiento a dos pasajeros.',
   'adminBookings.validationValueInvalid': 'Ingresá un valor total válido mayor o igual a 0.',
 
-  // Gestión administrativa de pasajes por reserva (PasajesAdmin)
+  // Admin - Pasajes por reserva (PasajesAdmin)
   'adminTickets.eyebrow': 'Panel de administración',
   'adminTickets.title': 'Pasajes por reserva',
   'adminTickets.subtitle': 'Modificá los datos del pasajero y servicios o cancelá pasajes asociados a una reserva manteniendo la consistencia de asientos e importes.',
@@ -624,6 +615,44 @@ export const es = {
   'adminTickets.updatedSuccess': 'Pasaje modificado y reserva recalculada correctamente.',
   'adminTickets.canceledSuccess': 'Pasaje cancelado y reserva actualizada correctamente.',
   'adminTickets.validationFields': 'Completá nombre, apellido, documento válido y fecha de nacimiento pasada.',
+
+  // Admin - Asignaciones (AsignacionesAdmin)
+  'adminAssignments.eyebrow': 'Panel de administración',
+  'adminAssignments.title': 'Asignaciones de tripulación',
+  'adminAssignments.subtitle': 'Consultá qué empleados están asignados a cada vuelo',
+  'adminAssignments.search': 'Buscar',
+  'adminAssignments.searchPlaceholder': 'Empleado, DNI, nº de vuelo, ciudad o IATA',
+  'adminAssignments.employee': 'Empleado',
+  'adminAssignments.role': 'Rol',
+  'adminAssignments.flightStatus': 'Estado del vuelo',
+  'adminAssignments.from': 'Desde',
+  'adminAssignments.to': 'Hasta',
+  'adminAssignments.all': 'Todos',
+  'adminAssignments.clearFilters': 'Limpiar filtros',
+  'adminAssignments.tabUpcoming': 'Próximas',
+  'adminAssignments.tabHistory': 'Historial',
+  'adminAssignments.tabAll': 'Todas',
+  'adminAssignments.loading': 'Cargando asignaciones...',
+  'adminAssignments.loadError': 'No se pudieron obtener las asignaciones. Intentá nuevamente.',
+  'adminAssignments.retry': 'Reintentar',
+  'adminAssignments.noResults': 'No hay asignaciones para mostrar con estos filtros.',
+  'adminAssignments.colFlight': 'Vuelo',
+  'adminAssignments.colRoute': 'Ruta',
+  'adminAssignments.colDeparture': 'Salida',
+  'adminAssignments.colEmployee': 'Empleado',
+  'adminAssignments.colRole': 'Rol',
+  'adminAssignments.colStatus': 'Estado',
+  'adminAssignments.resultsCount': '{count} asignación(es)',
+
+  // Común y utilidades
+  'common.loading': 'Cargando...',
+  'common.error': 'Ocurrió un error inesperado.',
+  'common.success': 'Operación exitosa.',
+  'common.cancel': 'Cancelar',
+  'common.confirm': 'Confirmar',
+  'common.back': 'Volver',
+  'common.save': 'Guardar',
+  'common.close': 'Cerrar',
 };
 
 export type TranslationKey = keyof typeof es;

@@ -13,4 +13,8 @@ export class AsignacionService {
   getMisAsignaciones(): Observable<Asignacion[]> {
     return this.http.get<Asignacion[]>(`${this.apiUrl}/mias`, { withCredentials: true });
   }
+
+    getTodas(): Observable<Asignacion[]> {
+    return this.http.get<Asignacion[]>(this.apiUrl, { withCredentials: true });
+  }
 }
