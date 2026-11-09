@@ -483,7 +483,7 @@ export const en: Record<TranslationKey, string> = {
   'adminPanel.moduleReadyDesc': 'Select a module to operate or use the direct access to flight management.',
     'adminPanel.users.title': 'Registered users',
   'adminPanel.users.desc': 'Browse the full list of users registered in the system and their roles.',
-  'adminPanel.users.cta': 'View users',
+  'adminPanel.users.cta': 'Manage users',
    'adminPanel.sales.title': 'Sales & transactions',
   'adminPanel.sales.desc': 'Track daily sales, period indicators and the full payment history.',
   'adminPanel.sales.cta': 'View sales',

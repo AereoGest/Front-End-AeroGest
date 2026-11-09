@@ -481,7 +481,7 @@ export const es = {
   'adminPanel.moduleReadyDesc': 'Seleccioná un módulo para operar o utilizá el acceso directo a la gestión de vuelos.',
    'adminPanel.users.title': 'Usuarios registrados',
   'adminPanel.users.desc': 'Consultá la lista completa de usuarios registrados en el sistema y sus roles.',
-  'adminPanel.users.cta': 'Ver usuarios',
+  'adminPanel.users.cta': 'Gestionar usuarios',
   'adminPanel.sales.title': 'Ventas y transacciones',
   'adminPanel.sales.desc': 'Seguí las ventas diarias, los indicadores del período y el historial completo de cobros.',
   'adminPanel.sales.cta': 'Ver ventas',
