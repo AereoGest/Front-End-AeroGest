@@ -44,7 +44,17 @@
 
                 <p class="item-precio">{{ formatearPrecio(subtotalItem(item)) }}</p>
 
-                <button type="button" class="btn btn-primary item-quitar" (click)="eliminarItem(item)">{{ 'cart.remove' | translate }}</button>
+                <button type="button" class="btn btn-primary item-quitar" (click)="eliminarItem(item)">
+                  {{ 'cart.remove' | translate }}
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-dark btn-reservar"
+                  [disabled]="cargando()"
+                  [routerLink]="['/asientos']">
+                  {{ 'cart.checkout' | translate }}
+                </button>
               </li>
             }
           </ul>
@@ -62,14 +72,6 @@
             <dt>{{ 'cart.total' | translate }}</dt>
             <dd>{{ formatearPrecio(total()) }}</dd>
           </div>
-
-          <button
-            type="button"
-            class="btn btn-primary btn-reservar"
-            [disabled]="items().length === 0 || cargando()"
-            [routerLink]="['/asientos']">
-            {{ 'cart.checkout' | translate }}
-          </button>
         </dl>
       </aside>
     </div>

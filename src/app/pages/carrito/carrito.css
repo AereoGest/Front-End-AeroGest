@@ -159,22 +159,23 @@
   color: var(--text);
 }
 
-.resumen .btn-reservar {
-  width: 100%;
+/* Botón "Reservar": ocupa todo el ancho del ítem, en una fila propia */
+.carrito-item .btn-reservar {
+  grid-column: 1 / -1;
+  justify-self: right;
+  min-width: 200px;
   justify-content: center;
-  margin-top: 20px;
 }
-.resumen .btn-reservar:disabled {
+.carrito-item .btn-reservar:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
-.resumen .btn-reservar:disabled:hover {
+.carrito-item .btn-reservar:disabled:hover {
   background: var(--btn-solid-bg);
   color: var(--btn-solid-text);
 }
-
 /* ── Avisos: reutilizan .toast global ── */
 .toast.error {
   border-left-color: var(--danger);
