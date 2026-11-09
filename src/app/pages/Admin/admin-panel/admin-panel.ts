@@ -8,8 +8,9 @@ import { VuelosAdmin } from '../vuelos-admin/vuelos-admin';
 import { ReservasAdmin } from '../reservas-admin/reservas-admin';
 import { PasajesAdmin } from '../pasajes-admin/pasajes-admin';
 import { AsignacionesAdmin } from '../asignaciones-admin/asignaciones-admin';
+import { UsuariosAdmin } from '../usuarios-admin/usuarios-admin';
 
-export type SeccionAdminId = 'RESUMEN' | 'VUELOS' | 'RESERVAS' | 'PASAJES' | 'ASIGNACIONES';
+export type SeccionAdminId = 'RESUMEN' | 'VUELOS' | 'RESERVAS' | 'PASAJES' | 'ASIGNACIONES'| 'USUARIOS';
 
 export interface ModuloAdmin {
   id: Exclude<SeccionAdminId, 'RESUMEN'>;
@@ -22,7 +23,7 @@ export interface ModuloAdmin {
 @Component({
   selector: 'app-admin-panel',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslatePipe, VuelosAdmin, ReservasAdmin, PasajesAdmin, AsignacionesAdmin],
+  imports: [CommonModule, RouterLink, TranslatePipe, VuelosAdmin, ReservasAdmin, PasajesAdmin, AsignacionesAdmin, UsuariosAdmin],
   templateUrl: './admin-panel.html',
   styleUrl: './admin-panel.css',
 })
@@ -59,6 +60,13 @@ export class AdminPanel {
       descripcionKey: 'adminPanel.assignments.desc',
       ctaKey: 'adminPanel.assignments.cta',
       rutaDirecta: '/asignacionesAdmin',
+    },
+    {
+      id: 'USUARIOS',
+      tituloKey: 'adminPanel.users.title',
+      descripcionKey: 'adminPanel.users.desc',
+      ctaKey: 'adminPanel.users.cta',
+      rutaDirecta: '/listaUsuariosAdmin',
     },
   ];
 

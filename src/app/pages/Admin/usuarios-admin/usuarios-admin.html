@@ -1,0 +1,120 @@
+<section class="admin-usr container">
+  <header class="admin-usr__header">
+    <span class="section-eyebrow">{{ 'adminUsers.eyebrow' | translate }}</span>
+    <h1 class="section-title">{{ 'adminUsers.title' | translate }}</h1>
+    <p class="admin-usr__subtitle">{{ 'adminUsers.subtitle' | translate }}</p>
+  </header>
+
+  <!-- Barra de filtros -->
+  <div class="filtros">
+    <div class="field filtros__busqueda">
+      <input id="u-busqueda" class="field-input" type="text"
+             [value]="busqueda()"
+             (input)="busqueda.set(valor($event))"
+             [placeholder]="'adminUsers.searchPlaceholder' | translate" />
+      <label class="field-label" for="u-busqueda">{{ 'adminUsers.search' | translate }}</label>
+    </div>
+
+    <div class="field">
+      <select id="u-rol" class="field-input" [value]="rolFiltro()" (change)="onRol($event)">
+        <option value="TODOS">{{ 'adminUsers.tabAll' | translate }}</option>
+        @for (r of roles; track r) {
+          <option [value]="r">{{ tabKey(r) | translate }}</option>
+        }
+      </select>
+      <label class="field-label" for="u-rol">{{ 'adminUsers.roleFilter' | translate }}</label>
+    </div>
+
+    <div class="field">
+      <select id="u-orden" class="field-input" [value]="orden()" (change)="onOrden($event)">
+        @for (o of ordenes; track o.valor) {
+          <option [value]="o.valor">{{ o.key | translate }}</option>
+        }
+      </select>
+      <label class="field-label" for="u-orden">{{ 'adminUsers.sortBy' | translate }}</label>
+    </div>
+
+    @if (hayFiltros()) {
+      <button type="button" class="btn filtros__limpiar" (click)="limpiarFiltros()">
+        {{ 'adminUsers.clearFilters' | translate }}
+      </button>
+    }
+  </div>
+
+  <!-- Pestañas por rol (sincronizadas con el select) -->
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" class="tab"
+            [class.active]="rolFiltro() === 'TODOS'"
+            (click)="rolFiltro.set('TODOS')">
+      {{ 'adminUsers.tabAll' | translate }}
+      <span class="tab__count">{{ porTexto().length }}</span>
+    </button>
+
+    @for (r of roles; track r) {
+      <button type="button" role="tab" class="tab"
+              [class.active]="rolFiltro() === r"
+              (click)="rolFiltro.set(r)">
+        {{ tabKey(r) | translate }}
+        <span class="tab__count">{{ cantidad(r) }}</span>
+      </button>
+    }
+  </div>
+
+  <!-- Contenido -->
+  @if (cargando()) {
+    <p class="estado-msg">{{ 'adminUsers.loading' | translate }}</p>
+
+  } @else if (error()) {
+    <div class="estado-msg">
+      <p class="mensaje-error">{{ 'adminUsers.loadError' | translate }}</p>
+      <button type="button" class="btn btn-dark" (click)="cargar()">
+        {{ 'adminUsers.retry' | translate }}
+      </button>
+    </div>
+
+  } @else if (visibles().length === 0) {
+    <p class="estado-msg">{{ 'adminUsers.noResults' | translate }}</p>
+
+  } @else {
+    <div class="tabla-wrap">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>{{ 'adminUsers.colUser' | translate }}</th>
+            <th>{{ 'adminUsers.colEmail' | translate }}</th>
+            <th>{{ 'adminUsers.colPhone' | translate }}</th>
+            <th>{{ 'adminUsers.colRole' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of visibles(); track u.id) {
+            <tr>
+              <td>
+                <div class="usuario">
+                  <span class="avatar">{{ iniciales(u) }}</span>
+                  <div>
+                    @if (perfilIncompleto(u)) {
+                      <strong class="usuario__incompleto">{{ 'adminUsers.incompleteName' | translate }}</strong>
+                    } @else {
+                      <strong>{{ u.apellido }}, {{ u.nombre }}</strong>
+                    }
+                    <small>ID #{{ u.id }}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <a class="email" [href]="'mailto:' + u.email">{{ u.email }}</a>
+              </td>
+              <td>{{ u.telefono || '—' }}</td>
+              <td>
+                <span class="badge rol--{{ u.role.toLowerCase() }}">{{ rolKey(u.role) | translate }}</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <p class="contador">{{ 'adminUsers.resultsCount' | translate: { count: visibles().length } }}</p>
+  }
+</section>
