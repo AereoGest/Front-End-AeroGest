@@ -1,0 +1,231 @@
+.admin-usr {
+  padding-top: 48px;
+  padding-bottom: 72px;
+}
+:host-context(.admin-content) .admin-usr {
+  max-width: none;
+  padding: 0;
+}
+
+/* ── Encabezado ── */
+.admin-usr__header {
+  margin-bottom: 32px;
+}
+.admin-usr__subtitle {
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+/* ── Barra de filtros ── */
+.filtros {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 28px 16px;
+  align-items: center;
+  padding: 32px 24px 24px;
+  margin-bottom: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.filtros__limpiar {
+  height: 52px;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* ── Pestañas ── */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom: 1.5px solid var(--border);
+  margin-bottom: 20px;
+}
+.tab {
+  padding: 10px 18px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1.5px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.tab:hover {
+  color: var(--text);
+}
+.tab.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+.tab__count {
+  display: inline-block;
+  min-width: 22px;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--bg-inset);
+  color: var(--text-muted);
+  font-size: 11px;
+  text-align: center;
+}
+.tab.active .tab__count {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+/* ── Estados ── */
+.estado-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 48px 0;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ── Tabla ── */
+.tabla-wrap {
+  overflow-x: auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.tabla th {
+  padding: 14px 18px;
+  text-align: left;
+  background: var(--bg-inset);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.tabla td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  color: var(--text);
+}
+.tabla tbody tr {
+  transition: background-color var(--transition);
+}
+.tabla tbody tr:hover {
+  background: var(--bg-subtle);
+}
+.tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ── Celda de usuario ── */
+.usuario {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.usuario strong {
+  display: block;
+  font-weight: 600;
+}
+.usuario small {
+  display: block;
+  color: var(--text-subtle);
+  font-size: 12px;
+}
+.usuario__incompleto {
+  color: var(--text-muted);
+  font-style: italic;
+  font-weight: 500 !important;
+}
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--surface-strong);
+  color: var(--text-inverse);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.email {
+  color: var(--accent-text);
+  transition: color var(--transition);
+}
+.email:hover {
+  text-decoration: underline;
+}
+
+/* ── Badges de rol ── */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.rol--role_admin {
+  background: var(--surface-strong);
+  color: var(--text-inverse);
+}
+.rol--role_empleado {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.rol--role_usuario {
+  background: var(--bg-inset);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.rol--role_incompleto {
+  background: var(--warning-soft);
+  color: var(--warning);
+  border-color: var(--warning-border);
+}
+
+.contador {
+  margin-top: 12px;
+  text-align: right;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .filtros {
+    grid-template-columns: 1fr 1fr;
+  }
+  .filtros__busqueda {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 600px) {
+  .filtros {
+    grid-template-columns: 1fr;
+  }
+}

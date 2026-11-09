@@ -479,6 +479,9 @@ export const es = {
   'adminPanel.assignmentFilters.cta': 'Explorar asignaciones',
   'adminPanel.moduleReadyTitle': 'Módulo administrativo preparado',
   'adminPanel.moduleReadyDesc': 'Seleccioná un módulo para operar o utilizá el acceso directo a la gestión de vuelos.',
+   'adminPanel.users.title': 'Usuarios registrados',
+  'adminPanel.users.desc': 'Consultá la lista completa de usuarios registrados en el sistema y sus roles.',
+  'adminPanel.users.cta': 'Ver usuarios',
 
   // Admin - Vuelos (VuelosAdmin)
   'adminFlights.eyebrow': 'Panel de administración',
@@ -653,6 +656,35 @@ export const es = {
   'common.back': 'Volver',
   'common.save': 'Guardar',
   'common.close': 'Cerrar',
+
+    // Admin - Usuarios (UsuariosAdmin)
+  'adminUsers.eyebrow': 'Panel de administración',
+  'adminUsers.title': 'Usuarios registrados',
+  'adminUsers.subtitle': 'Consultá todos los usuarios del sistema y filtralos por rol',
+  'adminUsers.search': 'Buscar usuario',
+  'adminUsers.searchPlaceholder': 'Nombre, apellido, email o teléfono',
+  'adminUsers.clearFilters': 'Limpiar filtros',
+  'adminUsers.tabAll': 'Todos',
+  'adminUsers.loading': 'Cargando usuarios...',
+  'adminUsers.loadError': 'No se pudieron obtener los usuarios. Intentá nuevamente.',
+  'adminUsers.retry': 'Reintentar',
+  'adminUsers.noResults': 'No hay usuarios que coincidan con la búsqueda.',
+  'adminUsers.colUser': 'Usuario',
+  'adminUsers.colEmail': 'Email',
+  'adminUsers.colPhone': 'Teléfono',
+  'adminUsers.colRole': 'Rol',
+  'adminUsers.incompleteName': 'Perfil sin completar',
+  'adminUsers.resultsCount': '{count} usuario(s)',
+  'adminUsers.role.ROLE_ADMIN': 'Administradores',
+  'adminUsers.role.ROLE_EMPLEADO': 'Empleados',
+  'adminUsers.role.ROLE_USUARIO': 'Clientes',
+  'adminUsers.role.ROLE_INCOMPLETO': 'Perfil incompleto',
+   'adminUsers.roleFilter': 'Rol',
+  'adminUsers.sortBy': 'Ordenar por',
+  'adminUsers.sortNameAsc': 'Apellido (A-Z)',
+  'adminUsers.sortNameDesc': 'Apellido (Z-A)',
+  'adminUsers.sortNewest': 'Más recientes',
+  'adminUsers.sortOldest': 'Más antiguos',
 };
 
 export type TranslationKey = keyof typeof es;

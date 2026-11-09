@@ -109,6 +109,16 @@
         </a>
       </div>
       <app-asignaciones-admin></app-asignaciones-admin>
+          } @else if (seccionActiva() === 'USUARIOS') {
+      <div class="admin-embedded-header">
+        <button type="button" class="btn-back-overview" (click)="seleccionarSeccion('RESUMEN')">
+          {{ 'adminPanel.backToOverview' | translate }}
+        </button>
+        <a routerLink="/usuariosAdmin" class="admin-module-link">
+          {{ 'adminPanel.openSection' | translate }}
+        </a>
+      </div>
+      <app-usuarios-admin></app-usuarios-admin>
     }
   </div>
 </section>
