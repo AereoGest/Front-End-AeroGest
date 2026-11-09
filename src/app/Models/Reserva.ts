@@ -13,7 +13,7 @@ export interface PersonaResumen {
   email?: string | null;
 }
 
-/** Pasaje tal como viene dentro de cada reserva en GET /api/reservas/mis-reservas. */
+/** Pasaje tal como viene dentro de cada reserva en GET /api/reservas o GET /api/pasajes/reserva/{id}. */
 export interface PasajeReserva {
   id: number;
   codigoReserva: string | null;
@@ -34,19 +34,23 @@ export interface PasajeReserva {
     id: number;
     aeropuertoOrigen: { codigoIata: string; ciudad: string };
     aeropuertoDestino: { codigoIata: string; ciudad: string };
+    avion?: { id: number; modelo?: string; identificador?: string };
     fechaSalida: string;   // yyyy-mm-dd
     horaSalida: string;    // HH:mm:ss
     fechaLlegada: string;
     horaLlegada: string;
+    precioVuelo?: number;
   };
   equipajes: {
     id: number;
     tipo: 'CABINA' | 'BODEGA' | 'MANO';
     peso: number | null;
+    precio?: number | null;
   }[];
   asistenciaAlViajero: {
     id: number;
     nombrePlan: string;
+    precio?: number | null;
   } | null;
 }
 
@@ -116,4 +120,21 @@ export interface ReservaUpdateDTO {
   cantidadPasajes?: number;
   estadoReserva: EstadoReserva;
   fechaReserva?: string;
+}
+
+/** Cuerpo de PUT /api/pasajes/{id} (Admin). */
+export interface PasajeUpdateDTO {
+  codigoPasaje?: string | null;
+  reservaId: number;
+  vueloId: number;
+  asientoId: number | null;
+  clasesVuelo: ClaseVuelo;
+  equipajeIds: number[];
+  asistenciaId: number | null;
+  nombre: string;
+  apellido: string;
+  tipoDocumento: TipoDocumento;
+  documento: string;
+  fechaNacimiento: string | null;
+  email: string | null;
 }

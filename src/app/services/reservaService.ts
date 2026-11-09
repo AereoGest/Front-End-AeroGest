@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   CheckInResponse,
+  PasajeReserva,
+  PasajeUpdateDTO,
   PersonaResumen,
   Reserva,
   ReservaAdminRequest,
@@ -17,6 +19,7 @@ import { PagoRequest, PagoResponse } from '../Models/Pago';
 })
 export class ReservaService {
   private readonly baseUrl = `${environment.apiUrl}/reservas`;
+  private readonly pasajesUrl = `${environment.apiUrl}/pasajes`;
   private readonly personasUrl = `${environment.apiUrl}/personas`;
 
   constructor(private http: HttpClient) {}
@@ -41,7 +44,7 @@ export class ReservaService {
     return this.http.post<CheckInResponse>(`${this.baseUrl}/mis-reservas/${id}/check-in`, {});
   }
 
-  // ===================== Administración =====================
+  // ===================== Administración de reservas =====================
 
   obtenerTodas(): Observable<Reserva[]> {
     return this.http.get<Reserva[]>(this.baseUrl);
@@ -65,5 +68,20 @@ export class ReservaService {
 
   obtenerClientes(): Observable<PersonaResumen[]> {
     return this.http.get<PersonaResumen[]>(this.personasUrl);
+  }
+
+  // ===================== Administración de pasajes por reserva =====================
+
+  obtenerPasajesPorReserva(reservaId: number): Observable<PasajeReserva[]> {
+    return this.http.get<PasajeReserva[]>(`${this.pasajesUrl}/reserva/${reservaId}`);
+  }
+
+  actualizarPasaje(id: number, dto: PasajeUpdateDTO): Observable<PasajeReserva> {
+    return this.http.put<PasajeReserva>(`${this.pasajesUrl}/${id}`, dto);
+  }
+
+  cancelarPasaje(id: number, reservaId: number): Observable<void> {
+    const params = new HttpParams().set('reservaId', String(reservaId));
+    return this.http.delete<void>(`${this.pasajesUrl}/${id}`, { params });
   }
 }
