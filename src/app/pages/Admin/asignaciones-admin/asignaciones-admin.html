@@ -1,9 +1,30 @@
 <section class="admin-asig container">
   <header class="admin-asig__header">
-    <span class="section-eyebrow">{{ 'adminAssignments.eyebrow' | translate }}</span>
-    <h1 class="section-title">{{ 'adminAssignments.title' | translate }}</h1>
-    <p class="admin-asig__subtitle">{{ 'adminAssignments.subtitle' | translate }}</p>
+    <div class="admin-asig__header-main">
+      <div>
+        <span class="section-eyebrow">{{ 'adminAssignments.eyebrow' | translate }}</span>
+        <h1 class="section-title">{{ 'adminAssignments.title' | translate }}</h1>
+        <p class="admin-asig__subtitle">{{ 'adminAssignments.subtitle' | translate }}</p>
+      </div>
+      <button type="button" class="btn btn-dark btn-alta" (click)="abrirModalAlta()">
+        + {{ 'adminAssignments.btnNew' | translate }}
+      </button>
+    </div>
   </header>
+
+  <!-- Alertas de éxito y error -->
+  @if (mensajeExito()) {
+    <div class="alerta alerta--exito" role="status">
+      <span>{{ mensajeExito() }}</span>
+      <button type="button" class="alerta__cerrar" (click)="mensajeExito.set(null)" aria-label="Cerrar">&times;</button>
+    </div>
+  }
+  @if (mensajeError()) {
+    <div class="alerta alerta--error" role="alert">
+      <span>{{ mensajeError() }}</span>
+      <button type="button" class="alerta__cerrar" (click)="mensajeError.set(null)" aria-label="Cerrar">&times;</button>
+    </div>
+  }
 
   <!-- Filtros -->
   <div class="filtros">
@@ -95,6 +116,7 @@
             <th>{{ 'adminAssignments.colEmployee' | translate }}</th>
             <th>{{ 'adminAssignments.colRole' | translate }}</th>
             <th>{{ 'adminAssignments.colStatus' | translate }}</th>
+            <th class="tabla__col-acciones">{{ 'adminAssignments.colActions' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -102,11 +124,11 @@
             <tr [class.fila--cancelada]="a.vuelo.estado === 'CANCELADO'">
               <td>
                 <strong>#{{ a.vuelo.id }}</strong>
-                <small>{{ a.vuelo.avion.identificador }}</small>
+                <small>{{ a.vuelo.avion?.identificador }}</small>
               </td>
               <td>
-                <strong class="ruta">{{ a.vuelo.aeropuertoOrigen.codigoIata }} → {{ a.vuelo.aeropuertoDestino.codigoIata }}</strong>
-                <small>{{ a.vuelo.aeropuertoOrigen.ciudad }} – {{ a.vuelo.aeropuertoDestino.ciudad }}</small>
+                <strong class="ruta">{{ a.vuelo.aeropuertoOrigen?.codigoIata }} → {{ a.vuelo.aeropuertoDestino?.codigoIata }}</strong>
+                <small>{{ a.vuelo.aeropuertoOrigen?.ciudad }} – {{ a.vuelo.aeropuertoDestino?.ciudad }}</small>
               </td>
               <td>
                 <strong>{{ salida(a) | date: 'dd/MM/yyyy' }}</strong>
@@ -114,7 +136,7 @@
               </td>
               <td>
                 <strong>{{ nombreEmpleado(a) }}</strong>
-                <small>{{ a.empleado?.numeroIdentificador }}</small>
+                <small>{{ a.empleado?.numeroIdentificador ? ('DOC: ' + a.empleado?.numeroIdentificador) : '' }}</small>
               </td>
               <td>
                 <span class="badge rol--{{ a.rolEmpleado.toLowerCase() }}">{{ rolKey(a.rolEmpleado) | translate }}</span>
@@ -122,11 +144,168 @@
               <td>
                 <span class="badge estado--{{ a.vuelo.estado.toLowerCase() }}">{{ estadoKey(a.vuelo.estado) | translate }}</span>
               </td>
+              <td class="tabla__acciones">
+                <button
+                  type="button"
+                  class="btn-icon"
+                  [title]="'adminAssignments.edit' | translate"
+                  [attr.aria-label]="'adminAssignments.edit' | translate"
+                  (click)="abrirModalEdicion(a)">
+                  ✎
+                </button>
+                <button
+                  type="button"
+                  class="btn-icon btn-icon--danger"
+                  [title]="'adminAssignments.delete' | translate"
+                  [attr.aria-label]="'adminAssignments.delete' | translate"
+                  (click)="abrirModalBaja(a)">
+                  🗑
+                </button>
+              </td>
             </tr>
           }
         </tbody>
       </table>
     </div>
     <p class="contador">{{ 'adminAssignments.resultsCount' | translate: { count: visibles().length } }}</p>
+  }
+
+  <!-- ================= Modal Alta ================= -->
+  @if (modalAltaAbierto()) {
+    <div class="modal-overlay" (click)="cerrarModalAlta()">
+      <div class="modal-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-labelledby]="'modal-alta-title'">
+        <button type="button" class="modal-cerrar" (click)="cerrarModalAlta()" aria-label="Cerrar">&times;</button>
+        <span class="section-eyebrow">{{ 'adminAssignments.eyebrow' | translate }}</span>
+        <h2 id="modal-alta-title" class="modal-titulo">{{ 'adminAssignments.modalNewTitle' | translate }}</h2>
+
+        @if (formularioError()) {
+          <div class="alerta alerta--error" role="alert">
+            <span>{{ formularioError() }}</span>
+          </div>
+        }
+
+        <form (ngSubmit)="guardarAlta()" class="modal-form">
+          <div class="field">
+            <select id="alta-vuelo" class="field-input" [ngModel]="altaVueloId()" (ngModelChange)="altaVueloId.set($event)" name="altaVuelo" required>
+              <option [ngValue]="null" disabled selected>{{ 'adminAssignments.flightPlaceholder' | translate }}</option>
+              @for (v of vuelos(); track v.id) {
+                <option [ngValue]="v.id">{{ formatoVueloOpcion(v) }}</option>
+              }
+            </select>
+            <label class="field-label" for="alta-vuelo">{{ 'adminAssignments.selectFlight' | translate }}</label>
+          </div>
+
+          <div class="field">
+            <select id="alta-empleado" class="field-input" [ngModel]="altaEmpleadoId()" (ngModelChange)="altaEmpleadoId.set($event)" name="altaEmpleado" required>
+              <option [ngValue]="null" disabled selected>{{ 'adminAssignments.employeePlaceholder' | translate }}</option>
+              @for (e of empleadosDisponibles(); track e.id) {
+                <option [ngValue]="e.id">{{ formatoEmpleadoOpcion(e) }}</option>
+              }
+            </select>
+            <label class="field-label" for="alta-empleado">{{ 'adminAssignments.selectEmployee' | translate }}</label>
+          </div>
+
+          <div class="field">
+            <select id="alta-rol" class="field-input" [ngModel]="altaRol()" (ngModelChange)="altaRol.set($event)" name="altaRol" required>
+              @for (r of roles; track r) {
+                <option [value]="r">{{ rolKey(r) | translate }}</option>
+              }
+            </select>
+            <label class="field-label" for="alta-rol">{{ 'adminAssignments.selectRole' | translate }}</label>
+          </div>
+
+          <div class="modal-acciones">
+            <button type="button" class="btn btn-outline" (click)="cerrarModalAlta()" [disabled]="guardando()">
+              {{ 'common.cancel' | translate }}
+            </button>
+            <button type="submit" class="btn btn-dark" [disabled]="guardando()">
+              {{ guardando() ? ('adminAssignments.saving' | translate) : ('adminAssignments.createAssignment' | translate) }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ================= Modal Edición ================= -->
+  @if (modalEdicionAbierto() && asignacionEnEdicion(); as actual) {
+    <div class="modal-overlay" (click)="cerrarModalEdicion()">
+      <div class="modal-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-labelledby]="'modal-edicion-title'">
+        <button type="button" class="modal-cerrar" (click)="cerrarModalEdicion()" aria-label="Cerrar">&times;</button>
+        <span class="section-eyebrow">{{ 'adminAssignments.eyebrow' | translate }}</span>
+        <h2 id="modal-edicion-title" class="modal-titulo">{{ 'adminAssignments.modalEditTitle' | translate }} #{{ actual.id }}</h2>
+
+        @if (formularioError()) {
+          <div class="alerta alerta--error" role="alert">
+            <span>{{ formularioError() }}</span>
+          </div>
+        }
+
+        <form (ngSubmit)="guardarEdicion()" class="modal-form">
+          <div class="field">
+            <select id="edit-vuelo" class="field-input" [ngModel]="edicionVueloId()" (ngModelChange)="edicionVueloId.set($event)" name="editVuelo" required>
+              @for (v of vuelos(); track v.id) {
+                <option [ngValue]="v.id">{{ formatoVueloOpcion(v) }}</option>
+              }
+            </select>
+            <label class="field-label" for="edit-vuelo">{{ 'adminAssignments.selectFlight' | translate }}</label>
+          </div>
+
+          <div class="field">
+            <select id="edit-empleado" class="field-input" [ngModel]="edicionEmpleadoId()" (ngModelChange)="edicionEmpleadoId.set($event)" name="editEmpleado" required>
+              @for (e of empleadosDisponibles(); track e.id) {
+                <option [ngValue]="e.id">{{ formatoEmpleadoOpcion(e) }}</option>
+              }
+            </select>
+            <label class="field-label" for="edit-empleado">{{ 'adminAssignments.selectEmployee' | translate }}</label>
+          </div>
+
+          <div class="field">
+            <select id="edit-rol" class="field-input" [ngModel]="edicionRol()" (ngModelChange)="edicionRol.set($event)" name="editRol" required>
+              @for (r of roles; track r) {
+                <option [value]="r">{{ rolKey(r) | translate }}</option>
+              }
+            </select>
+            <label class="field-label" for="edit-rol">{{ 'adminAssignments.selectRole' | translate }}</label>
+          </div>
+
+          <div class="modal-acciones">
+            <button type="button" class="btn btn-outline" (click)="cerrarModalEdicion()" [disabled]="guardando()">
+              {{ 'common.cancel' | translate }}
+            </button>
+            <button type="submit" class="btn btn-dark" [disabled]="guardando()">
+              {{ guardando() ? ('adminAssignments.saving' | translate) : ('adminAssignments.saveChanges' | translate) }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ================= Modal Confirmación Baja ================= -->
+  @if (modalBajaAbierto() && asignacionAEliminar(); as aEliminar) {
+    <div class="modal-overlay" (click)="cerrarModalBaja()">
+      <div class="modal-box modal-box--baja" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-labelledby]="'modal-baja-title'">
+        <button type="button" class="modal-cerrar" (click)="cerrarModalBaja()" aria-label="Cerrar">&times;</button>
+        <span class="section-eyebrow">{{ 'adminAssignments.eyebrow' | translate }}</span>
+        <h2 id="modal-baja-title" class="modal-titulo">{{ 'adminAssignments.confirmDeleteTitle' | translate }}</h2>
+        <p class="modal-subtitulo">{{ 'adminAssignments.confirmDeleteMessage' | translate }}</p>
+
+        <div class="baja-resumen">
+          <p><strong>{{ 'adminAssignments.colFlight' | translate }}:</strong> #{{ aEliminar.vuelo.id }} ({{ aEliminar.vuelo.aeropuertoOrigen?.codigoIata }} → {{ aEliminar.vuelo.aeropuertoDestino?.codigoIata }})</p>
+          <p><strong>{{ 'adminAssignments.colEmployee' | translate }}:</strong> {{ nombreEmpleado(aEliminar) }}</p>
+          <p><strong>{{ 'adminAssignments.colRole' | translate }}:</strong> {{ rolKey(aEliminar.rolEmpleado) | translate }}</p>
+        </div>
+
+        <div class="modal-acciones">
+          <button type="button" class="btn btn-outline" (click)="cerrarModalBaja()" [disabled]="eliminando()">
+            {{ 'common.cancel' | translate }}
+          </button>
+          <button type="button" class="btn btn-danger" (click)="confirmarBaja()" [disabled]="eliminando()">
+            {{ eliminando() ? ('adminAssignments.deleting' | translate) : ('adminAssignments.confirmDeleteAction' | translate) }}
+          </button>
+        </div>
+      </div>
+    </div>
   }
 </section>
