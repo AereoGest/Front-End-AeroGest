@@ -1,9 +1,30 @@
 <section class="admin-usr container">
   <header class="admin-usr__header">
-    <span class="section-eyebrow">{{ 'adminUsers.eyebrow' | translate }}</span>
-    <h1 class="section-title">{{ 'adminUsers.title' | translate }}</h1>
-    <p class="admin-usr__subtitle">{{ 'adminUsers.subtitle' | translate }}</p>
+    <div class="admin-usr__header-main">
+      <div>
+        <span class="section-eyebrow">{{ 'adminUsers.eyebrow' | translate }}</span>
+        <h1 class="section-title">{{ 'adminUsers.title' | translate }}</h1>
+        <p class="admin-usr__subtitle">{{ 'adminUsers.subtitle' | translate }}</p>
+      </div>
+      <button type="button" class="btn btn-dark btn-alta" (click)="abrirModalAlta()">
+        {{ 'adminUsers.btnNew' | translate }}
+      </button>
+    </div>
   </header>
+
+  <!-- Alertas globales -->
+  @if (mensajeExito()) {
+    <div class="alerta alerta--exito" role="status">
+      <span>{{ mensajeExito()! | translate }}</span>
+      <button type="button" class="alerta__cerrar" (click)="mensajeExito.set(null)" aria-label="Cerrar">&times;</button>
+    </div>
+  }
+  @if (mensajeError()) {
+    <div class="alerta alerta--error" role="alert">
+      <span>{{ mensajeError()! | translate }}</span>
+      <button type="button" class="alerta__cerrar" (click)="mensajeError.set(null)" aria-label="Cerrar">&times;</button>
+    </div>
+  }
 
   <!-- Barra de filtros -->
   <div class="filtros">
@@ -41,7 +62,7 @@
     }
   </div>
 
-  <!-- Pestañas por rol (sincronizadas con el select) -->
+  <!-- Pestañas por rol -->
   <div class="tabs" role="tablist">
     <button type="button" role="tab" class="tab"
             [class.active]="rolFiltro() === 'TODOS'"
@@ -81,9 +102,11 @@
         <thead>
           <tr>
             <th>{{ 'adminUsers.colUser' | translate }}</th>
+            <th>{{ 'adminUsers.fieldIdNumber' | translate }}</th>
             <th>{{ 'adminUsers.colEmail' | translate }}</th>
             <th>{{ 'adminUsers.colPhone' | translate }}</th>
             <th>{{ 'adminUsers.colRole' | translate }}</th>
+            <th class="th-acciones">{{ 'adminUsers.colActions' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -103,11 +126,32 @@
                 </div>
               </td>
               <td>
+                @if (u.numeroIdentificador) {
+                  <span class="doc-badge">{{ u.identificador || 'DNI' }}: {{ u.numeroIdentificador }}</span>
+                } @else {
+                  <span class="text-subtle">—</span>
+                }
+              </td>
+              <td>
                 <a class="email" [href]="'mailto:' + u.email">{{ u.email }}</a>
               </td>
               <td>{{ u.telefono || '—' }}</td>
               <td>
                 <span class="badge rol--{{ u.role.toLowerCase() }}">{{ rolKey(u.role) | translate }}</span>
+              </td>
+              <td class="td-acciones">
+                <div class="acciones-grupo">
+                  <button type="button" class="btn-accion btn-accion--edit"
+                          (click)="abrirModalEdicion(u)"
+                          [title]="'adminUsers.btnEdit' | translate">
+                    {{ 'adminUsers.btnEdit' | translate }}
+                  </button>
+                  <button type="button" class="btn-accion btn-accion--delete"
+                          (click)="abrirModalBaja(u)"
+                          [title]="'adminUsers.btnDelete' | translate">
+                    {{ 'adminUsers.btnDelete' | translate }}
+                  </button>
+                </div>
               </td>
             </tr>
           }
@@ -116,5 +160,280 @@
     </div>
 
     <p class="contador">{{ 'adminUsers.resultsCount' | translate: { count: visibles().length } }}</p>
+  }
+
+  <!-- ================= Modal Alta ================= -->
+  @if (modalAltaAbierto()) {
+    <div class="modal-overlay" (click)="cerrarModalAlta()">
+      <div class="modal-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="modal-alta-title">
+        <button type="button" class="modal-cerrar" (click)="cerrarModalAlta()" aria-label="Cerrar">&times;</button>
+        <span class="section-eyebrow">{{ 'adminUsers.eyebrow' | translate }}</span>
+        <h2 id="modal-alta-title" class="modal-titulo">{{ 'adminUsers.modalCreateTitle' | translate }}</h2>
+
+        @if (formularioError()) {
+          <div class="alerta alerta--error" role="alert">
+            <span>{{ formularioError() }}</span>
+          </div>
+        }
+
+        <form (ngSubmit)="crearUsuario()" class="modal-form">
+          <div class="form-row">
+            <div class="field">
+              <input id="alta-nombre" class="field-input" type="text"
+                     [ngModel]="altaNombre()" (ngModelChange)="altaNombre.set($event)"
+                     name="altaNombre" required />
+              <label class="field-label" for="alta-nombre">{{ 'adminUsers.fieldFirstName' | translate }}</label>
+            </div>
+
+            <div class="field">
+              <input id="alta-apellido" class="field-input" type="text"
+                     [ngModel]="altaApellido()" (ngModelChange)="altaApellido.set($event)"
+                     name="altaApellido" required />
+              <label class="field-label" for="alta-apellido">{{ 'adminUsers.fieldLastName' | translate }}</label>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <select id="alta-id-tipo" class="field-input"
+                      [ngModel]="altaIdentificador()" (ngModelChange)="altaIdentificador.set($event)"
+                      name="altaIdentificador">
+                @for (t of tiposIdentificador; track t) {
+                  <option [value]="t">{{ t }}</option>
+                }
+              </select>
+              <label class="field-label" for="alta-id-tipo">{{ 'adminUsers.fieldIdType' | translate }}</label>
+            </div>
+
+            <div class="field">
+              <input id="alta-id-num" class="field-input" type="text"
+                     [ngModel]="altaNumeroIdentificador()" (ngModelChange)="altaNumeroIdentificador.set($event)"
+                     name="altaNumeroIdentificador" required />
+              <label class="field-label" for="alta-id-num">{{ 'adminUsers.fieldIdNumber' | translate }}</label>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <input id="alta-fecha-nac" class="field-input" type="date"
+                     [ngModel]="altaFechaNacimiento()" (ngModelChange)="altaFechaNacimiento.set($event)"
+                     name="altaFechaNacimiento" required />
+              <label class="field-label" for="alta-fecha-nac">{{ 'adminUsers.fieldBirthDate' | translate }}</label>
+            </div>
+
+            <div class="field">
+              <select id="alta-sexo" class="field-input"
+                      [ngModel]="altaSexo()" (ngModelChange)="altaSexo.set($event)"
+                      name="altaSexo">
+                <option value="MASCULINO">{{ 'adminUsers.genderMale' | translate }}</option>
+                <option value="FEMENINO">{{ 'adminUsers.genderFemale' | translate }}</option>
+                <option value="OTRO">{{ 'adminUsers.genderOther' | translate }}</option>
+              </select>
+              <label class="field-label" for="alta-sexo">{{ 'adminUsers.fieldGender' | translate }}</label>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <input id="alta-email" class="field-input" type="email"
+                     [ngModel]="altaEmail()" (ngModelChange)="altaEmail.set($event)"
+                     name="altaEmail" required />
+              <label class="field-label" for="alta-email">{{ 'adminUsers.fieldEmail' | translate }}</label>
+            </div>
+
+            <div class="field">
+              <input id="alta-telefono" class="field-input" type="tel"
+                     [ngModel]="altaTelefono()" (ngModelChange)="altaTelefono.set($event)"
+                     name="altaTelefono" required />
+              <label class="field-label" for="alta-telefono">{{ 'adminUsers.fieldPhone' | translate }}</label>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <input id="alta-password" class="field-input" type="password"
+                     [ngModel]="altaPassword()" (ngModelChange)="altaPassword.set($event)"
+                     name="altaPassword" required />
+              <label class="field-label" for="alta-password">{{ 'adminUsers.fieldPassword' | translate }}</label>
+            </div>
+
+            <div class="field">
+              <select id="alta-rol-sel" class="field-input"
+                      [ngModel]="altaRole()" (ngModelChange)="altaRole.set($event)"
+                      name="altaRole">
+                @for (r of rolesAsignables; track r) {
+                  <option [value]="r">{{ rolKey(r) | translate }}</option>
+                }
+              </select>
+              <label class="field-label" for="alta-rol-sel">{{ 'adminUsers.fieldRole' | translate }}</label>
+            </div>
+          </div>
+
+          <div class="modal-acciones">
+            <button type="button" class="btn btn-outline" (click)="cerrarModalAlta()" [disabled]="guardando()">
+              {{ 'adminUsers.btnCancel' | translate }}
+            </button>
+            <button type="submit" class="btn btn-dark" [disabled]="guardando()">
+              {{ guardando() ? ('adminUsers.saving' | translate) : ('adminUsers.btnSave' | translate) }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ================= Modal Edición ================= -->
+  @if (modalEdicionAbierto() && usuarioSeleccionado(); as actual) {
+    <div class="modal-overlay" (click)="cerrarModalEdicion()">
+      <div class="modal-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="modal-edicion-title">
+        <button type="button" class="modal-cerrar" (click)="cerrarModalEdicion()" aria-label="Cerrar">&times;</button>
+        <span class="section-eyebrow">{{ 'adminUsers.eyebrow' | translate }}</span>
+        <h2 id="modal-edicion-title" class="modal-titulo">{{ 'adminUsers.modalEditTitle' | translate }} #{{ actual.id }}</h2>
+
+        @if (formularioError()) {
+          <div class="alerta alerta--error" role="alert">
+            <span>{{ formularioError() }}</span>
+          </div>
+        }
+
+        <form (ngSubmit)="guardarEdicion()" class="modal-form">
+          <div class="form-row">
+            <div class="field">
+              <input id="edit-nombre" class="field-input" type="text"
+                     [ngModel]="editNombre()" (ngModelChange)="editNombre.set($event)"
+                     name="editNombre" required />
+              <label class="field-label" for="edit-nombre">{{ 'adminUsers.fieldFirstName' | translate }}</label>
+            </div>
+
+            <div class="field">
+              <input id="edit-apellido" class="field-input" type="text"
+                     [ngModel]="editApellido()" (ngModelChange)="editApellido.set($event)"
+                     name="editApellido" required />
+              <label class="field-label" for="edit-apellido">{{ 'adminUsers.fieldLastName' | translate }}</label>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <select id="edit-id-tipo" class="field-input"
+                      [ngModel]="editIdentificador()" (ngModelChange)="editIdentificador.set($event)"
+                      name="editIdentificador">
+                @for (t of tiposIdentificador; track t) {
+                  <option [value]="t">{{ t }}</option>
+                }
+              </select>
+              <label class="field-label" for="edit-id-tipo">{{ 'adminUsers.fieldIdType' | translate }}</label>
+            </div>
+
+            <div class="field">
+              <input id="edit-id-num" class="field-input" type="text"
+                     [ngModel]="editNumeroIdentificador()" (ngModelChange)="editNumeroIdentificador.set($event)"
+                     name="editNumeroIdentificador" required />
+              <label class="field-label" for="edit-id-num">{{ 'adminUsers.fieldIdNumber' | translate }}</label>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <input id="edit-fecha-nac" class="field-input" type="date"
+                     [ngModel]="editFechaNacimiento()" (ngModelChange)="editFechaNacimiento.set($event)"
+                     name="editFechaNacimiento" required />
+              <label class="field-label" for="edit-fecha-nac">{{ 'adminUsers.fieldBirthDate' | translate }}</label>
+            </div>
+
+            <div class="field">
+              <select id="edit-sexo" class="field-input"
+                      [ngModel]="editSexo()" (ngModelChange)="editSexo.set($event)"
+                      name="editSexo">
+                <option value="MASCULINO">{{ 'adminUsers.genderMale' | translate }}</option>
+                <option value="FEMENINO">{{ 'adminUsers.genderFemale' | translate }}</option>
+                <option value="OTRO">{{ 'adminUsers.genderOther' | translate }}</option>
+              </select>
+              <label class="field-label" for="edit-sexo">{{ 'adminUsers.fieldGender' | translate }}</label>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <input id="edit-email" class="field-input" type="email"
+                     [ngModel]="editEmail()" (ngModelChange)="editEmail.set($event)"
+                     name="editEmail" required />
+              <label class="field-label" for="edit-email">{{ 'adminUsers.fieldEmail' | translate }}</label>
+            </div>
+
+            <div class="field">
+              <input id="edit-telefono" class="field-input" type="tel"
+                     [ngModel]="editTelefono()" (ngModelChange)="editTelefono.set($event)"
+                     name="editTelefono" required />
+              <label class="field-label" for="edit-telefono">{{ 'adminUsers.fieldPhone' | translate }}</label>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <input id="edit-password" class="field-input" type="password"
+                     [ngModel]="editPassword()" (ngModelChange)="editPassword.set($event)"
+                     name="editPassword"
+                     [placeholder]="'adminUsers.fieldPasswordEdit' | translate" />
+              <label class="field-label" for="edit-password">{{ 'adminUsers.fieldPasswordEdit' | translate }}</label>
+            </div>
+
+            <div class="field">
+              <select id="edit-rol-sel" class="field-input"
+                      [ngModel]="editRole()" (ngModelChange)="editRole.set($event)"
+                      name="editRole">
+                @for (r of rolesAsignables; track r) {
+                  <option [value]="r">{{ rolKey(r) | translate }}</option>
+                }
+              </select>
+              <label class="field-label" for="edit-rol-sel">{{ 'adminUsers.fieldRole' | translate }}</label>
+            </div>
+          </div>
+
+          <div class="modal-acciones">
+            <button type="button" class="btn btn-outline" (click)="cerrarModalEdicion()" [disabled]="guardando()">
+              {{ 'adminUsers.btnCancel' | translate }}
+            </button>
+            <button type="submit" class="btn btn-dark" [disabled]="guardando()">
+              {{ guardando() ? ('adminUsers.saving' | translate) : ('adminUsers.btnSave' | translate) }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ================= Modal Baja ================= -->
+  @if (modalBajaAbierto() && usuarioSeleccionado(); as actual) {
+    <div class="modal-overlay" (click)="cerrarModalBaja()">
+      <div class="modal-box modal-box--danger" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="modal-baja-title">
+        <button type="button" class="modal-cerrar" (click)="cerrarModalBaja()" aria-label="Cerrar">&times;</button>
+        <span class="section-eyebrow">{{ 'adminUsers.eyebrow' | translate }}</span>
+        <h2 id="modal-baja-title" class="modal-titulo">{{ 'adminUsers.modalDeleteTitle' | translate }}</h2>
+
+        <p class="modal-baja-texto">
+          {{ 'adminUsers.modalDeleteConfirm' | translate: { name: nombreCompleto(actual), id: actual.id } }}
+        </p>
+
+        <p class="modal-baja-advertencia">
+          {{ 'adminUsers.modalDeleteWarning' | translate }}
+        </p>
+
+        @if (formularioError()) {
+          <div class="alerta alerta--error" role="alert">
+            <span>{{ formularioError() }}</span>
+          </div>
+        }
+
+        <div class="modal-acciones">
+          <button type="button" class="btn btn-outline" (click)="cerrarModalBaja()" [disabled]="eliminando()">
+            {{ 'adminUsers.btnCancel' | translate }}
+          </button>
+          <button type="button" class="btn btn-danger" (click)="confirmarBaja()" [disabled]="eliminando()">
+            {{ eliminando() ? ('adminUsers.deleting' | translate) : ('adminUsers.btnConfirmDelete' | translate) }}
+          </button>
+        </div>
+      </div>
+    </div>
   }
 </section>
