@@ -5,6 +5,7 @@ import { Auth } from '../../../services/auth';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import type { TranslationKey } from '../../../i18n/es';
 import { VuelosAdmin } from '../vuelos-admin/vuelos-admin';
+import { ReservasAdmin } from '../reservas-admin/reservas-admin';
 
 export type SeccionAdminId =
   | 'RESUMEN'
@@ -25,7 +26,7 @@ export interface ModuloAdmin {
 @Component({
   selector: 'app-admin-panel',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslatePipe, VuelosAdmin],
+  imports: [CommonModule, RouterLink, TranslatePipe, VuelosAdmin, ReservasAdmin],
   templateUrl: './admin-panel.html',
   styleUrl: './admin-panel.css',
 })
@@ -47,6 +48,7 @@ export class AdminPanel {
       tituloKey: 'adminPanel.bookings.title',
       descripcionKey: 'adminPanel.bookings.desc',
       ctaKey: 'adminPanel.bookings.cta',
+      rutaDirecta: '/reservasAdmin',
     },
     {
       id: 'PASAJES',

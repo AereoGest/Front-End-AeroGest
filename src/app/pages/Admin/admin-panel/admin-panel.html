@@ -78,6 +78,16 @@
         </a>
       </div>
       <app-vuelos-admin></app-vuelos-admin>
+    } @else if (seccionActiva() === 'RESERVAS') {
+      <div class="admin-embedded-header">
+        <button type="button" class="btn-back-overview" (click)="seleccionarSeccion('RESUMEN')">
+          {{ 'adminPanel.backToOverview' | translate }}
+        </button>
+        <a routerLink="/reservasAdmin" class="admin-module-link">
+          {{ 'adminPanel.openSection' | translate }}
+        </a>
+      </div>
+      <app-reservas-admin></app-reservas-admin>
     } @else if (moduloSeleccionado(); as mod) {
       <div class="admin-embedded-header">
         <button type="button" class="btn-back-overview" (click)="seleccionarSeccion('RESUMEN')">
