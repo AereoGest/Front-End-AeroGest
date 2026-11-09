@@ -1,16 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CheckInMostrador } from './check-in-mostrador';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { CheckinMostrador } from './check-in-mostrador';
 
-describe('CheckInMostrador', () => {
-  let component: CheckInMostrador;
-  let fixture: ComponentFixture<CheckInMostrador>;
+describe('CheckinMostrador', () => {
+  let component: CheckinMostrador;
+  let fixture: ComponentFixture<CheckinMostrador>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CheckInMostrador],
+      imports: [CheckinMostrador],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(CheckInMostrador);
+    fixture = TestBed.createComponent(CheckinMostrador);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
