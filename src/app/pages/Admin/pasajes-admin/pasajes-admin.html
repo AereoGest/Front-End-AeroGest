@@ -1,0 +1,403 @@
+<section class="tickets-admin-bar">
+  <div class="container">
+    <div class="tickets-toolbar">
+      <fieldset class="field search-field">
+        <input
+          id="admin-buscar-pasaje"
+          type="text"
+          class="field-input"
+          [placeholder]="'adminTickets.searchPlaceholder' | translate"
+          [value]="busqueda()"
+          (input)="busqueda.set($any($event.target).value)"
+        />
+        <label class="field-label" for="admin-buscar-pasaje">{{ 'adminTickets.searchLabel' | translate }}</label>
+      </fieldset>
+
+      <div class="filter-select-wrap">
+        <label for="filtro-reserva-select" class="sr-only">{{ 'adminTickets.selectBookingLabel' | translate }}</label>
+        <select
+          id="filtro-reserva-select"
+          class="select-reserva"
+          [ngModel]="reservaSeleccionadaId()"
+          (ngModelChange)="reservaSeleccionadaId.set($event ? +$event : null)"
+        >
+          <option [ngValue]="null">{{ 'adminTickets.allBookings' | translate }}</option>
+          @for (r of reservasConPasajes(); track r.id) {
+            <option [ngValue]="r.id">
+              {{ codigoReserva(r) }} · {{ r.persona?.nombre }} {{ r.persona?.apellido }} ({{ r.pasajes?.length ?? 0 }})
+            </option>
+          }
+        </select>
+      </div>
+
+      @if (busqueda() || reservaSeleccionadaId() !== null) {
+        <button type="button" class="btn btn-outline" (click)="limpiarFiltros()">
+          {{ 'adminTickets.clearFilters' | translate }}
+        </button>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="section resultados-pasajes">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-eyebrow">{{ 'adminTickets.eyebrow' | translate }}</span>
+      <h2 class="section-title">{{ 'adminTickets.title' | translate }}</h2>
+      <p class="section-subtitle">{{ 'adminTickets.subtitle' | translate }}</p>
+    </div>
+
+    @if (mensajeExito()) {
+      <div class="alerta-exito" role="status">{{ mensajeExito() }}</div>
+    }
+    @if (mensajeError()) {
+      <div class="alerta-error" role="alert">{{ mensajeError() }}</div>
+    }
+
+    @if (cargando()) {
+      <p class="estado-texto" role="status">{{ 'adminTickets.loading' | translate }}</p>
+    }
+
+    @if (errorCarga() !== null) {
+      <div class="alerta-error" role="alert">
+        <span>{{ errorCarga() }}</span>
+        <button type="button" class="btn-reintentar" (click)="cargarReservas()">
+          {{ 'adminTickets.retry' | translate }}
+        </button>
+      </div>
+    }
+
+    @if (!cargando() && errorCarga() === null && reservasFiltradas().length === 0) {
+      <p class="estado-texto">{{ 'adminTickets.noResults' | translate }}</p>
+    }
+
+    <div class="reservas-pasajes-list">
+      @for (reserva of reservasFiltradas(); track reserva.id) {
+        <article class="reserva-grupo" [class.cancelada]="reserva.estadoReserva === 'CANCELADA'">
+          <header class="reserva-grupo-header">
+            <div class="reserva-grupo-info">
+              <span class="reserva-codigo">{{ codigoReserva(reserva) }}</span>
+              <span
+                class="badge-estado"
+                [class.badge-confirmado]="reserva.estadoReserva === 'CONFIRMADO' || reserva.estadoReserva === 'ACTIVO'"
+                [class.badge-procesando]="reserva.estadoReserva === 'PROCESANDO'"
+                [class.badge-cancelada]="reserva.estadoReserva === 'CANCELADA'"
+              >
+                {{ estadoReservaKey(reserva.estadoReserva) | translate }}
+              </span>
+              <span class="reserva-titular">
+                {{ 'adminBookings.holder' | translate }}:
+                <strong>{{ reserva.persona?.nombre }} {{ reserva.persona?.apellido }}</strong>
+              </span>
+            </div>
+
+            <div class="reserva-grupo-total">
+              <span class="total-label">{{ 'adminBookings.totalValue' | translate }}:</span>
+              <strong class="total-monto">{{ formatearPrecio(reserva.valor) }}</strong>
+            </div>
+          </header>
+
+          <div class="pasajes-grid">
+            @for (pasaje of reserva.pasajes; track pasaje.id) {
+              <div class="pasaje-card">
+                <div class="pasaje-card-body">
+                  <div class="pasaje-top">
+                    <span class="pasaje-codigo">{{ pasaje.codigoPasaje }}</span>
+                    <span class="pasaje-clase">{{ pasaje.clasesVuelo }}</span>
+                    <strong class="pasaje-nombre">{{ pasaje.nombre }} {{ pasaje.apellido }}</strong>
+                  </div>
+
+                  <div class="pasaje-detalles">
+                    <span>
+                      <strong>{{ 'adminTickets.document' | translate }}:</strong>
+                      {{ pasaje.tipoDocumento }} {{ pasaje.documento }}
+                    </span>
+                    @if (pasaje.vuelo) {
+                      <span>
+                        <strong>{{ 'adminTickets.flight' | translate }}:</strong>
+                        {{ pasaje.vuelo.aeropuertoOrigen?.codigoIata }} →
+                        {{ pasaje.vuelo.aeropuertoDestino?.codigoIata }} ({{ pasaje.vuelo.fechaSalida }})
+                      </span>
+                    }
+                    <span>
+                      <strong>{{ 'adminTickets.seat' | translate }}:</strong>
+                      {{ pasaje.asiento ? pasaje.asiento.codigo : ('adminTickets.unassignedSeat' | translate) }}
+                    </span>
+                    <span>
+                      <strong>{{ 'adminTickets.extras' | translate }}:</strong>
+                      {{ describirExtras(pasaje) || ('adminTickets.noExtras' | translate) }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="pasaje-card-actions">
+                  @if (reserva.estadoReserva === 'CANCELADA') {
+                    <span class="texto-cancelada">{{ 'adminTickets.bookingCanceledNotice' | translate }}</span>
+                  } @else {
+                    <button
+                      type="button"
+                      class="btn-accion btn-editar"
+                      (click)="abrirModalEdicion(reserva, pasaje)"
+                    >
+                      {{ 'adminTickets.editTicket' | translate }}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-accion btn-cancelar"
+                      (click)="abrirModalCancelacion(reserva, pasaje)"
+                    >
+                      {{ 'adminTickets.cancelTicket' | translate }}
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ===================== MODAL MODIFICACIÓN DE PASAJE ===================== -->
+@if (itemEnEdicion(); as item) {
+  <div class="modal-overlay" (click)="cerrarModalEdicion()">
+    <div
+      class="modal-box modal-box-lg"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-edit-pasaje-title"
+      (click)="$event.stopPropagation()"
+    >
+      <button
+        type="button"
+        class="modal-cerrar"
+        [attr.aria-label]="'common.close' | translate"
+        (click)="cerrarModalEdicion()"
+      >
+        ✕
+      </button>
+
+      <span class="section-eyebrow">
+        {{ codigoReserva(item.reserva) }} · {{ item.pasaje.codigoPasaje }}
+      </span>
+      <h3 id="modal-edit-pasaje-title" class="modal-titulo">{{ 'adminTickets.editModalTitle' | translate }}</h3>
+      <p class="modal-subtitulo">{{ 'adminTickets.editModalSubtitle' | translate }}</p>
+
+      @if (errorEdicion()) {
+        <div class="alerta-error" role="alert">{{ errorEdicion() }}</div>
+      }
+
+      <div class="form-grid-3">
+        <div class="form-group">
+          <label for="p-nombre" class="form-label">{{ 'adminBookings.firstName' | translate }}</label>
+          <input
+            id="p-nombre"
+            type="text"
+            class="form-control"
+            [ngModel]="editNombre()"
+            (ngModelChange)="editNombre.set($event)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="p-apellido" class="form-label">{{ 'adminBookings.lastName' | translate }}</label>
+          <input
+            id="p-apellido"
+            type="text"
+            class="form-control"
+            [ngModel]="editApellido()"
+            (ngModelChange)="editApellido.set($event)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="p-fecha-nac" class="form-label">{{ 'adminBookings.birthDate' | translate }}</label>
+          <input
+            id="p-fecha-nac"
+            type="date"
+            class="form-control"
+            [ngModel]="editFechaNacimiento()"
+            (ngModelChange)="editFechaNacimiento.set($event)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="p-tipo-doc" class="form-label">{{ 'adminBookings.docType' | translate }}</label>
+          <select
+            id="p-tipo-doc"
+            class="form-control"
+            [ngModel]="editTipoDocumento()"
+            (ngModelChange)="editTipoDocumento.set($event)"
+          >
+            @for (t of tiposDocumento; track t.valor) {
+              <option [ngValue]="t.valor">{{ t.etiqueta }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="p-doc" class="form-label">{{ 'adminBookings.docNumber' | translate }}</label>
+          <input
+            id="p-doc"
+            type="text"
+            class="form-control"
+            [ngModel]="editDocumento()"
+            (ngModelChange)="editDocumento.set($event)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="p-email" class="form-label">{{ 'adminBookings.email' | translate }}</label>
+          <input
+            id="p-email"
+            type="email"
+            class="form-control"
+            [ngModel]="editEmail()"
+            (ngModelChange)="editEmail.set($event)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="p-clase" class="form-label">{{ 'adminBookings.flightClass' | translate }}</label>
+          <select
+            id="p-clase"
+            class="form-control"
+            [ngModel]="editClase()"
+            (ngModelChange)="editClase.set($event)"
+          >
+            @for (cl of clasesVuelo; track cl) {
+              <option [ngValue]="cl">{{ cl }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="p-asiento" class="form-label">{{ 'adminBookings.seat' | translate }}</label>
+          <select
+            id="p-asiento"
+            class="form-control"
+            [ngModel]="editAsientoId()"
+            (ngModelChange)="editAsientoId.set($event ? +$event : null)"
+          >
+            <option [ngValue]="null">{{ 'adminBookings.seatAuto' | translate }}</option>
+            @for (a of asientosOpcionesEdicion(); track a.id) {
+              <option [ngValue]="a.id">
+                {{ a.codigo }}{{ a.precioExtra ? ' (+$' + a.precioExtra + ')' : '' }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="p-asistencia" class="form-label">{{ 'adminBookings.assistance' | translate }}</label>
+          <select
+            id="p-asistencia"
+            class="form-control"
+            [ngModel]="editAsistenciaId()"
+            (ngModelChange)="editAsistenciaId.set($event ? +$event : null)"
+          >
+            <option [ngValue]="null">{{ 'adminBookings.noAssistance' | translate }}</option>
+            @for (asist of asistenciasCatalogo(); track asist.id) {
+              <option [ngValue]="asist.id">{{ asist.nombrePlan }} (+${{ asist.precio }})</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (equipajesCatalogo().length > 0) {
+        <div class="equipaje-group">
+          <span class="form-label">{{ 'adminBookings.baggage' | translate }}:</span>
+          <div class="equipaje-checks">
+            @for (eq of equipajesCatalogo(); track eq.id) {
+              <label class="check-pill">
+                <input
+                  type="checkbox"
+                  [checked]="editEquipajeIds().includes(eq.id)"
+                  (change)="alternarEquipajeEdicion(eq.id, $any($event.target).checked)"
+                />
+                <span>{{ eq.tipo }} ({{ eq.peso }} kg · +${{ eq.precio }})</span>
+              </label>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-outline" [disabled]="guardandoEdicion()" (click)="cerrarModalEdicion()">
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button type="button" class="btn btn-dark" [disabled]="guardandoEdicion()" (click)="guardarEdicionPasaje()">
+          {{ (guardandoEdicion() ? 'adminTickets.saving' : 'adminTickets.saveBtn') | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ===================== MODAL CANCELACIÓN DE PASAJE ===================== -->
+@if (itemParaCancelar(); as itemCancel) {
+  <div class="modal-overlay" (click)="cerrarModalCancelacion()">
+    <div
+      class="modal-box"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-cancel-pasaje-title"
+      (click)="$event.stopPropagation()"
+    >
+      <button
+        type="button"
+        class="modal-cerrar"
+        [attr.aria-label]="'common.close' | translate"
+        (click)="cerrarModalCancelacion()"
+      >
+        ✕
+      </button>
+
+      <span class="section-eyebrow">
+        {{ codigoReserva(itemCancel.reserva) }} · {{ itemCancel.pasaje.codigoPasaje }}
+      </span>
+      <h3 id="modal-cancel-pasaje-title" class="modal-titulo">{{ 'adminTickets.cancelModalTitle' | translate }}</h3>
+      <p class="modal-subtitulo">
+        {{
+          'adminTickets.cancelModalDesc'
+            | translate
+              : {
+                  ticketCode: itemCancel.pasaje.codigoPasaje,
+                  passenger: itemCancel.pasaje.nombre + ' ' + itemCancel.pasaje.apellido,
+                  bookingCode: codigoReserva(itemCancel.reserva)
+                }
+        }}
+      </p>
+
+      @if ((itemCancel.reserva.pasajes?.length ?? 0) <= 1) {
+        <div class="alerta-advertencia">
+          {{ 'adminTickets.cancelLastTicketWarning' | translate }}
+        </div>
+      }
+
+      @if (errorCancelacion()) {
+        <div class="alerta-error" role="alert">{{ errorCancelacion() }}</div>
+      }
+
+      <div class="modal-acciones">
+        <button
+          type="button"
+          class="btn btn-outline"
+          [disabled]="procesandoCancelacion()"
+          (click)="cerrarModalCancelacion()"
+        >
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          [disabled]="procesandoCancelacion()"
+          (click)="confirmarCancelacionPasaje()"
+        >
+          {{ (procesandoCancelacion() ? 'adminTickets.canceling' : 'adminTickets.confirmCancelBtn') | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

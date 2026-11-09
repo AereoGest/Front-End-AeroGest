@@ -6,6 +6,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 import type { TranslationKey } from '../../../i18n/es';
 import { VuelosAdmin } from '../vuelos-admin/vuelos-admin';
 import { ReservasAdmin } from '../reservas-admin/reservas-admin';
+import { PasajesAdmin } from '../pasajes-admin/pasajes-admin';
 
 export type SeccionAdminId =
   | 'RESUMEN'
@@ -26,7 +27,7 @@ export interface ModuloAdmin {
 @Component({
   selector: 'app-admin-panel',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslatePipe, VuelosAdmin, ReservasAdmin],
+  imports: [CommonModule, RouterLink, TranslatePipe, VuelosAdmin, ReservasAdmin, PasajesAdmin],
   templateUrl: './admin-panel.html',
   styleUrl: './admin-panel.css',
 })
@@ -55,6 +56,7 @@ export class AdminPanel {
       tituloKey: 'adminPanel.tickets.title',
       descripcionKey: 'adminPanel.tickets.desc',
       ctaKey: 'adminPanel.tickets.cta',
+      rutaDirecta: '/pasajesAdmin',
     },
     {
       id: 'ASIGNACIONES',
