@@ -1,0 +1,93 @@
+<section class="asignaciones">
+  <header class="asignaciones__header">
+    <h1>{{ 'myAssignments.title' | translate }}</h1>
+    <p>{{ 'myAssignments.subtitle' | translate }}</p>
+  </header>
+
+  @if (cargando()) {
+    <p class="estado-msg">{{ 'myAssignments.loading' | translate }}</p>
+  } @else if (error()) {
+    <div class="estado-msg estado-msg--error">
+      <p>{{ 'myAssignments.loadError' | translate }}</p>
+      <button type="button" (click)="cargar()">{{ 'myAssignments.retry' | translate }}</button>
+    </div>
+  } @else {
+
+    @if (siguiente(); as s) {
+      <article class="destacada">
+        <span class="destacada__tag">
+          {{ 'myAssignments.nextFlight' | translate }} ·
+          {{ faltan(s).key | translate: { n: faltan(s).n } }}
+        </span>
+        <div class="ruta">
+          <div>
+            <strong>{{ s.vuelo.aeropuertoOrigen.codigoIata }}</strong>
+            <small>{{ s.vuelo.aeropuertoOrigen.ciudad }}</small>
+          </div>
+          <span class="ruta__linea">✈</span>
+          <div>
+            <strong>{{ s.vuelo.aeropuertoDestino.codigoIata }}</strong>
+            <small>{{ s.vuelo.aeropuertoDestino.ciudad }}</small>
+          </div>
+        </div>
+        <p>
+          {{ salida(s) | date: 'EEEE d/MM' }} ·
+          {{ 'myAssignments.time' | translate: { time: hora(s.vuelo.horaSalida) } }} ·
+          <span class="rol">{{ rolKey(s.rolEmpleado) | translate }}</span>
+        </p>
+      </article>
+    }
+
+    <div class="tabs">
+      <button type="button" [class.activa]="pestania() === 'proximas'" (click)="pestania.set('proximas')">
+        {{ 'myAssignments.tabUpcoming' | translate }} ({{ proximas().length }})
+      </button>
+      <button type="button" [class.activa]="pestania() === 'historial'" (click)="pestania.set('historial')">
+        {{ 'myAssignments.tabHistory' | translate }} ({{ historial().length }})
+      </button>
+    </div>
+
+    @if (visibles().length === 0) {
+      <p class="estado-msg">
+        @if (pestania() === 'proximas') {
+          {{ 'myAssignments.emptyUpcoming' | translate }}
+        } @else {
+          {{ 'myAssignments.emptyHistory' | translate }}
+        }
+      </p>
+    } @else {
+      <ul class="lista">
+        @for (a of visibles(); track a.id) {
+          <li class="card" [class.card--cancelada]="a.vuelo.estado === 'CANCELADO'">
+            <div class="card__fecha">
+              <span class="dia">{{ salida(a) | date: 'dd' }}</span>
+              <span class="mes">{{ salida(a) | date: 'MMM' }}</span>
+            </div>
+
+            <div class="card__info">
+              <div class="ruta ruta--chica">
+                <strong>{{ a.vuelo.aeropuertoOrigen.codigoIata }}</strong>
+                <span class="ruta__linea">→</span>
+                <strong>{{ a.vuelo.aeropuertoDestino.codigoIata }}</strong>
+              </div>
+              <p>{{ a.vuelo.aeropuertoOrigen.ciudad }} – {{ a.vuelo.aeropuertoDestino.ciudad }}</p>
+              <p>
+                {{ 'myAssignments.departs' | translate: { time: hora(a.vuelo.horaSalida) } }} ·
+                {{ 'myAssignments.arrives' | translate: { time: hora(a.vuelo.horaLlegada) } }}
+              </p>
+              <p class="card__avion">
+                {{ 'myAssignments.flightNumber' | translate: { id: a.vuelo.id } }} ·
+                {{ a.vuelo.avion.modelo }} ({{ a.vuelo.avion.identificador }})
+              </p>
+            </div>
+
+            <div class="card__badges">
+              <span class="rol rol--{{ a.rolEmpleado.toLowerCase() }}">{{ rolKey(a.rolEmpleado) | translate }}</span>
+              <span class="estado estado--{{ a.vuelo.estado.toLowerCase() }}">{{ estadoKey(a.vuelo.estado) | translate }}</span>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>
