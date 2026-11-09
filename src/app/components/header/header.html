@@ -9,6 +9,9 @@
             <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">{{ 'nav.home' | translate }}</a></li>
             <li><a routerLink="/vuelos" routerLinkActive="active">{{ 'nav.flights' | translate }}</a></li>
             <li><a routerLink="/" fragment="destinos">{{ 'nav.destinations' | translate }}</a></li>
+            @if (auth.esAdmin()) {
+                <li><a id="nav-admin-link" routerLink="/adminPanel" routerLinkActive="active">{{ 'nav.adminPanel' | translate }}</a></li>
+            }
         </ul>
     </nav>
 
@@ -73,6 +76,11 @@
                     (click)="toggleMenu()">
                     <span class="user-avatar" aria-hidden="true">{{ inicialUsuario() }}</span>
                     <span class="user-name">{{ nombreCorto() }}</span>
+                    @if (rolKey(); as rKey) {
+                        <span id="header-role-badge" class="user-role-badge" [attr.data-role]="auth.rolUsuario()">
+                            {{ rKey | translate }}
+                        </span>
+                    }
                     <svg class="user-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="m6 9 6 6 6-6"></path>
@@ -86,12 +94,34 @@
                             <div class="dropdown-user-meta">
                                 <span class="dropdown-user-label">{{ 'nav.loggedIn' | translate }}</span>
                                 <span class="dropdown-user-email">{{ auth.emailUsuario() || ('nav.myAccount' | translate) }}</span>
+                                @if (rolKey(); as rKey) {
+                                    <span id="dropdown-role-badge" class="dropdown-user-role" [attr.data-role]="auth.rolUsuario()">
+                                        {{ 'nav.roleLabel' | translate }}: {{ rKey | translate }}
+                                    </span>
+                                }
                             </div>
                         </div>
 
                         <hr class="dropdown-divider" />
 
                         <ul class="dropdown-list">
+                            @if (auth.esAdmin()) {
+                                <li role="none">
+                                    <a
+                                        id="admin-panel-link"
+                                        class="dropdown-item dropdown-item-admin"
+                                        role="menuitem"
+                                        [routerLink]="['/adminPanel']"
+                                        routerLinkActive="is-active"
+                                        (click)="cerrarMenu()">
+                                        <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                        </svg>
+                                        <span>{{ 'nav.adminPanel' | translate }}</span>
+                                    </a>
+                                </li>
+                            }
                             <li role="none">
                                 <a
                                     id="perfil"

@@ -1,9 +1,10 @@
-import { Component, ElementRef, HostListener, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Auth } from '../../services/auth';
 import { I18nService } from '../../services/i18n';
 import { ThemeService } from '../../services/theme';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import type { TranslationKey } from '../../i18n/es';
 
 @Component({
   imports: [RouterLink, RouterLinkActive, TranslatePipe],
@@ -11,7 +12,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   styleUrl: './header.css',
   templateUrl: './header.html',
 })
-export class Header {
+export class Header implements OnInit {
   protected readonly auth = inject(Auth);
   protected readonly theme = inject(ThemeService);
   protected readonly i18n = inject(I18nService);
@@ -32,6 +33,17 @@ export class Header {
     const email = this.auth.emailUsuario();
     return email ? email.charAt(0).toUpperCase() : 'U';
   });
+
+  protected readonly rolKey = computed<TranslationKey | null>(() => {
+    const rol = this.auth.rolUsuario();
+    return rol ? (`role.${rol}` as TranslationKey) : null;
+  });
+
+  ngOnInit(): void {
+    if (this.auth.usuarioAutenticado() && !this.auth.rolUsuario()) {
+      this.auth.sincronizarRolDesdeServidor().subscribe();
+    }
+  }
 
   toggleMenu(): void {
     this.menuAbierto.update((abierto) => !abierto);
