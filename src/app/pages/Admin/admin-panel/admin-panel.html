@@ -1,0 +1,105 @@
+<section class="admin-hero" aria-labelledby="admin-panel-title">
+  <div class="container admin-hero-inner">
+    <div class="admin-hero-copy">
+      <span class="section-eyebrow">{{ 'adminPanel.eyebrow' | translate }}</span>
+      <h1 id="admin-panel-title" class="admin-hero-title">
+        {{ 'adminPanel.title' | translate }} <em>{{ 'adminPanel.titleEm' | translate }}</em>
+      </h1>
+      <p class="admin-hero-subtitle">{{ 'adminPanel.subtitle' | translate }}</p>
+    </div>
+
+    <div class="admin-role-card" role="status">
+      <span class="admin-role-label">{{ 'adminPanel.roleVerified' | translate }}</span>
+      <strong class="admin-role-value">{{ rolKey() | translate }}</strong>
+      @if (auth.emailUsuario(); as email) {
+        <span class="admin-role-email">{{ email }}</span>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="section admin-content">
+  <div class="container">
+    <nav class="admin-tabs" [attr.aria-label]="'adminPanel.quickAccess' | translate">
+      <button
+        type="button"
+        class="admin-tab"
+        [class.is-active]="seccionActiva() === 'RESUMEN'"
+        [attr.aria-pressed]="seccionActiva() === 'RESUMEN'"
+        (click)="seleccionarSeccion('RESUMEN')">
+        {{ 'adminPanel.quickAccess' | translate }}
+      </button>
+      @for (modulo of modulos; track modulo.id) {
+        <button
+          type="button"
+          class="admin-tab"
+          [attr.data-module]="modulo.id"
+          [class.is-active]="seccionActiva() === modulo.id"
+          [attr.aria-pressed]="seccionActiva() === modulo.id"
+          (click)="seleccionarSeccion(modulo.id)">
+          {{ modulo.tituloKey | translate }}
+        </button>
+      }
+    </nav>
+
+    @if (seccionActiva() === 'RESUMEN') {
+      <div class="admin-modules-grid">
+        @for (modulo of modulos; track modulo.id) {
+          <article class="admin-module-card" [attr.data-module-card]="modulo.id">
+            <div class="admin-module-body">
+              <span class="admin-module-eyebrow">{{ 'adminPanel.eyebrow' | translate }}</span>
+              <h2 class="admin-module-title">{{ modulo.tituloKey | translate }}</h2>
+              <p class="admin-module-desc">{{ modulo.descripcionKey | translate }}</p>
+            </div>
+
+            <div class="admin-module-actions">
+              <button
+                type="button"
+                class="btn btn-dark"
+                (click)="seleccionarSeccion(modulo.id)">
+                {{ modulo.ctaKey | translate }}
+              </button>
+              @if (modulo.rutaDirecta) {
+                <a [routerLink]="[modulo.rutaDirecta]" class="admin-module-link">
+                  {{ 'adminPanel.openSection' | translate }}
+                </a>
+              }
+            </div>
+          </article>
+        }
+      </div>
+    } @else if (seccionActiva() === 'VUELOS') {
+      <div class="admin-embedded-header">
+        <button type="button" class="btn-back-overview" (click)="seleccionarSeccion('RESUMEN')">
+          {{ 'adminPanel.backToOverview' | translate }}
+        </button>
+        <a routerLink="/vuelosAdmin" class="admin-module-link">
+          {{ 'adminPanel.openSection' | translate }}
+        </a>
+      </div>
+      <app-vuelos-admin></app-vuelos-admin>
+    } @else if (moduloSeleccionado(); as mod) {
+      <div class="admin-embedded-header">
+        <button type="button" class="btn-back-overview" (click)="seleccionarSeccion('RESUMEN')">
+          {{ 'adminPanel.backToOverview' | translate }}
+        </button>
+      </div>
+
+      <article class="admin-module-stage" role="region" [attr.aria-label]="mod.tituloKey | translate">
+        <span class="section-eyebrow">{{ 'adminPanel.activeSection' | translate }}</span>
+        <h2 class="section-title">{{ mod.tituloKey | translate }}</h2>
+        <p class="section-subtitle">{{ mod.descripcionKey | translate }}</p>
+
+        <div class="admin-stage-box">
+          <strong>{{ 'adminPanel.moduleReadyTitle' | translate }}</strong>
+          <p>{{ 'adminPanel.moduleReadyDesc' | translate }}</p>
+          <div class="admin-stage-actions">
+            <button type="button" class="btn btn-dark" (click)="seleccionarSeccion('VUELOS')">
+              {{ 'adminPanel.flights.cta' | translate }}
+            </button>
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+</section>

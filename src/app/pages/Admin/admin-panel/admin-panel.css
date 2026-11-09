@@ -1,0 +1,266 @@
+:host {
+  display: block;
+}
+
+.admin-hero {
+  padding: clamp(36px, 5vw, 60px) 0;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-hero-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.admin-hero-copy {
+  max-width: 680px;
+}
+
+.admin-hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.6vw, 42px);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.admin-hero-title em {
+  font-style: normal;
+  color: var(--accent-text);
+}
+
+.admin-hero-subtitle {
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.admin-role-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 22px;
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  box-shadow: var(--shadow-sm);
+  min-width: 220px;
+}
+
+.admin-role-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.admin-role-value {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--accent-text);
+}
+
+.admin-role-email {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.admin-content {
+  padding: clamp(32px, 5vw, 64px) 0 80px;
+}
+
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px;
+  margin-bottom: 32px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.admin-tab {
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color var(--transition),
+    color var(--transition),
+    box-shadow var(--transition);
+}
+
+.admin-tab:hover {
+  color: var(--text);
+}
+
+.admin-tab.is-active {
+  background: var(--bg-elevated);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 20px;
+}
+
+.admin-module-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform var(--transition),
+    border-color var(--transition),
+    box-shadow var(--transition),
+    background-color var(--transition-theme);
+}
+
+.admin-module-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+}
+
+.admin-module-eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent-text);
+  margin-bottom: 8px;
+}
+
+.admin-module-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.admin-module-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.admin-module-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.admin-module-link {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-text);
+  transition: color var(--transition);
+}
+
+.admin-module-link:hover {
+  color: var(--text);
+}
+
+.admin-embedded-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.btn-back-overview {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  color: var(--text);
+  padding: 8px 14px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    color var(--transition),
+    background-color var(--transition);
+}
+
+.btn-back-overview:hover {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.admin-module-stage {
+  text-align: center;
+  padding: clamp(32px, 5vw, 56px) 24px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-stage-box {
+  max-width: 540px;
+  margin: 28px auto 0;
+  padding: 24px;
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+}
+
+.admin-stage-box strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.admin-stage-box p {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+}
+
+.admin-stage-actions {
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .admin-role-card {
+    width: 100%;
+  }
+  .admin-tab {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+}

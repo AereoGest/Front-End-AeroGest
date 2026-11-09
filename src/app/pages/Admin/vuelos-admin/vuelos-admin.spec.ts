@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { VuelosAdmin } from './vuelos-admin';
 
 describe('VuelosAdmin', () => {
@@ -8,6 +10,7 @@ describe('VuelosAdmin', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [VuelosAdmin],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(VuelosAdmin);
