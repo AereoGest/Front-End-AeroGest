@@ -1,0 +1,234 @@
+<section class="admin-ventas container">
+  <header class="admin-ventas__header">
+    <span class="section-eyebrow">{{ 'adminSales.eyebrow' | translate }}</span>
+    <h1 class="section-title">{{ 'adminSales.title' | translate }}</h1>
+    <p class="admin-ventas__subtitle">{{ 'adminSales.subtitle' | translate }}</p>
+  </header>
+
+  <!-- ============ Rango de fechas ============ -->
+  <div class="rango">
+    <div class="rango__rapidos" role="group" [attr.aria-label]="'adminSales.quickRange' | translate">
+      @for (d of rangosRapidos; track d) {
+        <button type="button" class="chip" [class.active]="rango() === d" (click)="elegirRango(d)">
+          {{ 'adminSales.lastDays' | translate: { n: d } }}
+        </button>
+      }
+    </div>
+
+    <div class="rango__fechas">
+      <div class="field">
+        <input id="v-desde" class="field-input" type="date"
+               [value]="desde()" [max]="hasta()" (change)="onDesde($event)" />
+        <label class="field-label" for="v-desde">{{ 'adminSales.from' | translate }}</label>
+      </div>
+      <div class="field">
+        <input id="v-hasta" class="field-input" type="date"
+               [value]="hasta()" [min]="desde()" [max]="hoy" (change)="onHasta($event)" />
+        <label class="field-label" for="v-hasta">{{ 'adminSales.to' | translate }}</label>
+      </div>
+    </div>
+  </div>
+
+  @if (cargando()) {
+    <p class="estado-msg">{{ 'adminSales.loading' | translate }}</p>
+
+  } @else if (error()) {
+    <div class="estado-msg">
+      <p class="mensaje-error">{{ 'adminSales.loadError' | translate }}</p>
+      <button type="button" class="btn btn-dark" (click)="cargar()">{{ 'adminSales.retry' | translate }}</button>
+    </div>
+
+  } @else {
+
+    <!-- ============ Indicadores ============ -->
+    <div class="kpis">
+      <article class="kpi">
+        <span class="kpi__label">{{ 'adminSales.kpiToday' | translate }}</span>
+        @if (ventasHoy(); as h) {
+          <strong class="kpi__valor">{{ moneda(h.total) }}</strong>
+          <span class="kpi__detalle">{{ 'adminSales.transactionsCount' | translate: { count: h.cantidad } }}</span>
+        } @else {
+          <strong class="kpi__valor kpi__valor--vacio">—</strong>
+          <span class="kpi__detalle">{{ 'adminSales.todayOutOfRange' | translate }}</span>
+        }
+      </article>
+
+      <article class="kpi kpi--destacado">
+        <span class="kpi__label">{{ 'adminSales.kpiTotal' | translate }}</span>
+        <strong class="kpi__valor">{{ moneda(totalPeriodo()) }}</strong>
+        <span class="kpi__detalle">
+          {{ fecha(desde()) | date: 'dd/MM' }} – {{ fecha(hasta()) | date: 'dd/MM/yyyy' }}
+        </span>
+      </article>
+
+      <article class="kpi">
+        <span class="kpi__label">{{ 'adminSales.kpiTransactions' | translate }}</span>
+        <strong class="kpi__valor">{{ cantidadPeriodo() }}</strong>
+        @if (mejorDia(); as m) {
+          <span class="kpi__detalle">
+            {{ 'adminSales.bestDay' | translate }}: {{ fecha(m.fecha) | date: 'dd/MM' }} · {{ monedaCorta(m.total) }}
+          </span>
+        }
+      </article>
+
+      <article class="kpi">
+        <span class="kpi__label">{{ 'adminSales.kpiAverage' | translate }}</span>
+        <strong class="kpi__valor">{{ moneda(ticketPromedio()) }}</strong>
+        <span class="kpi__detalle">{{ 'adminSales.perTransaction' | translate }}</span>
+      </article>
+    </div>
+
+    <!-- ============ Gráfico de ventas diarias ============ -->
+    <article class="grafico">
+      <header class="grafico__header">
+        <h2 class="grafico__titulo">{{ 'adminSales.chartTitle' | translate }}</h2>
+        <span class="grafico__ayuda">{{ 'adminSales.chartHint' | translate }}</span>
+      </header>
+
+      @if (cantidadPeriodo() === 0) {
+        <p class="estado-msg">{{ 'adminSales.noSales' | translate }}</p>
+      } @else {
+        <div class="grafico__cuerpo">
+          <!-- Eje Y -->
+          <div class="grafico__eje-y" aria-hidden="true">
+            @for (t of ticks(); track $index) {
+              <span [style.bottom.%]="$index * 25">{{ monedaCorta(t) }}</span>
+            }
+          </div>
+
+          <div class="grafico__area">
+            <!-- Líneas guía -->
+            @for (t of ticks(); track $index) {
+              <div class="grafico__guia" [class.grafico__guia--base]="$index === 0" [style.bottom.%]="$index * 25"></div>
+            }
+
+            <!-- Barras -->
+            <div class="grafico__barras" (mouseleave)="hoverIndex.set(null)">
+              @for (v of ventas(); track v.fecha; let i = $index) {
+                <button type="button" class="col"
+                        [class.col--activa]="hoverIndex() === i"
+                        [class.col--seleccionada]="diaSeleccionado() === v.fecha"
+                        [class.col--atenuada]="diaSeleccionado() && diaSeleccionado() !== v.fecha"
+                        [attr.aria-label]="(fecha(v.fecha) | date: 'dd/MM/yyyy') + ': ' + moneda(v.total)"
+                        [attr.aria-pressed]="diaSeleccionado() === v.fecha"
+                        (mouseenter)="hoverIndex.set(i)"
+                        (focus)="hoverIndex.set(i)"
+                        (blur)="hoverIndex.set(null)"
+                        (click)="seleccionarDia(v)">
+                  <span class="barra" [style.height.%]="alturaBarra(v)"></span>
+                </button>
+              }
+            </div>
+
+            <!-- Tooltip -->
+            @if (ventaHover(); as v) {
+              <div class="tooltip" [style.left.%]="posicionTooltip(hoverIndex()!)" role="status">
+                <span class="tooltip__fecha">{{ fecha(v.fecha) | date: 'EEEE dd/MM' }}</span>
+                <strong class="tooltip__total">{{ moneda(v.total) }}</strong>
+                <span class="tooltip__cantidad">{{ 'adminSales.transactionsCount' | translate: { count: v.cantidad } }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Eje X -->
+        <div class="grafico__eje-x" aria-hidden="true">
+          @for (v of ventas(); track v.fecha; let i = $index) {
+            <span>{{ mostrarEtiqueta(i) ? (fecha(v.fecha) | date: 'dd/MM') : '' }}</span>
+          }
+        </div>
+      }
+    </article>
+
+    <!-- ============ Historial de transacciones ============ -->
+    <article class="historial">
+      <header class="historial__header">
+        <h2 class="grafico__titulo">{{ 'adminSales.historyTitle' | translate }}</h2>
+        @if (diaSeleccionado(); as d) {
+          <button type="button" class="chip active" (click)="diaSeleccionado.set(null)">
+            {{ fecha(d) | date: 'dd/MM/yyyy' }} ✕
+          </button>
+        }
+      </header>
+
+      <div class="filtros">
+        <div class="field filtros__busqueda">
+          <input id="v-busqueda" class="field-input" type="text"
+                 [value]="busqueda()"
+                 (input)="busqueda.set(valor($event))"
+                 [placeholder]="'adminSales.searchPlaceholder' | translate" />
+          <label class="field-label" for="v-busqueda">{{ 'adminSales.search' | translate }}</label>
+        </div>
+
+        <div class="field">
+          <select id="v-metodo" class="field-input" [value]="metodo()" (change)="onMetodo($event)">
+            <option value="">{{ 'adminSales.allMethods' | translate }}</option>
+            @for (m of metodos; track m) {
+              <option [value]="m">{{ metodoKey(m) | translate }}</option>
+            }
+          </select>
+          <label class="field-label" for="v-metodo">{{ 'adminSales.paymentMethod' | translate }}</label>
+        </div>
+
+        @if (hayFiltros()) {
+          <button type="button" class="btn filtros__limpiar" (click)="limpiarFiltros()">
+            {{ 'adminSales.clearFilters' | translate }}
+          </button>
+        }
+      </div>
+
+      @if (transaccionesFiltradas().length === 0) {
+        <p class="estado-msg">{{ 'adminSales.noTransactions' | translate }}</p>
+      } @else {
+        <div class="tabla-wrap">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>{{ 'adminSales.colDate' | translate }}</th>
+                <th>{{ 'adminSales.colBooking' | translate }}</th>
+                <th>{{ 'adminSales.colCustomer' | translate }}</th>
+                <th>{{ 'adminSales.colMethod' | translate }}</th>
+                <th>{{ 'adminSales.colStatus' | translate }}</th>
+                <th class="num">{{ 'adminSales.colAmount' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (t of transaccionesFiltradas(); track t.facturaId) {
+                <tr>
+                  <td>
+                    <strong>{{ t.fechaEmision | date: 'dd/MM/yyyy' }}</strong>
+                    <small>{{ t.fechaEmision | date: 'HH:mm' }} hs · #{{ t.facturaId }}</small>
+                  </td>
+                  <td>
+                    <strong class="codigo">{{ t.codigoReserva || ('#' + t.reservaId) }}</strong>
+                    <small>{{ 'adminSales.ticketsCount' | translate: { count: t.cantidadPasajes } }}</small>
+                  </td>
+                  <td>
+                    <strong>{{ t.cliente || '—' }}</strong>
+                    <small>{{ t.cuil || '' }}</small>
+                  </td>
+                  <td>
+                    <strong>{{ metodoKey(t.metodoDePago) | translate }}</strong>
+                    @if (t.cuotas && t.cuotas > 1) {
+                      <small>{{ 'adminSales.installments' | translate: { n: t.cuotas } }}</small>
+                    }
+                  </td>
+                  <td>
+                    <span class="badge estado--{{ t.estadoReserva.toLowerCase() }}">{{ estadoKey(t.estadoReserva) | translate }}</span>
+                  </td>
+                  <td class="num"><strong>{{ moneda(t.total) }}</strong></td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="5">{{ 'adminSales.transactionsCount' | translate: { count: transaccionesFiltradas().length } }}</td>
+                <td class="num"><strong>{{ moneda(totalFiltrado()) }}</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      }
+    </article>
+  }
+</section>
