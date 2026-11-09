@@ -17,6 +17,8 @@ import { checkoutPagoGuard } from './guards/checkoutPagoGuard';
 import { VuelosAdmin } from './pages/Admin/vuelos-admin/vuelos-admin';
 import { Favoritos } from './pages/favoritos/favoritos';
 import { CheckinMostrador} from './pages/check-in-mostrador/check-in-mostrador';
+import { AsignacionService } from './services/asignacion-service';
+import { MisAsignaciones } from './pages/mis-asignaciones/mis-asignaciones';
 
 export const routes: Routes = [
     { path: "", component: Home },
@@ -35,5 +37,6 @@ export const routes: Routes = [
     {path: "reset-password", component: ResetPassword},
     {path: "asientos", component: Asientos},
     {path: "check-in", component: CheckinMostrador, canActivate: [authGuard]},
+    {path: "mis-asignaciones", component: MisAsignaciones, canActivate: [authGuard]},
     { path: "**", redirectTo: "" }
 ];
