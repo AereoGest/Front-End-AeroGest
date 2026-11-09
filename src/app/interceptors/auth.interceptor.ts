@@ -2,9 +2,11 @@ import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
+import { Auth } from '../services/auth';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
+  const auth = inject(Auth);
   const token = localStorage.getItem('token');
 
   const authReq = token
@@ -14,11 +16,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('email');
-        localStorage.removeItem('userId');
-        localStorage.removeItem('perfilCompleto');
-        localStorage.removeItem('role');
+        auth.invalidarSesionLocal();
         router.navigate(['/login']);
       }
       return throwError(() => error);
