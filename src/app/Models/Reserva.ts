@@ -3,10 +3,20 @@ import { TipoDocumento } from './Perfil';
 
 export type EstadoReserva = 'ACTIVO' | 'CANCELADA' | 'PROCESANDO' | 'CONFIRMADO';
 
+/** Persona asociada como titular de una reserva o listada en GET /api/personas. */
+export interface PersonaResumen {
+  id: number;
+  nombre: string;
+  apellido: string;
+  identificador?: TipoDocumento | null;
+  numeroIdentificador?: string | null;
+  email?: string | null;
+}
+
 /** Pasaje tal como viene dentro de cada reserva en GET /api/reservas/mis-reservas. */
 export interface PasajeReserva {
   id: number;
-  codigoReserva: string | null; 
+  codigoReserva: string | null;
   codigoPasaje: string;
   clasesVuelo: ClaseVuelo;
   nombre: string;
@@ -40,13 +50,17 @@ export interface PasajeReserva {
   } | null;
 }
 
-/** Reserva tal como la devuelve GET /api/reservas/mis-reservas. */
+/** Reserva tal como la devuelve GET /api/reservas o GET /api/reservas/mis-reservas. */
 export interface Reserva {
   id: number;
-  codigoReserva: string | null; 
+  codigoReserva: string | null;
   persona: {
+    id?: number;
     nombre: string;
     apellido: string;
+    identificador?: TipoDocumento | null;
+    numeroIdentificador?: string | null;
+    email?: string | null;
   };
   valor: number;
   cantidadPasajes: number;
@@ -69,7 +83,7 @@ export interface CheckInResponse {
   }[];
 }
 
-/** Datos de un pasajero para POST /api/reservas/mis-reservas. */
+/** Datos de un pasajero para POST /api/reservas o POST /api/reservas/mis-reservas. */
 export interface PasajeRequest {
   clasesVuelo: ClaseVuelo;
   asientoId?: number;
@@ -88,4 +102,18 @@ export interface ReservaRequest {
   vueloId: number;
   cantidadPasajes: number;
   pasajes: PasajeRequest[];
+}
+
+/** Cuerpo de POST /api/reservas (Admin). Incluye personaId del titular seleccionado. */
+export interface ReservaAdminRequest extends ReservaRequest {
+  personaId: number;
+}
+
+/** Cuerpo de PUT /api/reservas/{id} (Admin). */
+export interface ReservaUpdateDTO {
+  clienteId: number;
+  valor: number;
+  cantidadPasajes?: number;
+  estadoReserva: EstadoReserva;
+  fechaReserva?: string;
 }
