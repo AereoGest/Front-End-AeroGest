@@ -32,5 +32,14 @@ export interface VueloAsignacion {
 export interface Asignacion {
   id: number;
   vuelo: VueloAsignacion;
+  empleado?: EmpleadoAsignacion;
   rolEmpleado: RolEmpleado;
+}
+
+export interface EmpleadoAsignacion {
+  id: number;
+  nombre: string;
+  apellido: string;
+  identificador?: 'DNI' | 'PASAPORTE';
+  numeroIdentificador?: string;
 }

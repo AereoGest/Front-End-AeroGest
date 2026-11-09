@@ -23,6 +23,7 @@ import { Favoritos } from './pages/favoritos/favoritos';
 import { CheckinMostrador} from './pages/check-in-mostrador/check-in-mostrador';
 import { AsignacionService } from './services/asignacion-service';
 import { MisAsignaciones } from './pages/mis-asignaciones/mis-asignaciones';
+import { AsignacionesAdmin } from './pages/Admin/asignaciones-admin/asignaciones-admin';
 
 export const routes: Routes = [
     { path: "", component: Home },
@@ -34,6 +35,7 @@ export const routes: Routes = [
     { path: "vuelosAdmin", component: VuelosAdmin, canActivate: [adminGuard] },
     { path: "reservasAdmin", component: ReservasAdmin, canActivate: [adminGuard] },
     { path: "pasajesAdmin", component: PasajesAdmin, canActivate: [adminGuard] },
+    {path: "asignacionesAdmin", component: AsignacionesAdmin, canActivate: [authGuard]},
     { path: "verify", component: Verify },
     { path: "checkoutReserva", component: Reserva, canActivate: [authGuard] },
     {path: "checkoutReserva/pago", component: Pago, canActivate: [checkoutPagoGuard, authGuard] },
