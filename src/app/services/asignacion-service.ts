@@ -1,8 +1,18 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Asignacion, AsignacionRequest, EmpleadoAsignacion } from '../Models/Asignacion';
+import { Asignacion, AsignacionRequest, EmpleadoAsignacion, EstadoVuelo, RolEmpleado } from '../Models/Asignacion';
+
+export interface FiltroAsignaciones {
+  empleadoId?: number | null;
+  vueloId?: number | null;
+  rolEmpleado?: RolEmpleado | string;
+  estadoVuelo?: EstadoVuelo | string;
+  fechaDesde?: string;
+  fechaHasta?: string;
+  busqueda?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AsignacionService {
@@ -15,6 +25,16 @@ export class AsignacionService {
 
   getTodas(): Observable<Asignacion[]> {
     return this.http.get<Asignacion[]>(this.apiUrl, { withCredentials: true });
+  }
+
+  filtrar(filtros: FiltroAsignaciones): Observable<Asignacion[]> {
+    let params = new HttpParams();
+    Object.entries(filtros).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params = params.set(key, String(value));
+      }
+    });
+    return this.http.get<Asignacion[]>(`${this.apiUrl}/filtrar`, { params, withCredentials: true });
   }
 
   getPorId(id: number): Observable<Asignacion> {

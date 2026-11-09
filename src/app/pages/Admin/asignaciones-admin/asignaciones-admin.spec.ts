@@ -239,4 +239,92 @@ describe('AsignacionesAdmin', () => {
     expect(component.modalBajaAbierto()).toBe(false);
     expect(component.mensajeExito()).toBeTruthy();
   });
+  // ── Pruebas específicas de filtros (Tarea 5) ──
+  it('debe filtrar asignaciones por empleado seleccionado', () => {
+    component.pestania.set('todas');
+    component.empleadoId.set(10);
+    expect(component.visibles().length).toBe(1);
+    expect(component.visibles()[0].empleado?.id).toBe(10);
+
+    component.empleadoId.set(999);
+    expect(component.visibles().length).toBe(0);
+  });
+
+  it('debe filtrar asignaciones por rol del empleado', () => {
+    component.pestania.set('todas');
+    component.rol.set('PILOTO');
+    expect(component.visibles().length).toBe(1);
+    expect(component.visibles()[0].rolEmpleado).toBe('PILOTO');
+
+    component.rol.set('AZAFATA');
+    expect(component.visibles().length).toBe(1);
+    expect(component.visibles()[0].rolEmpleado).toBe('AZAFATA');
+
+    component.rol.set('COPILOTO');
+    expect(component.visibles().length).toBe(0);
+  });
+
+  it('debe filtrar asignaciones por estado de vuelo', () => {
+    component.pestania.set('todas');
+    component.estado.set('PROGRAMADO');
+    expect(component.visibles().length).toBe(1);
+    expect(component.visibles()[0].vuelo.estado).toBe('PROGRAMADO');
+
+    component.estado.set('CANCELADO');
+    expect(component.visibles().length).toBe(1);
+    expect(component.visibles()[0].vuelo.estado).toBe('CANCELADO');
+  });
+
+  it('debe filtrar por rango de fechas (desde y hasta)', () => {
+    component.pestania.set('todas');
+    // Vuelo 1: 2026-12-01 · Vuelo 2: 2026-10-01
+    component.desde.set('2026-11-01');
+    expect(component.visibles().length).toBe(1);
+    expect(component.visibles()[0].id).toBe(1);
+
+    component.desde.set('');
+    component.hasta.set('2026-10-15');
+    expect(component.visibles().length).toBe(1);
+    expect(component.visibles()[0].id).toBe(2);
+
+    component.desde.set('2026-09-01');
+    component.hasta.set('2026-12-31');
+    expect(component.visibles().length).toBe(2);
+  });
+
+  it('debe combinar múltiples filtros simultáneamente', () => {
+    component.pestania.set('todas');
+    component.rol.set('PILOTO');
+    component.estado.set('PROGRAMADO');
+    component.busqueda.set('EZE');
+    component.desde.set('2026-11-01');
+
+    expect(component.visibles().length).toBe(1);
+    expect(component.visibles()[0].id).toBe(1);
+
+    // Si agregamos un filtro incompatible, el resultado debe ser vacío
+    component.rol.set('AZAFATA');
+    expect(component.visibles().length).toBe(0);
+  });
+
+  it('debe limpiar todos los filtros aplicados', () => {
+    component.busqueda.set('Carlos');
+    component.empleadoId.set(10);
+    component.rol.set('PILOTO');
+    component.estado.set('PROGRAMADO');
+    component.desde.set('2026-01-01');
+    component.hasta.set('2026-12-31');
+
+    expect(component.hayFiltros()).toBe(true);
+
+    component.limpiarFiltros();
+
+    expect(component.busqueda()).toBe('');
+    expect(component.empleadoId()).toBeNull();
+    expect(component.rol()).toBe('');
+    expect(component.estado()).toBe('');
+    expect(component.desde()).toBe('');
+    expect(component.hasta()).toBe('');
+    expect(component.hayFiltros()).toBe(false);
+  });
 });
