@@ -746,4 +746,12 @@ export const en: Record<TranslationKey, string> = {
   'adminUsers.successUpdated': 'Customer updated successfully.',
   'adminUsers.successDeleted': 'Customer deleted successfully.',
   'adminUsers.errorGeneric': 'An error occurred while processing the request.',
+  'adminUsers.filterIdType': 'ID type',
+  'adminUsers.allIdTypes': 'All ID types',
+  'adminUsers.employeesHeader': 'Employees roster',
+  'adminUsers.employeesSubtitle': 'Browse and filter airline staff and employees',
+  'adminUsers.searchEmployeesPlaceholder': 'Search employee by name, ID, email or phone...',
+  'adminUsers.noEmployees': 'No employees match the selected filters.',
+  'adminUsers.filterActiveIndicator': 'Employee filter active',
+  'adminUsers.employeesBadge': 'Staff / Employees',
 };

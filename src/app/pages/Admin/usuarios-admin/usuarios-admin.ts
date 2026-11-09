@@ -15,6 +15,7 @@ import {
 } from '../../../Models/Usuario';
 
 type FiltroRol = 'TODOS' | RolUsuario;
+type FiltroIdentificador = 'TODOS' | TipoIdentificador;
 type Orden = 'NOMBRE_ASC' | 'NOMBRE_DESC' | 'RECIENTES' | 'ANTIGUOS';
 
 @Component({
@@ -50,6 +51,7 @@ export class UsuariosAdmin implements OnInit {
   // ── Filtros ──
   busqueda = signal('');
   rolFiltro = signal<FiltroRol>('TODOS');
+  identificadorFiltro = signal<FiltroIdentificador>('TODOS');
   orden = signal<Orden>('NOMBRE_ASC');
 
   // ── Modales ──
@@ -85,23 +87,34 @@ export class UsuariosAdmin implements OnInit {
   editPassword = signal('');
   editRole = signal<RolUsuario>('ROLE_USUARIO');
 
-  /** Filtrados por texto y ordenados (sin el rol), para los contadores de las pestañas. */
+  /** Indica si la pestaña activa es la de Empleados. */
+  esVistaEmpleados = computed(() => this.rolFiltro() === 'ROLE_EMPLEADO');
+
+  /** Filtrados por texto, tipo de documento y ordenados. */
   porTexto = computed(() => {
     const texto = this.normalizar(this.busqueda());
-    const lista = this.usuarios().filter(
-      u => !texto || this.normalizar(this.textoBuscable(u)).includes(texto)
-    );
+    const tipoDoc = this.identificadorFiltro();
+
+    const lista = this.usuarios().filter(u => {
+      const coincideTexto = !texto || this.normalizar(this.textoBuscable(u)).includes(texto);
+      const coincideDoc = tipoDoc === 'TODOS' || (u.identificador ?? 'DNI') === tipoDoc;
+      return coincideTexto && coincideDoc;
+    });
     return this.ordenar(lista, this.orden());
   });
 
-  /** Lo que se muestra en la tabla: texto + rol + orden. */
+  /** Lo que se muestra en la tabla: texto + doc + rol + orden. */
   visibles = computed(() => {
     const rol = this.rolFiltro();
     return rol === 'TODOS' ? this.porTexto() : this.porTexto().filter(u => u.role === rol);
   });
 
   hayFiltros = computed(
-    () => !!this.busqueda() || this.rolFiltro() !== 'TODOS' || this.orden() !== 'NOMBRE_ASC'
+    () =>
+      !!this.busqueda() ||
+      this.rolFiltro() !== 'TODOS' ||
+      this.identificadorFiltro() !== 'TODOS' ||
+      this.orden() !== 'NOMBRE_ASC'
   );
 
   @HostListener('window:keydown.escape')
@@ -134,6 +147,7 @@ export class UsuariosAdmin implements OnInit {
   limpiarFiltros(): void {
     this.busqueda.set('');
     this.rolFiltro.set('TODOS');
+    this.identificadorFiltro.set('TODOS');
     this.orden.set('NOMBRE_ASC');
   }
 
@@ -144,6 +158,10 @@ export class UsuariosAdmin implements OnInit {
 
   onRol(event: Event): void {
     this.rolFiltro.set(this.valor(event) as FiltroRol);
+  }
+
+  onIdentificador(event: Event): void {
+    this.identificadorFiltro.set(this.valor(event) as FiltroIdentificador);
   }
 
   onOrden(event: Event): void {
@@ -163,7 +181,7 @@ export class UsuariosAdmin implements OnInit {
     this.altaEmail.set('');
     this.altaTelefono.set('');
     this.altaPassword.set('');
-    this.altaRole.set('ROLE_USUARIO');
+    this.altaRole.set(this.rolFiltro() === 'ROLE_EMPLEADO' ? 'ROLE_EMPLEADO' : 'ROLE_USUARIO');
     this.modalAltaAbierto.set(true);
   }
 
@@ -366,6 +384,12 @@ export class UsuariosAdmin implements OnInit {
   iniciales(u: Usuario): string {
     if (this.perfilIncompleto(u)) return u.email.charAt(0).toUpperCase();
     return `${u.nombre.charAt(0)}${u.apellido.charAt(0)}`.toUpperCase();
+  }
+
+  placeholderBusqueda(): string {
+    return this.esVistaEmpleados()
+      ? 'adminUsers.searchEmployeesPlaceholder'
+      : 'adminUsers.searchPlaceholder';
   }
 
   private ordenar(lista: Usuario[], orden: Orden): Usuario[] {

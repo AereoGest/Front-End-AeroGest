@@ -4,7 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import { UsuarioService } from './usuario-service';
 import { environment } from '../../environments/environment';
-import { ActualizarUsuarioRequest, CrearUsuarioRequest, Usuario } from '../Models/Usuario';
+import { ActualizarUsuarioRequest, CrearUsuarioRequest, FiltrosUsuarioRequest, Usuario } from '../Models/Usuario';
 
 describe('UsuarioService', () => {
   let service: UsuarioService;
@@ -54,6 +54,39 @@ describe('UsuarioService', () => {
     const req = httpMock.expectOne(`${environment.apiUrl}/auth/usuarios/5`);
     expect(req.request.method).toBe('GET');
     req.flush(mockUser);
+  });
+
+  it('filtrar sends GET to adminUrl/filtrar with query parameters', () => {
+    const filtros: FiltrosUsuarioRequest = {
+      texto: 'Carlos',
+      role: 'ROLE_EMPLEADO',
+      identificador: 'DNI',
+      numeroIdentificador: '30111222',
+      orden: 'NOMBRE_ASC',
+    };
+
+    service.filtrar(filtros).subscribe(res => {
+      expect(res.length).toBe(1);
+    });
+
+    const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/admin/users/filtrar`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('texto')).toBe('Carlos');
+    expect(req.request.params.get('role')).toBe('ROLE_EMPLEADO');
+    expect(req.request.params.get('identificador')).toBe('DNI');
+    expect(req.request.params.get('numeroIdentificador')).toBe('30111222');
+    expect(req.request.params.get('orden')).toBe('NOMBRE_ASC');
+    req.flush([{ id: 1, nombre: 'Carlos', role: 'ROLE_EMPLEADO' }]);
+  });
+
+  it('filtrarEmpleados sets role to ROLE_EMPLEADO automatically', () => {
+    service.filtrarEmpleados({ texto: 'Juan' }).subscribe();
+
+    const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/admin/users/filtrar`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('role')).toBe('ROLE_EMPLEADO');
+    expect(req.request.params.get('texto')).toBe('Juan');
+    req.flush([]);
   });
 
   it('crearUsuario sends POST to adminUrl', () => {

@@ -64,7 +64,7 @@
 /* ── Barra de filtros ── */
 .filtros {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr auto;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
   gap: 28px 16px;
   align-items: center;
   padding: 32px 24px 24px;

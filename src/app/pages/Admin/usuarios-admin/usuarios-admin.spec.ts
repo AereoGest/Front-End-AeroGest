@@ -228,4 +228,41 @@ describe('UsuariosAdmin', () => {
     component.onEscape();
     expect(component.modalAltaAbierto()).toBe(false);
   });
+
+  it('filters employees tab and updates view state and placeholder', () => {
+    expectInitialLoad();
+    component.rolFiltro.set('ROLE_EMPLEADO');
+    expect(component.esVistaEmpleados()).toBe(true);
+    expect(component.placeholderBusqueda()).toBe('adminUsers.searchEmployeesPlaceholder');
+    expect(component.visibles().length).toBe(1);
+    expect(component.visibles()[0].email).toBe('ana@example.com');
+  });
+
+  it('filters users by document type', () => {
+    expectInitialLoad();
+    component.identificadorFiltro.set('PASAPORTE');
+    expect(component.visibles().length).toBe(1);
+    expect(component.visibles()[0].nombre).toBe('Beatriz');
+
+    component.identificadorFiltro.set('DNI');
+    expect(component.visibles().length).toBe(2);
+  });
+
+  it('clears all applied filters including document type', () => {
+    expectInitialLoad();
+    component.busqueda.set('Carlos');
+    component.rolFiltro.set('ROLE_USUARIO');
+    component.identificadorFiltro.set('DNI');
+    component.orden.set('NOMBRE_DESC');
+
+    expect(component.hayFiltros()).toBe(true);
+
+    component.limpiarFiltros();
+
+    expect(component.busqueda()).toBe('');
+    expect(component.rolFiltro()).toBe('TODOS');
+    expect(component.identificadorFiltro()).toBe('TODOS');
+    expect(component.orden()).toBe('NOMBRE_ASC');
+    expect(component.hayFiltros()).toBe(false);
+  });
 });

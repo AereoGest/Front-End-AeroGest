@@ -41,3 +41,11 @@ export interface ActualizarUsuarioRequest {
   password?: string;
   role: RolUsuario;
 }
+
+export interface FiltrosUsuarioRequest {
+  texto?: string;
+  role?: RolUsuario | 'TODOS';
+  identificador?: TipoIdentificador | 'TODOS';
+  numeroIdentificador?: string;
+  orden?: 'NOMBRE_ASC' | 'NOMBRE_DESC' | 'RECIENTES' | 'ANTIGUOS';
+}

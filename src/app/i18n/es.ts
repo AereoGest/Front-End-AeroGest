@@ -744,6 +744,14 @@ export const es = {
   'adminUsers.successUpdated': 'Cliente actualizado exitosamente.',
   'adminUsers.successDeleted': 'Cliente eliminado exitosamente.',
   'adminUsers.errorGeneric': 'Ocurrió un error al procesar la solicitud.',
+  'adminUsers.filterIdType': 'Tipo de doc.',
+  'adminUsers.allIdTypes': 'Todos los documentos',
+  'adminUsers.employeesHeader': 'Lista de empleados',
+  'adminUsers.employeesSubtitle': 'Consultá y filtrá rápidamente el personal y empleados de la aerolínea',
+  'adminUsers.searchEmployeesPlaceholder': 'Buscar empleado por nombre, apellido, DNI, email o teléfono...',
+  'adminUsers.noEmployees': 'No hay empleados que coincidan con los filtros aplicados.',
+  'adminUsers.filterActiveIndicator': 'Filtro de empleados activo',
+  'adminUsers.employeesBadge': 'Personal / Empleados',
 };
 
 export type TranslationKey = keyof typeof es;

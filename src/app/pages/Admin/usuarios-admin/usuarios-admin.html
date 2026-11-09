@@ -3,8 +3,12 @@
     <div class="admin-usr__header-main">
       <div>
         <span class="section-eyebrow">{{ 'adminUsers.eyebrow' | translate }}</span>
-        <h1 class="section-title">{{ 'adminUsers.title' | translate }}</h1>
-        <p class="admin-usr__subtitle">{{ 'adminUsers.subtitle' | translate }}</p>
+        <h1 class="section-title">
+          {{ (esVistaEmpleados() ? 'adminUsers.employeesHeader' : 'adminUsers.title') | translate }}
+        </h1>
+        <p class="admin-usr__subtitle">
+          {{ (esVistaEmpleados() ? 'adminUsers.employeesSubtitle' : 'adminUsers.subtitle') | translate }}
+        </p>
       </div>
       <button type="button" class="btn btn-dark btn-alta" (click)="abrirModalAlta()">
         {{ 'adminUsers.btnNew' | translate }}
@@ -26,14 +30,43 @@
     </div>
   }
 
+  <!-- Pestañas por rol -->
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" class="tab"
+            [class.active]="rolFiltro() === 'TODOS'"
+            (click)="rolFiltro.set('TODOS')">
+      {{ 'adminUsers.tabAll' | translate }}
+      <span class="tab__count">{{ porTexto().length }}</span>
+    </button>
+
+    @for (r of roles; track r) {
+      <button type="button" role="tab" class="tab"
+              [class.active]="rolFiltro() === r"
+              (click)="rolFiltro.set(r)">
+        {{ tabKey(r) | translate }}
+        <span class="tab__count">{{ cantidad(r) }}</span>
+      </button>
+    }
+  </div>
+
   <!-- Barra de filtros -->
   <div class="filtros">
     <div class="field filtros__busqueda">
       <input id="u-busqueda" class="field-input" type="text"
              [value]="busqueda()"
              (input)="busqueda.set(valor($event))"
-             [placeholder]="'adminUsers.searchPlaceholder' | translate" />
+             [placeholder]="placeholderBusqueda() | translate" />
       <label class="field-label" for="u-busqueda">{{ 'adminUsers.search' | translate }}</label>
+    </div>
+
+    <div class="field">
+      <select id="u-tipo-doc" class="field-input" [value]="identificadorFiltro()" (change)="onIdentificador($event)">
+        <option value="TODOS">{{ 'adminUsers.allIdTypes' | translate }}</option>
+        @for (t of tiposIdentificador; track t) {
+          <option [value]="t">{{ t }}</option>
+        }
+      </select>
+      <label class="field-label" for="u-tipo-doc">{{ 'adminUsers.filterIdType' | translate }}</label>
     </div>
 
     <div class="field">
@@ -62,25 +95,6 @@
     }
   </div>
 
-  <!-- Pestañas por rol -->
-  <div class="tabs" role="tablist">
-    <button type="button" role="tab" class="tab"
-            [class.active]="rolFiltro() === 'TODOS'"
-            (click)="rolFiltro.set('TODOS')">
-      {{ 'adminUsers.tabAll' | translate }}
-      <span class="tab__count">{{ porTexto().length }}</span>
-    </button>
-
-    @for (r of roles; track r) {
-      <button type="button" role="tab" class="tab"
-              [class.active]="rolFiltro() === r"
-              (click)="rolFiltro.set(r)">
-        {{ tabKey(r) | translate }}
-        <span class="tab__count">{{ cantidad(r) }}</span>
-      </button>
-    }
-  </div>
-
   <!-- Contenido -->
   @if (cargando()) {
     <p class="estado-msg">{{ 'adminUsers.loading' | translate }}</p>
@@ -94,7 +108,9 @@
     </div>
 
   } @else if (visibles().length === 0) {
-    <p class="estado-msg">{{ 'adminUsers.noResults' | translate }}</p>
+    <p class="estado-msg">
+      {{ (esVistaEmpleados() ? 'adminUsers.noEmployees' : 'adminUsers.noResults') | translate }}
+    </p>
 
   } @else {
     <div class="tabla-wrap">
