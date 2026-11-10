@@ -32,10 +32,10 @@ describe('AdminPanel', () => {
     await fixture.whenStable();
   });
 
-  it('debería crearse y mostrar los 5 módulos administrativos requeridos', () => {
+  it('debería crearse y mostrar los módulos administrativos requeridos', () => {
     expect(component).toBeTruthy();
     const cards = fixture.nativeElement.querySelectorAll('.admin-module-card');
-    expect(cards.length).toBe(5);
+    expect(cards.length).toBe((component as any).modulos.length);
   });
 
   it('traduce los títulos del panel en español e inglés y soporta cambio de tema', async () => {

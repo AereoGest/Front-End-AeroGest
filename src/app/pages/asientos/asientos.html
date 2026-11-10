@@ -157,17 +157,14 @@
 
       <!-- Panel resumen -->
       <aside class="seat-summary-card">
-        <div class="sidebar-header">
-          <div class="sidebar-title">{{ 'seats.progressSeat' | translate }}</div>
-          <div class="seat-counter">
-            {{ selectedSeats.length }} / {{ seatsNeeded }}
-          </div>
-        </div>
+        <h2 class="summary-title">{{ 'seats.yourSelection' | translate }}</h2>
 
-        <div class="selected-seats-badge">
-          <div class="badge-label">{{ 'seats.selected' | translate }}</div>
-          <div class="badge-seats">
-            {{ asientosTexto }}
+        <div class="selected-seat-display">
+          <div class="asientos-progress">
+            {{ 'seats.selectedOfNeeded' | translate:{ selected: selectedSeats.length, needed: seatsNeeded } }}
+          </div>
+          <div class="asientos-seleccionados">
+            {{ selectedSeats.length ? asientosTexto : ('seats.noneYet' | translate) }}
           </div>
         </div>
 
@@ -191,19 +188,19 @@
         <div class="price-summary">
           <div class="price-row">
             <span>{{ 'seats.baseFlight' | translate }}</span>
-            <span>${{ basePrice }}</span>
+            <span>$ {{ basePrice }}</span>
           </div>
 
           <div class="price-row">
             <span>{{ 'seats.extraSeats' | translate }}</span>
             <span>
-              {{ totalExtra > 0 ? ('+$' + totalExtra) : ('seats.noCost' | translate) }}
+              {{ totalExtra > 0 ? ('+$ ' + totalExtra) : ('seats.noCost' | translate) }}
             </span>
           </div>
 
           <div class="price-total">
             <span>{{ 'seats.total' | translate }}</span>
-            <span>${{ total }}</span>
+            <span>$ {{ total }}</span>
           </div>
         </div>
 
