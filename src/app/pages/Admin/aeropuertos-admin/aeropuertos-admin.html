@@ -1,0 +1,202 @@
+<section class="admin-aero container">
+  <header class="admin-aero__header">
+    <div class="admin-aero__header-main">
+      <div>
+        <span class="section-eyebrow">{{ 'adminAirports.eyebrow' | translate }}</span>
+        <h1 class="section-title">{{ 'adminAirports.title' | translate }}</h1>
+        <p class="admin-aero__subtitle">{{ 'adminAirports.subtitle' | translate }}</p>
+      </div>
+      <button type="button" class="btn btn-dark btn-alta" (click)="abrirModalAlta()">
+        + {{ 'adminAirports.btnNew' | translate }}
+      </button>
+    </div>
+  </header>
+
+  <!-- Alertas de éxito y error -->
+  @if (mensajeExito()) {
+    <div class="alerta alerta--exito" role="status">
+      <span>{{ mensajeExito() }}</span>
+      <button type="button" class="alerta__cerrar" (click)="mensajeExito.set(null)" [attr.aria-label]="'common.close' | translate">&times;</button>
+    </div>
+  }
+  @if (mensajeError()) {
+    <div class="alerta alerta--error" role="alert">
+      <span>{{ mensajeError() }}</span>
+      <button type="button" class="alerta__cerrar" (click)="mensajeError.set(null)" [attr.aria-label]="'common.close' | translate">&times;</button>
+    </div>
+  }
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <div class="field">
+      <input id="fa-nombre" class="field-input" type="text" placeholder=" "
+             [value]="nombre()" (input)="nombre.set(valor($event))" />
+      <label class="field-label" for="fa-nombre">{{ 'adminAirports.name' | translate }}</label>
+    </div>
+
+    <div class="field">
+      <input id="fa-iata" class="field-input" type="text" placeholder=" " maxlength="3"
+             [value]="codigoIata()" (input)="codigoIata.set(valor($event))" />
+      <label class="field-label" for="fa-iata">{{ 'adminAirports.iata' | translate }}</label>
+    </div>
+
+    <div class="field">
+      <input id="fa-ciudad" class="field-input" type="text" placeholder=" "
+             [value]="ciudad()" (input)="ciudad.set(valor($event))" />
+      <label class="field-label" for="fa-ciudad">{{ 'adminAirports.city' | translate }}</label>
+    </div>
+
+    <div class="field">
+      <input id="fa-pais" class="field-input" type="text" placeholder=" "
+             [value]="pais()" (input)="pais.set(valor($event))" />
+      <label class="field-label" for="fa-pais">{{ 'adminAirports.country' | translate }}</label>
+    </div>
+
+    @if (hayFiltros()) {
+      <button type="button" class="btn filtros__limpiar" (click)="limpiarFiltros()">
+        {{ 'adminAirports.clearFilters' | translate }}
+      </button>
+    }
+  </div>
+
+  @if (cargando()) {
+    <p class="estado-msg">{{ 'adminAirports.loading' | translate }}</p>
+  } @else if (error()) {
+    <div class="estado-msg">
+      <p class="mensaje-error">{{ 'adminAirports.loadError' | translate }}</p>
+      <button type="button" class="btn btn-dark" (click)="cargar()">{{ 'adminAirports.retry' | translate }}</button>
+    </div>
+  } @else if (filtrados().length === 0) {
+    <p class="estado-msg">{{ 'adminAirports.noResults' | translate }}</p>
+  } @else {
+    <div class="tabla-wrap">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>{{ 'adminAirports.iata' | translate }}</th>
+            <th>{{ 'adminAirports.name' | translate }}</th>
+            <th>{{ 'adminAirports.city' | translate }}</th>
+            <th>{{ 'adminAirports.country' | translate }}</th>
+            <th class="tabla__col-acciones">{{ 'adminAirports.colActions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of filtrados(); track a.id) {
+            <tr>
+              <td><strong class="iata">{{ a.codigoIata }}</strong></td>
+              <td>{{ a.nombre }}</td>
+              <td>{{ a.ciudad }}</td>
+              <td>{{ a.pais }}</td>
+              <td class="tabla__acciones">
+                <button
+                  type="button"
+                  class="btn-icon"
+                  [title]="'adminAirports.edit' | translate"
+                  [attr.aria-label]="'adminAirports.edit' | translate"
+                  (click)="abrirModalEdicion(a)">
+                  ✎
+                </button>
+                <button
+                  type="button"
+                  class="btn-icon btn-icon--danger"
+                  [title]="'adminAirports.delete' | translate"
+                  [attr.aria-label]="'adminAirports.delete' | translate"
+                  (click)="abrirModalBaja(a)">
+                  🗑
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="contador">{{ 'adminAirports.resultsCount' | translate: { count: filtrados().length } }}</p>
+  }
+
+  <!-- ================= Modal Alta / Edición ================= -->
+  @if (modalFormularioAbierto()) {
+    <div class="modal-overlay" (click)="cerrarModalFormulario()">
+      <div class="modal-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="modal-aeropuerto-title">
+        <button type="button" class="modal-cerrar" (click)="cerrarModalFormulario()" [attr.aria-label]="'common.close' | translate">&times;</button>
+        <span class="section-eyebrow">{{ 'adminAirports.eyebrow' | translate }}</span>
+        <h2 id="modal-aeropuerto-title" class="modal-titulo">
+          @if (aeropuertoEnEdicion(); as actual) {
+            {{ 'adminAirports.modalEditTitle' | translate }} {{ actual.codigoIata }}
+          } @else {
+            {{ 'adminAirports.modalNewTitle' | translate }}
+          }
+        </h2>
+
+        @if (formularioError()) {
+          <div class="alerta alerta--error" role="alert">
+            <span>{{ formularioError() }}</span>
+          </div>
+        }
+
+        <form (ngSubmit)="guardar()" class="modal-form">
+          <div class="field">
+            <input id="form-nombre" class="field-input" type="text" placeholder=" " name="formNombre"
+                   [ngModel]="formNombre()" (ngModelChange)="formNombre.set($event)" required />
+            <label class="field-label" for="form-nombre">{{ 'adminAirports.name' | translate }}</label>
+          </div>
+
+          <div class="field">
+            <input id="form-iata" class="field-input" type="text" placeholder=" " maxlength="3" name="formCodigoIata"
+                   [ngModel]="formCodigoIata()" (ngModelChange)="formCodigoIata.set($event)" required />
+            <label class="field-label" for="form-iata">{{ 'adminAirports.iata' | translate }}</label>
+          </div>
+
+          <div class="field">
+            <input id="form-ciudad" class="field-input" type="text" placeholder=" " name="formCiudad"
+                   [ngModel]="formCiudad()" (ngModelChange)="formCiudad.set($event)" required />
+            <label class="field-label" for="form-ciudad">{{ 'adminAirports.city' | translate }}</label>
+          </div>
+
+          <div class="field">
+            <input id="form-pais" class="field-input" type="text" placeholder=" " name="formPais"
+                   [ngModel]="formPais()" (ngModelChange)="formPais.set($event)" required />
+            <label class="field-label" for="form-pais">{{ 'adminAirports.country' | translate }}</label>
+          </div>
+
+          <div class="modal-acciones">
+            <button type="button" class="btn btn-outline" (click)="cerrarModalFormulario()" [disabled]="guardando()">
+              {{ 'common.cancel' | translate }}
+            </button>
+            <button type="submit" class="btn btn-dark" [disabled]="guardando()">
+              {{ guardando()
+                ? ('adminAirports.saving' | translate)
+                : ((aeropuertoEnEdicion() ? 'adminAirports.saveChanges' : 'adminAirports.createAirport') | translate) }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ================= Modal Confirmación Baja ================= -->
+  @if (modalBajaAbierto() && aeropuertoAEliminar(); as aEliminar) {
+    <div class="modal-overlay" (click)="cerrarModalBaja()">
+      <div class="modal-box modal-box--baja" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="modal-baja-title">
+        <button type="button" class="modal-cerrar" (click)="cerrarModalBaja()" [attr.aria-label]="'common.close' | translate">&times;</button>
+        <span class="section-eyebrow">{{ 'adminAirports.eyebrow' | translate }}</span>
+        <h2 id="modal-baja-title" class="modal-titulo">{{ 'adminAirports.confirmDeleteTitle' | translate }}</h2>
+        <p class="modal-subtitulo">{{ 'adminAirports.confirmDeleteMessage' | translate }}</p>
+
+        <div class="baja-resumen">
+          <p><strong>{{ 'adminAirports.iata' | translate }}:</strong> {{ aEliminar.codigoIata }}</p>
+          <p><strong>{{ 'adminAirports.name' | translate }}:</strong> {{ aEliminar.nombre }}</p>
+          <p><strong>{{ 'adminAirports.city' | translate }}:</strong> {{ aEliminar.ciudad }}, {{ aEliminar.pais }}</p>
+        </div>
+
+        <div class="modal-acciones">
+          <button type="button" class="btn btn-outline" (click)="cerrarModalBaja()" [disabled]="eliminando()">
+            {{ 'common.cancel' | translate }}
+          </button>
+          <button type="button" class="btn btn-danger" (click)="confirmarBaja()" [disabled]="eliminando()">
+            {{ eliminando() ? ('adminAirports.deleting' | translate) : ('adminAirports.confirmDeleteAction' | translate) }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>
