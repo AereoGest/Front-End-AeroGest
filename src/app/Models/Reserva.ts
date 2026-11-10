@@ -71,6 +71,10 @@ export interface Reserva {
   estadoReserva: EstadoReserva;
   fechaReserva: string;
   fechaCheckIn?: string | null;
+  /** Solo en reservas canceladas: monto a devolver al cliente. */
+  montoReembolso?: number | null;
+  /** Solo en reservas canceladas: por qué se canceló (ej. "Vuelo cancelado por la aerolínea"). */
+  motivoCancelacion?: string | null;
   pasajes?: PasajeReserva[];
 }
 
