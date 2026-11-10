@@ -28,10 +28,15 @@
 
 <section class="section resultados">
   <div class="container">
-    <div class="section-header">
-      <span class="section-eyebrow">{{ 'adminFlights.eyebrow' | translate }}</span>
-      <h2 class="section-title">{{ 'adminFlights.title' | translate }}</h2>
-      <p class="section-subtitle">{{ 'adminFlights.subtitle' | translate }}</p>
+    <div class="section-header encabezado-abm">
+      <div>
+        <span class="section-eyebrow">{{ 'adminFlights.eyebrow' | translate }}</span>
+        <h2 class="section-title">{{ 'adminFlights.title' | translate }}</h2>
+        <p class="section-subtitle">{{ 'adminFlights.subtitle' | translate }}</p>
+      </div>
+      <button type="button" class="btn btn-dark btn-alta" (click)="abrirAlta()">
+        {{ 'adminFlights.btnNew' | translate }}
+      </button>
     </div>
 
     <div class="tabs-estado" role="tablist" [attr.aria-label]="'adminFlights.filterByStatus' | translate">
@@ -88,11 +93,28 @@
 
             <div class="dest-card-price">
               <span class="badge-estado" [class.badge-inactivo]="!esActivo(vuelo)">
-                {{ (esActivo(vuelo) ? 'adminFlights.active' : 'adminFlights.inactive') | translate }}
+                {{ etiquetaEstado(vuelo) | translate }}
               </span>
               <span class="dest-price-amount">${{ vuelo.precioVuelo }}</span>
-              <span class="estado-detalle">{{ vuelo.estado }}</span>
+              @if (!estaFinalizado(vuelo) || estaCancelado(vuelo)) {
+                <span class="estado-detalle">{{ vuelo.estado }}</span>
+              }
             </div>
+
+            @if (esGestionable(vuelo)) {
+              <div class="card-acciones">
+                <button type="button" class="btn-accion" (click)="abrirEdicion(vuelo, $event)"
+                  (keydown.enter)="$event.stopPropagation()">
+                  {{ 'adminFlights.btnEdit' | translate }}
+                </button>
+                @if (!estaCancelado(vuelo)) {
+                  <button type="button" class="btn-accion btn-accion--peligro" (click)="abrirBaja(vuelo, $event)"
+                    (keydown.enter)="$event.stopPropagation()">
+                    {{ 'adminFlights.btnDelete' | translate }}
+                  </button>
+                }
+              </div>
+            }
           </div>
         </div>
       }
@@ -116,7 +138,7 @@
       </h3>
 
       <span class="badge-estado" [class.badge-inactivo]="!esActivo(v)">
-        {{ (esActivo(v) ? 'adminFlights.active' : 'adminFlights.inactive') | translate }}
+        {{ etiquetaEstado(v) | translate }}
       </span>
 
       <dl class="modal-datos">
@@ -130,9 +152,265 @@
         <div><dt>{{ 'adminFlights.price' | translate }}</dt><dd>${{ v.precioVuelo }}</dd></div>
       </dl>
 
+      @if (!esGestionable(v)) {
+        <p class="aviso-catalogos">{{ 'adminFlights.finishedHint' | translate }}</p>
+      }
+
       <div class="modal-acciones">
+        @if (esGestionable(v) && !estaCancelado(v)) {
+          <button type="button" class="btn btn-danger" (click)="abrirBaja(v)">{{ 'adminFlights.btnDelete' | translate }}</button>
+        }
+        @if (esGestionable(v)) {
+          <button type="button" class="btn btn-primary" (click)="abrirEdicion(v)">{{ 'adminFlights.btnEdit' | translate }}</button>
+        }
         <button type="button" class="btn btn-dark" (click)="cerrarDetalle()">{{ 'flights.close' | translate }}</button>
       </div>
     </div>
+  </div>
+}
+
+<!-- Modal de alta / modificación -->
+@if (modoFormulario(); as modo) {
+  <div class="modal-overlay" [class.cerrando]="cerrandoFormulario()" (click)="cerrarFormulario()">
+    <div class="modal-vuelo modal-form-vuelo" role="dialog" aria-modal="true" aria-labelledby="modal-form-titulo"
+      (click)="$event.stopPropagation()">
+
+      <button type="button" class="modal-cerrar" [attr.aria-label]="'flights.close' | translate"
+        (click)="cerrarFormulario()">✕</button>
+
+      <span class="section-eyebrow">{{ 'adminFlights.eyebrow' | translate }}</span>
+      <h3 id="modal-form-titulo" class="modal-ruta">
+        @if (modo === 'ALTA') {
+          {{ 'adminFlights.modalCreateTitle' | translate }}
+        } @else {
+          {{ 'adminFlights.modalEditTitle' | translate: { id: vueloEditado()?.id } }}
+        }
+      </h3>
+
+      @if (aeropuertos().length === 0 || aviones().length === 0) {
+        <p class="aviso-catalogos">{{ 'adminFlights.catalogsUnavailable' | translate }}</p>
+      }
+
+      <form class="form-vuelo" (ngSubmit)="guardar()" novalidate>
+        <div class="form-row">
+          <div class="field">
+            <select id="f-origen" class="field-input" name="origen"
+              [attr.aria-invalid]="!!errores().origen"
+              [ngModel]="fOrigenId()" (ngModelChange)="fOrigenId.set($event)">
+              <option [ngValue]="null" disabled>{{ 'adminFlights.selectPlaceholder' | translate }}</option>
+              @for (a of aeropuertos(); track a.id) {
+                <option [ngValue]="a.id" [disabled]="aeropuertoBloqueado(a, fDestinoId())">{{ etiquetaAeropuerto(a) }}</option>
+              }
+            </select>
+            <label class="field-label" for="f-origen">{{ 'flights.origin' | translate }}</label>
+            @if (errores().origen; as e) {
+              <p class="field-error">{{ e | translate }}</p>
+            }
+          </div>
+
+          <div class="field">
+            <select id="f-destino" class="field-input" name="destino"
+              [attr.aria-invalid]="!!errores().destino"
+              [ngModel]="fDestinoId()" (ngModelChange)="fDestinoId.set($event)">
+              <option [ngValue]="null" disabled>{{ 'adminFlights.selectPlaceholder' | translate }}</option>
+              @for (a of aeropuertos(); track a.id) {
+                <option [ngValue]="a.id" [disabled]="aeropuertoBloqueado(a, fOrigenId())">{{ etiquetaAeropuerto(a) }}</option>
+              }
+            </select>
+            <label class="field-label" for="f-destino">{{ 'flights.destination' | translate }}</label>
+            @if (errores().destino; as e) {
+              <p class="field-error">{{ e | translate }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="field">
+          <select id="f-avion" class="field-input" name="avion"
+            [attr.aria-invalid]="!!errores().avion || !!errorServidor()"
+            [ngModel]="fAvionId()" (ngModelChange)="fAvionId.set($event)">
+            <option [ngValue]="null" disabled>{{ 'adminFlights.selectPlaceholder' | translate }}</option>
+            @for (a of avionesSeleccionables(); track a.id) {
+              <option [ngValue]="a.id">{{ etiquetaAvion(a) }}</option>
+            }
+          </select>
+          <label class="field-label" for="f-avion">{{ 'adminFlights.fieldAircraft' | translate }}</label>
+          @if (errores().avion; as e) {
+            <p class="field-error">{{ e | translate }}</p>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <input id="f-fecha-salida" class="field-input" type="date" name="fechaSalida"
+              [attr.min]="modo === 'ALTA' ? hoy() : null"
+              [attr.aria-invalid]="!!errores().salida"
+              [ngModel]="fFechaSalida()" (ngModelChange)="fFechaSalida.set($event)" />
+            <label class="field-label" for="f-fecha-salida">{{ 'adminFlights.departureDateShort' | translate }}</label>
+          </div>
+
+          <div class="field campo-hora" [class.campo-hora--error]="!!errores().salida">
+            <div class="campo-hora__selects">
+              <select id="f-hora-salida" class="field-input" name="salidaHora"
+                [attr.aria-label]="'adminFlights.hour' | translate"
+                [ngModel]="fSalidaHora()" (ngModelChange)="elegirHora('salida', $event)">
+                <option value="" disabled>HH</option>
+                @for (h of horas; track h) {
+                  <option [value]="h">{{ h }}</option>
+                }
+              </select>
+              <span class="campo-hora__sep" aria-hidden="true">:</span>
+              <select class="field-input" name="salidaMin"
+                [attr.aria-label]="'adminFlights.minutes' | translate"
+                [ngModel]="fSalidaMin()" (ngModelChange)="fSalidaMin.set($event)">
+                <option value="" disabled>MM</option>
+                @for (m of minutosPara(fSalidaMin()); track m) {
+                  <option [value]="m">{{ m }}</option>
+                }
+              </select>
+            </div>
+            <label class="field-label" for="f-hora-salida">{{ 'flights.departure' | translate }}</label>
+          </div>
+        </div>
+        @if (errores().salida; as e) {
+          <p class="field-error field-error--fila">{{ e | translate }}</p>
+        }
+
+        <div class="form-row">
+          <div class="field">
+            <input id="f-fecha-llegada" class="field-input" type="date" name="fechaLlegada"
+              [min]="fFechaSalida()"
+              [attr.aria-invalid]="!!errores().llegada"
+              [ngModel]="fFechaLlegada()" (ngModelChange)="fFechaLlegada.set($event)" />
+            <label class="field-label" for="f-fecha-llegada">{{ 'adminFlights.arrivalDateShort' | translate }}</label>
+          </div>
+
+          <div class="field campo-hora" [class.campo-hora--error]="!!errores().llegada">
+            <div class="campo-hora__selects">
+              <select id="f-hora-llegada" class="field-input" name="llegadaHora"
+                [attr.aria-label]="'adminFlights.hour' | translate"
+                [ngModel]="fLlegadaHora()" (ngModelChange)="elegirHora('llegada', $event)">
+                <option value="" disabled>HH</option>
+                @for (h of horas; track h) {
+                  <option [value]="h">{{ h }}</option>
+                }
+              </select>
+              <span class="campo-hora__sep" aria-hidden="true">:</span>
+              <select class="field-input" name="llegadaMin"
+                [attr.aria-label]="'adminFlights.minutes' | translate"
+                [ngModel]="fLlegadaMin()" (ngModelChange)="fLlegadaMin.set($event)">
+                <option value="" disabled>MM</option>
+                @for (m of minutosPara(fLlegadaMin()); track m) {
+                  <option [value]="m">{{ m }}</option>
+                }
+              </select>
+            </div>
+            <label class="field-label" for="f-hora-llegada">{{ 'flights.arrival' | translate }}</label>
+          </div>
+        </div>
+        @if (errores().llegada; as e) {
+          <p class="field-error field-error--fila">{{ e | translate }}</p>
+        }
+
+        <div class="form-row">
+          <div class="field">
+            <input id="f-precio" class="field-input" type="number" name="precio" min="1" step="0.01" placeholder=" "
+              [attr.aria-invalid]="!!errores().precio"
+              [ngModel]="fPrecio()" (ngModelChange)="fPrecio.set($event)" />
+            <label class="field-label" for="f-precio">{{ 'adminFlights.price' | translate }}</label>
+            @if (errores().precio; as e) {
+              <p class="field-error">{{ e | translate }}</p>
+            }
+          </div>
+          <div class="field">
+            <select id="f-escala" class="field-input" name="escala"
+              [ngModel]="fEscala()" (ngModelChange)="fEscala.set($event)">
+              <option [ngValue]="false">{{ 'flights.direct' | translate }}</option>
+              <option [ngValue]="true">{{ 'flights.layover' | translate }}</option>
+            </select>
+            <label class="field-label" for="f-escala">{{ 'flights.type' | translate }}</label>
+          </div>
+        </div>
+
+        @if (modo === 'EDICION') {
+          <div class="field">
+            <select id="f-estado" class="field-input" name="estado"
+              [ngModel]="fEstado()" (ngModelChange)="fEstado.set($event)">
+              @for (e of estados; track e) {
+                <option [ngValue]="e">{{ e }}</option>
+              }
+            </select>
+            <label class="field-label" for="f-estado">{{ 'flights.status' | translate }}</label>
+          </div>
+        } @else {
+          <p class="aviso-catalogos">{{ 'adminFlights.createStatusHint' | translate }}</p>
+        }
+
+        <!-- Resultado de la validación en vivo contra el backend -->
+        @if (validandoServidor()) {
+          <p class="aviso-catalogos" role="status">{{ 'adminFlights.validating' | translate }}</p>
+        } @else if (errorServidor()) {
+          <div class="alerta alerta--error" role="alert">
+            <span>{{ errorServidor() }}</span>
+          </div>
+        } @else if (intentoGuardar() && hayErroresLocales()) {
+          <div class="alerta alerta--error" role="alert">
+            <span>{{ 'adminFlights.errorFixFields' | translate }}</span>
+          </div>
+        } @else if (formularioError()) {
+          <div class="alerta alerta--error" role="alert">
+            <span>{{ formularioError()! | translate }}</span>
+          </div>
+        }
+
+        <div class="modal-acciones">
+          <button type="button" class="btn btn-primary" (click)="cerrarFormulario()" [disabled]="guardando()">
+            {{ 'adminFlights.btnCancel' | translate }}
+          </button>
+          <button type="submit" class="btn btn-dark" [disabled]="!puedeGuardar()">
+            {{ (guardando() ? 'adminFlights.saving' : (modo === 'ALTA' ? 'adminFlights.btnCreate' : 'adminFlights.btnSave')) | translate }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Aviso de confirmación de baja -->
+@if (vueloABajar(); as b) {
+  <div class="modal-overlay" [class.cerrando]="cerrandoBaja()" (click)="cancelarBaja()">
+    <div class="modal-vuelo alerta-confirmacion" role="alertdialog" aria-modal="true"
+      aria-labelledby="alerta-baja-titulo" aria-describedby="alerta-baja-texto"
+      (click)="$event.stopPropagation()">
+
+      <div class="alerta-confirmacion__icono" aria-hidden="true">!</div>
+      <h3 id="alerta-baja-titulo" class="alerta-confirmacion__titulo">{{ 'adminFlights.confirmDeleteTitle' | translate }}</h3>
+
+      <p id="alerta-baja-texto" class="alerta-confirmacion__texto">
+        {{ 'adminFlights.modalDeleteConfirm' | translate: {
+          id: b.id,
+          route: (b.aeropuertoOrigen?.codigoIata ?? '') + ' → ' + (b.aeropuertoDestino?.codigoIata ?? ''),
+          date: b.fechaSalida
+        } }}
+      </p>
+      <p class="alerta-confirmacion__advertencia">{{ 'adminFlights.modalDeleteWarning' | translate }}</p>
+
+      <div class="alerta-confirmacion__acciones">
+        <button type="button" class="btn btn-primary" (click)="cancelarBaja()" [disabled]="guardando()">
+          {{ 'adminFlights.btnCancel' | translate }}
+        </button>
+        <button type="button" class="btn btn-danger" (click)="confirmarBaja()" [disabled]="guardando()">
+          {{ (guardando() ? 'adminFlights.deleting' : 'adminFlights.btnConfirmDelete') | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as t) {
+  <div class="toast toast-vuelos" [class.error]="t.tipo === 'error'" [class.info]="t.tipo === 'info'"
+    [attr.role]="t.tipo === 'error' ? 'alert' : 'status'">
+    <span>{{ t.texto }}</span>
+    <button type="button" class="toast-vuelos__cerrar" [attr.aria-label]="'flights.close' | translate"
+      (click)="cerrarToast()">&times;</button>
   </div>
 }
