@@ -5,13 +5,14 @@ import { Auth } from '../../../services/auth';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import type { TranslationKey } from '../../../i18n/es';
 import { VuelosAdmin } from '../vuelos-admin/vuelos-admin';
+import { AvionesAdmin } from '../aviones-admin/aviones-admin';
 import { ReservasAdmin } from '../reservas-admin/reservas-admin';
 import { PasajesAdmin } from '../pasajes-admin/pasajes-admin';
 import { AsignacionesAdmin } from '../asignaciones-admin/asignaciones-admin';
 import { UsuariosAdmin } from '../usuarios-admin/usuarios-admin';
 import { VentasAdmin } from '../ventas-admin/ventas-admin';
 
-export type SeccionAdminId = 'RESUMEN' | 'VUELOS' | 'RESERVAS' | 'PASAJES' | 'ASIGNACIONES'| 'USUARIOS' | 'VENTAS';
+export type SeccionAdminId = 'RESUMEN' | 'VUELOS' | 'AVIONES' | 'RESERVAS' | 'PASAJES' | 'ASIGNACIONES'| 'USUARIOS' | 'VENTAS';
 
 export interface ModuloAdmin {
   id: Exclude<SeccionAdminId, 'RESUMEN'>;
@@ -24,7 +25,7 @@ export interface ModuloAdmin {
 @Component({
   selector: 'app-admin-panel',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslatePipe, VuelosAdmin, ReservasAdmin, PasajesAdmin, AsignacionesAdmin, UsuariosAdmin, VentasAdmin],
+  imports: [CommonModule, RouterLink, TranslatePipe, VuelosAdmin, AvionesAdmin, ReservasAdmin, PasajesAdmin, AsignacionesAdmin, UsuariosAdmin, VentasAdmin],
   templateUrl: './admin-panel.html',
   styleUrl: './admin-panel.css',
 })
@@ -40,6 +41,13 @@ export class AdminPanel {
       descripcionKey: 'adminPanel.flights.desc',
       ctaKey: 'adminPanel.flights.cta',
       rutaDirecta: '/vuelosAdmin',
+    },
+    {
+      id: 'AVIONES',
+      tituloKey: 'adminPanel.planes.title',
+      descripcionKey: 'adminPanel.planes.desc',
+      ctaKey: 'adminPanel.planes.cta',
+      rutaDirecta: '/avionesAdmin',
     },
     {
       id: 'RESERVAS',

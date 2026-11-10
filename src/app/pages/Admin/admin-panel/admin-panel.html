@@ -77,6 +77,17 @@
       </div>
       <app-vuelos-admin></app-vuelos-admin>
 
+    } @else if (seccionActiva() === 'AVIONES') {
+      <div class="admin-embedded-header">
+        <button type="button" class="btn-back-overview" (click)="seleccionarSeccion('RESUMEN')">
+          {{ 'adminPanel.backToOverview' | translate }}
+        </button>
+        <a routerLink="/avionesAdmin" class="admin-module-link">
+          {{ 'adminPanel.openSection' | translate }}
+        </a>
+      </div>
+      <app-aviones-admin></app-aviones-admin>
+
     } @else if (seccionActiva() === 'RESERVAS') {
       <div class="admin-embedded-header">
         <button type="button" class="btn-back-overview" (click)="seleccionarSeccion('RESUMEN')">

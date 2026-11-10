@@ -1,0 +1,234 @@
+<section class="section flota">
+  <div class="container">
+    <div class="section-header encabezado-abm">
+      <div>
+        <span class="section-eyebrow">{{ 'adminPlanes.eyebrow' | translate }}</span>
+        <h2 class="section-title">{{ 'adminPlanes.title' | translate }}</h2>
+        <p class="section-subtitle">{{ 'adminPlanes.subtitle' | translate }}</p>
+      </div>
+      <button type="button" class="btn btn-dark btn-alta" (click)="abrirAlta()">
+        {{ 'adminPlanes.btnNew' | translate }}
+      </button>
+    </div>
+
+    <div class="barra-filtros">
+      <div class="field barra-filtros__busqueda">
+        <input id="av-busqueda" class="field-input" type="text" placeholder=" "
+          [value]="busqueda()" (input)="busqueda.set($any($event.target).value)" />
+        <label class="field-label" for="av-busqueda">{{ 'adminPlanes.search' | translate }}</label>
+      </div>
+
+      <div class="tabs-estado" role="tablist" [attr.aria-label]="'adminPlanes.filterByStatus' | translate">
+        @for (f of filtros; track f) {
+          <button type="button" role="tab" class="tab" [class.activa]="filtroEstado() === f"
+            [attr.aria-selected]="filtroEstado() === f" (click)="filtroEstado.set(f)">
+            {{ tabKey(f) | translate }} <span class="tab-contador">{{ cantidad(f) }}</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (cargando()) {
+      <p class="texto-estado" role="status">{{ 'adminPlanes.loading' | translate }}</p>
+    }
+
+    @if (error() !== null) {
+      <p class="mensaje-error" role="alert">
+        {{ error() || ('adminPlanes.loadError' | translate) }}
+        <button type="button" class="btn-reintentar" (click)="cargar()">{{ 'adminPlanes.retry' | translate }}</button>
+      </p>
+    }
+
+    @if (!cargando() && error() === null && avionesFiltrados().length === 0) {
+      <p class="texto-estado">{{ 'adminPlanes.noResults' | translate }}</p>
+    }
+
+    <div class="grilla-aviones">
+      @for (avion of avionesFiltrados(); track avion.id) {
+        <article class="tarjeta-avion" [class.de-baja]="avion.estado === 'BAJA'">
+          <header class="tarjeta-avion__cabecera">
+            <div>
+              <h3 class="tarjeta-avion__matricula">{{ avion.identificador }}</h3>
+              <p class="tarjeta-avion__modelo">{{ avion.modelo }}</p>
+            </div>
+            <span class="badge-avion" [attr.data-estado]="avion.estado">{{ estadoKey(avion.estado) | translate }}</span>
+          </header>
+
+          <dl class="tarjeta-avion__datos">
+            <div>
+              <dt>{{ 'adminPlanes.passengers' | translate }}</dt>
+              <dd>{{ avion.capacidadPasajeros }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'adminPlanes.cargo' | translate }}</dt>
+              <dd>{{ avion.capacidadBodega | number: '1.0-2' }} kg</dd>
+            </div>
+          </dl>
+
+          @if (pendientes(avion).length; as n) {
+            <p class="tarjeta-avion__vuelos">{{ 'adminPlanes.pendingFlights' | translate: { count: n } }}</p>
+          } @else {
+            <p class="tarjeta-avion__vuelos tarjeta-avion__vuelos--libre">{{ 'adminPlanes.noPendingFlights' | translate }}</p>
+          }
+
+          <div class="card-acciones">
+            <button type="button" class="btn-accion" (click)="abrirEdicion(avion)">
+              {{ 'adminPlanes.btnEdit' | translate }}
+            </button>
+            @if (avion.estado !== 'BAJA') {
+              <button type="button" class="btn-accion btn-accion--peligro"
+                [disabled]="pendientes(avion).length > 0"
+                [attr.title]="pendientes(avion).length > 0 ? ('adminPlanes.deleteBlocked' | translate) : null"
+                (click)="abrirBaja(avion)">
+                {{ 'adminPlanes.btnDelete' | translate }}
+              </button>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Modal de alta / modificación (el mismo formulario, según la signal modoFormulario) -->
+@if (modoFormulario(); as modo) {
+  <div class="modal-overlay" [class.cerrando]="cerrandoFormulario()" (click)="cerrarFormulario()">
+    <div class="modal-avion" role="dialog" aria-modal="true" aria-labelledby="av-form-titulo"
+      (click)="$event.stopPropagation()">
+
+      <button type="button" class="modal-cerrar" [attr.aria-label]="'flights.close' | translate"
+        (click)="cerrarFormulario()">✕</button>
+
+      <span class="section-eyebrow">{{ 'adminPlanes.eyebrow' | translate }}</span>
+      <h3 id="av-form-titulo" class="modal-titulo">
+        @if (modo === 'ALTA') {
+          {{ 'adminPlanes.modalCreateTitle' | translate }}
+        } @else {
+          {{ 'adminPlanes.modalEditTitle' | translate: { id: avionEditado()?.identificador } }}
+        }
+      </h3>
+
+      <form class="form-avion" (ngSubmit)="guardar()" novalidate>
+        <div class="form-row">
+          <div class="field">
+            <input id="av-identificador" class="field-input" type="text" name="identificador" placeholder="LV-KFX"
+              autocomplete="off" maxlength="20"
+              [attr.aria-invalid]="!!errores().identificador"
+              [ngModel]="fIdentificador()" (ngModelChange)="fIdentificador.set($event.toUpperCase())" />
+            <label class="field-label" for="av-identificador">{{ 'adminPlanes.fieldId' | translate }}</label>
+            @if (errores().identificador; as e) {
+              <p class="field-error">{{ e | translate }}</p>
+            } @else {
+              <p class="field-ayuda">{{ 'adminPlanes.fieldIdHint' | translate }}</p>
+            }
+          </div>
+
+          <div class="field">
+            <input id="av-modelo" class="field-input" type="text" name="modelo" placeholder="Airbus A320"
+              [attr.maxlength]="maxLargoModelo"
+              [attr.aria-invalid]="!!errores().modelo"
+              [ngModel]="fModelo()" (ngModelChange)="fModelo.set($event)" />
+            <label class="field-label" for="av-modelo">{{ 'adminPlanes.fieldModel' | translate }}</label>
+            @if (errores().modelo; as e) {
+              <p class="field-error">{{ e | translate }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <input id="av-pasajeros" class="field-input" type="number" name="pasajeros" min="1" [attr.max]="maxPasajeros"
+              step="1" placeholder=" "
+              [attr.aria-invalid]="!!errores().pasajeros"
+              [ngModel]="fPasajeros()" (ngModelChange)="fPasajeros.set($event)" />
+            <label class="field-label" for="av-pasajeros">{{ 'adminPlanes.fieldPassengers' | translate }}</label>
+            @if (errores().pasajeros; as e) {
+              <p class="field-error">{{ e | translate }}</p>
+            }
+          </div>
+
+          <div class="field">
+            <input id="av-bodega" class="field-input" type="number" name="bodega" min="1" step="0.01" placeholder=" "
+              [attr.aria-invalid]="!!errores().bodega"
+              [ngModel]="fBodega()" (ngModelChange)="fBodega.set($event)" />
+            <label class="field-label" for="av-bodega">{{ 'adminPlanes.fieldCargo' | translate }}</label>
+            @if (errores().bodega; as e) {
+              <p class="field-error">{{ e | translate }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="field">
+          <select id="av-estado" class="field-input" name="estado"
+            [attr.aria-invalid]="!!errores().estado"
+            [ngModel]="fEstado()" (ngModelChange)="fEstado.set($event)">
+            @for (e of (modo === 'ALTA' ? estadosAlta : estados); track e) {
+              <option [ngValue]="e">{{ estadoKey(e) | translate }}</option>
+            }
+          </select>
+          <label class="field-label" for="av-estado">{{ 'adminPlanes.fieldState' | translate }}</label>
+          @if (errores().estado; as e) {
+            <p class="field-error">
+              {{ e | translate: { count: avionEditado() ? pendientes(avionEditado()!).length : 0 } }}
+            </p>
+          }
+        </div>
+
+        @if (intentoGuardar() && hayErrores()) {
+          <div class="alerta alerta--error" role="alert">
+            <span>{{ 'adminPlanes.errorFixFields' | translate }}</span>
+          </div>
+        } @else if (formularioError()) {
+          <div class="alerta alerta--error" role="alert">
+            <span>{{ formularioError()! | translate }}</span>
+          </div>
+        }
+
+        <div class="modal-acciones">
+          <button type="button" class="btn btn-primary" (click)="cerrarFormulario()" [disabled]="guardando()">
+            {{ 'adminPlanes.btnCancel' | translate }}
+          </button>
+          <button type="submit" class="btn btn-dark" [disabled]="guardando() || hayErrores()">
+            {{ (guardando() ? 'adminPlanes.saving' : (modo === 'ALTA' ? 'adminPlanes.btnCreate' : 'adminPlanes.btnSave')) | translate }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Aviso de confirmación de baja -->
+@if (avionABajar(); as b) {
+  <div class="modal-overlay" [class.cerrando]="cerrandoBaja()" (click)="cancelarBaja()">
+    <div class="modal-avion alerta-confirmacion" role="alertdialog" aria-modal="true"
+      aria-labelledby="av-baja-titulo" aria-describedby="av-baja-texto"
+      (click)="$event.stopPropagation()">
+
+      <div class="alerta-confirmacion__icono" aria-hidden="true">!</div>
+      <h3 id="av-baja-titulo" class="alerta-confirmacion__titulo">{{ 'adminPlanes.confirmDeleteTitle' | translate }}</h3>
+
+      <p id="av-baja-texto" class="alerta-confirmacion__texto">
+        {{ 'adminPlanes.modalDeleteConfirm' | translate: { id: b.identificador, model: b.modelo } }}
+      </p>
+      <p class="alerta-confirmacion__advertencia">{{ 'adminPlanes.modalDeleteWarning' | translate }}</p>
+
+      <div class="alerta-confirmacion__acciones">
+        <button type="button" class="btn btn-primary" (click)="cancelarBaja()" [disabled]="guardando()">
+          {{ 'adminPlanes.btnCancel' | translate }}
+        </button>
+        <button type="button" class="btn btn-danger" (click)="confirmarBaja()" [disabled]="guardando()">
+          {{ (guardando() ? 'adminPlanes.deleting' : 'adminPlanes.btnConfirmDelete') | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast(); as t) {
+  <div class="toast toast-aviones" [class.error]="t.tipo === 'error'" [class.info]="t.tipo === 'info'"
+    [attr.role]="t.tipo === 'error' ? 'alert' : 'status'">
+    <span>{{ t.texto }}</span>
+    <button type="button" class="toast-aviones__cerrar" [attr.aria-label]="'flights.close' | translate"
+      (click)="cerrarToast()">&times;</button>
+  </div>
+}
