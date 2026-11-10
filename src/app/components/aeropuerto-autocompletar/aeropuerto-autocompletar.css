@@ -1,0 +1,78 @@
+/* ── Autocompletado de aeropuertos ── */
+.autocompletar {
+  position: relative;
+}
+.autocompletar__lista {
+  position: absolute;
+  top: calc(52px + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: 264px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  animation: modal-in 0.2s ease;
+}
+.autocompletar__opcion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  color: var(--text);
+  cursor: pointer;
+}
+.autocompletar__opcion:hover,
+.autocompletar__opcion.resaltada {
+  background: var(--accent-soft);
+}
+.autocompletar__opcion.bloqueada {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.autocompletar__opcion.bloqueada:hover {
+  background: transparent;
+}
+.autocompletar__iata {
+  flex: 0 0 auto;
+  min-width: 48px;
+  padding: 4px 6px;
+  border-radius: var(--radius);
+  background: var(--bg-inset);
+  color: var(--accent-text);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+.autocompletar__texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.35;
+}
+.autocompletar__texto small {
+  color: var(--text-muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.autocompletar__motivo {
+  margin-left: auto;
+  color: var(--danger);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.autocompletar__vacio {
+  padding: 10px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
