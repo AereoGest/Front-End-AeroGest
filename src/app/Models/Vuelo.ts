@@ -17,3 +17,23 @@ export interface Vuelo {
   precioVuelo: number;
   escala: boolean;
 }
+
+/** Respuesta de POST /api/vuelos/validar */
+export interface ValidacionVuelo {
+  valido: boolean;
+  mensaje: string | null;
+}
+
+/** Cuerpo que espera el backend para el alta (POST) y la modificación (PUT) de un vuelo. */
+export interface VueloRequest {
+  aeropuertoOrigenId: number;
+  aeropuertoDestinoId: number;
+  avionId: number;
+  fechaSalida: string;   // yyyy-MM-dd
+  fechaLlegada: string;  // yyyy-MM-dd
+  horaSalida: string;    // HH:mm
+  horaLlegada: string;   // HH:mm
+  estado?: EstadoVuelo;  // en el alta, si no se envía queda PROGRAMADO
+  precioVuelo: number;
+  escala: boolean;
+}

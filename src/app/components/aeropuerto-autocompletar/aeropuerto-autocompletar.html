@@ -1,0 +1,44 @@
+<div class="field autocompletar">
+  <input class="field-input" type="text" autocomplete="off"
+    role="combobox" aria-autocomplete="list"
+    [id]="inputId()" [name]="inputId()"
+    [attr.aria-controls]="inputId() + '-lista'"
+    [attr.aria-expanded]="mostrarLista()"
+    [attr.aria-activedescendant]="resaltado() >= 0 ? opcionId(resaltado()) : null"
+    [attr.aria-invalid]="!!error()"
+    [placeholder]="'adminFlights.airportSearchPlaceholder' | translate"
+    [ngModel]="texto()" (ngModelChange)="onInput($event)"
+    (focus)="abierto.set(true)" (blur)="onBlur()" (keydown)="onKeydown($event)" />
+  <label class="field-label" [for]="inputId()">{{ label() }}</label>
+
+  @if (mostrarLista()) {
+    <ul class="autocompletar__lista" role="listbox" [id]="inputId() + '-lista'">
+      @for (a of sugerencias(); track a.id; let i = $index) {
+        <li role="option" class="autocompletar__opcion"
+          [id]="opcionId(i)"
+          [class.resaltada]="i === resaltado()"
+          [class.bloqueada]="bloqueado(a)"
+          [attr.aria-selected]="i === resaltado()"
+          [attr.aria-disabled]="bloqueado(a)"
+          (mousedown)="$event.preventDefault(); elegir(a)">
+          <span class="autocompletar__iata">{{ a.codigoIata }}</span>
+          <span class="autocompletar__texto">
+            <span><strong>{{ a.ciudad }}</strong>, {{ a.pais }}</span>
+            <small>{{ a.nombre }}</small>
+          </span>
+          @if (bloqueado(a) && motivoBloqueo()) {
+            <small class="autocompletar__motivo">{{ motivoBloqueo() | translate }}</small>
+          }
+        </li>
+      } @empty {
+        <li class="autocompletar__vacio" role="option" aria-disabled="true">
+          {{ 'adminFlights.noAirportMatches' | translate }}
+        </li>
+      }
+    </ul>
+  }
+
+  @if (error(); as e) {
+    <p class="field-error">{{ e | translate }}</p>
+  }
+</div>

@@ -444,3 +444,219 @@
     animation-duration: 0.01s;
   }
 }
+/* ── ABM de vuelos ── */
+.encabezado-abm {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  text-align: left;
+  margin-bottom: 32px;
+}
+.encabezado-abm .section-subtitle {
+  margin-left: 0;
+}
+.btn-alta {
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Alertas dentro de los modales (colores globales de error) */
+.alerta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.alerta--error {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border: 1px solid var(--danger-border);
+}
+
+/* Acciones dentro de cada tarjeta */
+.resultados .card-acciones {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.btn-accion {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-xlg);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color var(--transition), border-color var(--transition), color var(--transition);
+}
+.btn-accion:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.btn-accion--peligro {
+  color: var(--danger);
+  border-color: var(--danger-border);
+}
+.btn-accion--peligro:hover {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+}
+
+/* Botón de peligro con el burgundy global (mismo formato que .btn) */
+.btn-danger {
+  background: var(--danger);
+  color: var(--danger-contrast);
+  border-color: var(--danger);
+}
+.btn-danger:hover:not(:disabled) {
+  background: var(--danger);
+  color: var(--danger-contrast);
+  filter: brightness(1.12);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Formulario de alta / modificación ──
+   Las etiquetas flotan 36px por encima de cada campo, así que las filas
+   necesitan aire vertical para que no se peguen al campo de arriba. */
+.modal-form-vuelo {
+  max-width: 660px;
+}
+.form-vuelo {
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+  margin-top: 34px;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 34px 16px;
+}
+.form-vuelo .field-error--fila {
+  margin-top: -26px;
+}
+.aviso-catalogos {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Hora con dos selects (HH : MM) en lugar del selector nativo */
+.campo-hora__selects {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 6px;
+}
+.campo-hora__sep {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.campo-hora .field-label {
+  transform: translateY(calc(-50% - 36px)) scale(0.78);
+  font-weight: 500;
+}
+.campo-hora:focus-within .field-label {
+  color: var(--accent-text);
+}
+.campo-hora--error .field-input {
+  border-color: var(--danger);
+}
+.campo-hora--error .field-label {
+  color: var(--danger);
+}
+
+.modal-acciones {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── Aviso de confirmación de baja ── */
+.alerta-confirmacion {
+  max-width: 440px;
+  text-align: center;
+}
+.alerta-confirmacion__icono {
+  width: 56px;
+  height: 56px;
+  margin: 4px auto 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--danger-soft);
+  border: 2px solid var(--danger-border);
+  color: var(--danger);
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+}
+.alerta-confirmacion__titulo {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 22px;
+  margin: 0 0 12px;
+}
+.alerta-confirmacion__texto {
+  color: var(--text);
+  font-size: 15px;
+  margin: 0 0 10px;
+}
+.alerta-confirmacion__advertencia {
+  color: var(--danger);
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0 0 24px;
+}
+.alerta-confirmacion__acciones {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── Toast (reutiliza .toast global) ── */
+.toast-vuelos {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-left-color: var(--success);
+}
+.toast-vuelos.info {
+  border-left-color: var(--accent);
+}
+.toast-vuelos.error {
+  border-left-color: var(--danger);
+}
+.toast-vuelos__cerrar {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.8;
+}
+.toast-vuelos__cerrar:hover {
+  opacity: 1;
+}
+
+@media (max-width: 600px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  .encabezado-abm .btn-alta {
+    width: 100%;
+    justify-content: center;
+  }
+}
