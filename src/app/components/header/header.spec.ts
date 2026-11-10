@@ -42,7 +42,7 @@ describe('Header', () => {
     expect(component).toBeTruthy();
   });
 
-  it('muestra el rol traducido en el header y acceso al panel admin cuando el usuario es ROLE_ADMIN', async () => {
+  it('muestra el rol traducido en el header y acceso al panel admin solo en el menú desplegable cuando el usuario es ROLE_ADMIN', async () => {
     i18n.setLang('es');
     auth.guardarSesion({
       token: 'jwt.admin',
@@ -61,19 +61,31 @@ describe('Header', () => {
     const badge = native.querySelector('#header-role-badge');
     expect(badge?.textContent?.trim()).toBe('Administrador');
 
-    const navAdminLink = native.querySelector('#nav-admin-link');
-    expect(navAdminLink).toBeTruthy();
-    expect(navAdminLink?.textContent?.trim()).toBe('Panel de administración');
+    // Ya no debe estar en la barra principal del header
+    expect(native.querySelector('#nav-admin-link')).toBeNull();
+
+    // Al abrir el menú desplegable, sí debe estar presente
+    component.toggleMenu();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const adminPanelLink = native.querySelector('#admin-panel-link');
+    expect(adminPanelLink).toBeTruthy();
+    expect(adminPanelLink?.textContent?.trim()).toBe('Panel de administración');
+
+    // Debe existir también el acceso a configuración
+    const settingsLink = native.querySelector('#settings');
+    expect(settingsLink).toBeTruthy();
 
     i18n.setLang('en');
     fixture.detectChanges();
     await fixture.whenStable();
 
     expect(badge?.textContent?.trim()).toBe('Administrator');
-    expect(navAdminLink?.textContent?.trim()).toBe('Admin panel');
+    expect(adminPanelLink?.textContent?.trim()).toBe('Admin panel');
   });
 
-  it('muestra el rol Usuario y oculta el enlace al panel admin cuando el usuario es ROLE_USUARIO', async () => {
+  it('muestra el rol Usuario y no muestra el panel admin en el menú desplegable cuando el usuario es ROLE_USUARIO', async () => {
     i18n.setLang('es');
     auth.guardarSesion({
       token: 'jwt.user',
@@ -92,5 +104,12 @@ describe('Header', () => {
     const badge = native.querySelector('#header-role-badge');
     expect(badge?.textContent?.trim()).toBe('Usuario');
     expect(native.querySelector('#nav-admin-link')).toBeNull();
+
+    component.toggleMenu();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(native.querySelector('#admin-panel-link')).toBeNull();
+    expect(native.querySelector('#settings')).toBeTruthy();
   });
 });

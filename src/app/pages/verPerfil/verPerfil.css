@@ -7,11 +7,52 @@
 }
 
 .profile-layout {
-  max-width: 1120px;
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
   gap: 24px;
-  align-items: start;
+}
+
+/* ── Pestañas de Navegación ── */
+.settings-nav-tabs {
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+  margin-top: 16px;
+  margin-bottom: 24px;
+}
+
+.settings-nav-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  background: transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.settings-nav-tab:hover {
+  color: var(--text);
+  background: var(--bg-inset);
+}
+
+.settings-nav-tab.is-active {
+  color: var(--btn-solid-text);
+  background: var(--btn-solid-bg);
+  box-shadow: var(--shadow-xs);
+}
+
+.tab-icon {
+  width: 17px;
+  height: 17px;
 }
 
 .profile-alert {

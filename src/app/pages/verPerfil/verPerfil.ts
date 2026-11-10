@@ -1,4 +1,5 @@
 import { Component, computed, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import {
   FieldTree,
   FormField,
@@ -31,7 +32,7 @@ const DATOS_VACIOS: DatosPerfil = {
 
 @Component({
   selector: 'app-ver-perfil',
-  imports: [FormField, TranslatePipe],
+  imports: [FormField, RouterLink, TranslatePipe],
   templateUrl: './verPerfil.html',
   styleUrl: './verPerfil.css',
 })

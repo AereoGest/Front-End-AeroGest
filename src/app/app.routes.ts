@@ -28,11 +28,14 @@ import { AsignacionesAdmin } from './pages/Admin/asignaciones-admin/asignaciones
 import { UsuariosAdmin } from './pages/Admin/usuarios-admin/usuarios-admin';
 import { VentasAdmin } from './pages/Admin/ventas-admin/ventas-admin';
 import { AeropuertosAdmin } from './pages/Admin/aeropuertos-admin/aeropuertos-admin';
+import { Settings } from './pages/settings/settings';
 
 export const routes: Routes = [
     { path: "", component: Home },
     { path: "register", component: RegistrationForm },
     { path: "perfil", component: VerPerfil, canActivate: [authGuard] },
+    { path: "settings", component: Settings, canActivate: [authGuard] },
+    { path: "configuracion", redirectTo: "settings" },
     { path: "login", component: LoginForm },
     { path: "vuelos", component: Vuelos },
     { path: "adminPanel", component: AdminPanel, canActivate: [adminGuard] },

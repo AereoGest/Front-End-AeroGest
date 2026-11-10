@@ -14,6 +14,7 @@ describe('Asientos', () => {
   let fixture: ComponentFixture<Asientos>;
 
   beforeEach(async () => {
+    TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [Asientos],
       providers: [
