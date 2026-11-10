@@ -110,6 +110,14 @@
               <h2 class="booking-route">{{ 'myBookings.bookingItem' | translate:{ id: reserva.id } }}</h2>
               <p class="booking-details">{{ 'myBookings.ticketsCount' | translate:{ count: reserva.cantidadPasajes } }} · {{ formatearPrecio(reserva.valor) }}</p>
               <span class="estado-badge" [attr.data-estado]="reserva.estadoReserva">{{ etiquetaEstado(reserva.estadoReserva) }}</span>
+              @if (reserva.estadoReserva === 'CANCELADA' && reserva.motivoCancelacion) {
+                <p class="booking-cancelacion">
+                  <strong>{{ textoMotivo(reserva.motivoCancelacion) }}</strong>
+                  @if (reserva.montoReembolso != null) {
+                    <span>{{ textoReembolso(reserva.montoReembolso) }}</span>
+                  }
+                </p>
+              }
             </div>
             <time class="booking-date" [attr.datetime]="reserva.fechaReserva">
               <span class="booking-date-day">{{ formatearDia(reserva.fechaReserva) }}</span>
@@ -177,6 +185,18 @@
         <dt>{{ 'myBookings.status' | translate }}</dt>
         <dd><span class="estado-badge" [attr.data-estado]="reserva.estadoReserva">{{ etiquetaEstado(reserva.estadoReserva) }}</span></dd>
       </div>
+      @if (reserva.estadoReserva === 'CANCELADA' && reserva.motivoCancelacion) {
+        <div class="completo">
+          <dt>{{ 'myBookings.cancelReason' | translate }}</dt>
+          <dd>{{ textoMotivo(reserva.motivoCancelacion) }}</dd>
+        </div>
+        @if (reserva.montoReembolso != null) {
+          <div class="completo">
+            <dt>{{ 'myBookings.refund' | translate }}</dt>
+            <dd>{{ textoReembolso(reserva.montoReembolso) }}</dd>
+          </div>
+        }
+      }
     </dl>
 
     @if (reserva.pasajes?.length) {

@@ -18,6 +18,13 @@ export interface Vuelo {
   escala: boolean;
 }
 
+/** Respuesta de GET /api/vuelos/{id}/impacto-cancelacion: qué pasa con los clientes si se cancela el vuelo. */
+export interface ImpactoCancelacion {
+  reservas: number;
+  pasajeros: number;
+  montoReembolso: number;   // 100% de lo pagado
+}
+
 /** Respuesta de POST /api/vuelos/validar */
 export interface ValidacionVuelo {
   valido: boolean;

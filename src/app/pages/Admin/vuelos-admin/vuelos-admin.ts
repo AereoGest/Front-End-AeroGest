@@ -5,7 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject, catchError, debounceTime, forkJoin, of, switchMap, tap } from 'rxjs';
 import { VueloService } from '../../../services/vuelo';
-import { EstadoVuelo, ValidacionVuelo, Vuelo, VueloRequest } from '../../../Models/Vuelo';
+import { EstadoVuelo, ImpactoCancelacion, ValidacionVuelo, Vuelo, VueloRequest } from '../../../Models/Vuelo';
 import { Aeropuerto } from '../../../Models/Aeropuerto';
 import { Avion } from '../../../Models/Avion';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
@@ -64,6 +64,9 @@ export class VuelosAdmin implements OnInit {
   protected readonly modoFormulario = signal<ModoFormulario | null>(null);
   protected readonly vueloEditado = signal<Vuelo | null>(null);
   protected readonly vueloABajar = signal<Vuelo | null>(null);
+  /** Reservas activas del vuelo que se está por cancelar (baja o estado CANCELADO en "Modificar"). */
+  protected readonly impactoCancelacion = signal<ImpactoCancelacion | null>(null);
+  protected readonly cargandoImpacto = signal(false);
   protected readonly guardando = signal(false);
   protected readonly formularioError = signal<string | null>(null);
   /** Se activa al intentar guardar: recién ahí se marcan los campos obligatorios vacíos. */
@@ -87,6 +90,14 @@ export class VuelosAdmin implements OnInit {
   protected readonly fPrecio = signal<number | null>(null);
   protected readonly fEscala = signal(false);
   protected readonly fEstado = signal<EstadoVuelo>('PROGRAMADO');
+
+  /** Al modificar, se pasó a CANCELADO un vuelo que no lo estaba: se van a cancelar sus reservas. */
+  protected readonly avisoCancelacionVisible = computed(
+    () =>
+      this.modoFormulario() === 'EDICION' &&
+      this.fEstado() === 'CANCELADO' &&
+      this.vueloEditado()?.estado !== 'CANCELADO'
+  );
 
   // Validación contra el backend (ej. avión ocupado en ese horario)
   protected readonly validandoServidor = signal(false);
@@ -441,6 +452,7 @@ export class VuelosAdmin implements OnInit {
     this.fPrecio.set(vuelo?.precioVuelo ?? null);
     this.fEscala.set(!!vuelo?.escala);
     this.fEstado.set(vuelo?.estado ?? 'PROGRAMADO');
+    this.impactoCancelacion.set(null);
   }
 
   protected cerrarFormulario(): void {
@@ -480,14 +492,20 @@ export class VuelosAdmin implements OnInit {
     this.guardando.set(true);
     this.formularioError.set(null);
 
+    // Se guarda antes de cerrar el formulario, que limpia estas signals
+    const cancelaElVuelo = this.avisoCancelacionVisible();
+
     peticion.subscribe({
       next: (vuelo) => {
         this.guardando.set(false);
-        this.cerrarFormulario();
+        const id = vuelo?.id ?? editado?.id;
         this.mostrarToast(
-          this.i18n.t(esEdicion ? 'adminFlights.toastUpdated' : 'adminFlights.toastCreated', { id: vuelo?.id ?? editado?.id }),
+          cancelaElVuelo
+            ? this.mensajeCancelacion('adminFlights.toastUpdated', 'adminFlights.toastCancelledWithBookings', id)
+            : this.i18n.t(esEdicion ? 'adminFlights.toastUpdated' : 'adminFlights.toastCreated', { id }),
           'exito'
         );
+        this.cerrarFormulario();
         this.cargar();
       },
       error: (err: HttpErrorResponse) => {
@@ -503,6 +521,34 @@ export class VuelosAdmin implements OnInit {
     this.vueloDetalle.set(null);
     this.formularioError.set(null);
     this.vueloABajar.set(vuelo);
+    this.cargarImpacto(Number(vuelo.id));
+  }
+
+  // ── Impacto de cancelar un vuelo en las reservas de los clientes ──
+  /** Pide al back cuántas reservas activas tiene el vuelo y cuánto habría que reembolsar. */
+  private cargarImpacto(vueloId: number): void {
+    this.impactoCancelacion.set(null);
+    this.cargandoImpacto.set(true);
+    this.vueloService.obtenerImpactoCancelacion(vueloId).subscribe({
+      next: (impacto) => this.impactoCancelacion.set(impacto),
+      error: () => this.impactoCancelacion.set(null), // si falla, la baja igual se puede hacer
+    }).add(() => this.cargandoImpacto.set(false));
+  }
+
+  /** En "Modificar", elegir CANCELADO tiene el mismo efecto que la baja: se avisa qué reservas se cancelan. */
+  protected cambiarEstado(estado: EstadoVuelo): void {
+    this.fEstado.set(estado);
+    const editado = this.vueloEditado();
+    if (this.avisoCancelacionVisible() && editado && !this.impactoCancelacion()) {
+      this.cargarImpacto(Number(editado.id));
+    }
+  }
+
+  private mensajeCancelacion(clave: TranslationKey, claveConReservas: TranslationKey, id: unknown): string {
+    const impacto = this.impactoCancelacion();
+    return impacto && impacto.reservas > 0
+      ? this.i18n.t(claveConReservas, { id, count: impacto.reservas })
+      : this.i18n.t(clave, { id });
   }
 
   /** El usuario eligió no dar de baja: se cierra el aviso y se informa con un toast. */
@@ -524,7 +570,10 @@ export class VuelosAdmin implements OnInit {
       next: () => {
         this.guardando.set(false);
         this.cerrarAlertaBaja();
-        this.mostrarToast(this.i18n.t('adminFlights.toastDeleted', { id: vuelo.id }), 'exito');
+        this.mostrarToast(
+          this.mensajeCancelacion('adminFlights.toastDeleted', 'adminFlights.toastDeletedWithBookings', vuelo.id),
+          'exito'
+        );
         this.cargar();
       },
       error: (err: HttpErrorResponse) => {

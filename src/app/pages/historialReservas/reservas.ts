@@ -5,6 +5,7 @@ import { CheckInResponse, EstadoReserva, PasajeReserva, Reserva } from '../../Mo
 import { ReservaService } from '../../services/reservaService';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { I18nService } from '../../services/i18n';
+import type { TranslationKey } from '../../i18n/es';
 import { Checkinonline } from '../check-in-online/check-in-online';
 
 const ESTADOS_ACTIVOS: EstadoReserva[] = ['CONFIRMADO', 'PROCESANDO', 'ACTIVO'];
@@ -19,6 +20,13 @@ const ETIQUETAS_ESTADO: Record<EstadoReserva, string> = {
   ACTIVO: 'Activo',
   PROCESANDO: 'Procesando',
   CANCELADA: 'Cancelada',
+};
+
+// Motivos de cancelación que guarda el back (mismos textos que CancelacionVueloService y ReservaService)
+const MOTIVOS_CANCELACION: Record<string, TranslationKey> = {
+  'Vuelo cancelado por la aerolínea': 'myBookings.reasonFlightCancelled',
+  'Cancelada por el cliente': 'myBookings.reasonCustomer',
+  'Cancelada por la aerolínea': 'myBookings.reasonAirline',
 };
 
 @Component({
@@ -252,6 +260,18 @@ export class Reservas implements OnInit {
     if (estado === 'CANCELADA') return this.i18n.t('myBookings.statusCanceled');
     if (estado === 'PROCESANDO' || estado === 'ACTIVO') return this.i18n.t('myBookings.statusPending');
     return ETIQUETAS_ESTADO[estado] ?? estado;
+  }
+
+  /** El back guarda el motivo en español; los conocidos se traducen. */
+  protected textoMotivo(motivo: string): string {
+    const clave = MOTIVOS_CANCELACION[motivo];
+    return clave ? this.i18n.t(clave) : motivo;
+  }
+
+  protected textoReembolso(monto: number): string {
+    return monto > 0
+      ? this.i18n.t('myBookings.refundAmount', { amount: this.formatearPrecio(monto) })
+      : this.i18n.t('myBookings.refundNone');
   }
 
   protected formatearPrecio(valor: number): string {
