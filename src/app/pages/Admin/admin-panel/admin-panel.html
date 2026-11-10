@@ -140,6 +140,16 @@
         </a>
       </div>
       <app-ventas-admin></app-ventas-admin>
+    } @else if (seccionActiva() === 'AEROPUERTOS') {
+      <div class="admin-embedded-header">
+        <button type="button" class="btn-back-overview" (click)="seleccionarSeccion('RESUMEN')">
+          {{ 'adminPanel.backToOverview' | translate }}
+        </button>
+        <a routerLink="/aeropuertosAdmin" class="admin-module-link">
+          {{ 'adminPanel.openSection' | translate }}
+        </a>
+      </div>
+      <app-aeropuertos-admin></app-aeropuertos-admin>
     }
   </div>
 </section>
