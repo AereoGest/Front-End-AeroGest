@@ -12,17 +12,11 @@
     </div>
   </header>
 
-  <!-- Alertas de éxito y error -->
+  <!-- Alerta de éxito (alta y modificación). La baja se informa con un toast. -->
   @if (mensajeExito()) {
     <div class="alerta alerta--exito" role="status">
       <span>{{ mensajeExito() }}</span>
       <button type="button" class="alerta__cerrar" (click)="mensajeExito.set(null)" [attr.aria-label]="'common.close' | translate">&times;</button>
-    </div>
-  }
-  @if (mensajeError()) {
-    <div class="alerta alerta--error" role="alert">
-      <span>{{ mensajeError() }}</span>
-      <button type="button" class="alerta__cerrar" (click)="mensajeError.set(null)" [attr.aria-label]="'common.close' | translate">&times;</button>
     </div>
   }
 
@@ -88,21 +82,11 @@
               <td>{{ a.ciudad }}</td>
               <td>{{ a.pais }}</td>
               <td class="tabla__acciones">
-                <button
-                  type="button"
-                  class="btn-icon"
-                  [title]="'adminAirports.edit' | translate"
-                  [attr.aria-label]="'adminAirports.edit' | translate"
-                  (click)="abrirModalEdicion(a)">
-                  ✎
+                <button type="button" class="btn-accion" (click)="abrirModalEdicion(a)">
+                  {{ 'adminAirports.edit' | translate }}
                 </button>
-                <button
-                  type="button"
-                  class="btn-icon btn-icon--danger"
-                  [title]="'adminAirports.delete' | translate"
-                  [attr.aria-label]="'adminAirports.delete' | translate"
-                  (click)="abrirModalBaja(a)">
-                  🗑
+                <button type="button" class="btn-accion btn-accion--peligro" (click)="abrirModalBaja(a)">
+                  {{ 'adminAirports.delete' | translate }}
                 </button>
               </td>
             </tr>
@@ -159,7 +143,7 @@
           </div>
 
           <div class="modal-acciones">
-            <button type="button" class="btn btn-outline" (click)="cerrarModalFormulario()" [disabled]="guardando()">
+            <button type="button" class="btn btn-primary" (click)="cerrarModalFormulario()" [disabled]="guardando()">
               {{ 'common.cancel' | translate }}
             </button>
             <button type="submit" class="btn btn-dark" [disabled]="guardando()">
@@ -173,23 +157,23 @@
     </div>
   }
 
-  <!-- ================= Modal Confirmación Baja ================= -->
+  <!-- ================= Aviso de confirmación de baja (mismo estilo que vuelos-admin) ================= -->
   @if (modalBajaAbierto() && aeropuertoAEliminar(); as aEliminar) {
-    <div class="modal-overlay" (click)="cerrarModalBaja()">
-      <div class="modal-box modal-box--baja" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="modal-baja-title">
-        <button type="button" class="modal-cerrar" (click)="cerrarModalBaja()" [attr.aria-label]="'common.close' | translate">&times;</button>
-        <span class="section-eyebrow">{{ 'adminAirports.eyebrow' | translate }}</span>
-        <h2 id="modal-baja-title" class="modal-titulo">{{ 'adminAirports.confirmDeleteTitle' | translate }}</h2>
-        <p class="modal-subtitulo">{{ 'adminAirports.confirmDeleteMessage' | translate }}</p>
+    <div class="modal-overlay modal-overlay--alerta" [class.cerrando]="cerrandoBaja()" (click)="cancelarBaja()">
+      <div class="modal-box alerta-confirmacion" role="alertdialog" aria-modal="true"
+        aria-labelledby="alerta-baja-titulo" aria-describedby="alerta-baja-texto"
+        (click)="$event.stopPropagation()">
 
-        <div class="baja-resumen">
-          <p><strong>{{ 'adminAirports.iata' | translate }}:</strong> {{ aEliminar.codigoIata }}</p>
-          <p><strong>{{ 'adminAirports.name' | translate }}:</strong> {{ aEliminar.nombre }}</p>
-          <p><strong>{{ 'adminAirports.city' | translate }}:</strong> {{ aEliminar.ciudad }}, {{ aEliminar.pais }}</p>
-        </div>
+        <div class="alerta-confirmacion__icono" aria-hidden="true">!</div>
+        <h2 id="alerta-baja-titulo" class="alerta-confirmacion__titulo">{{ 'adminAirports.confirmDeleteTitle' | translate }}</h2>
 
-        <div class="modal-acciones">
-          <button type="button" class="btn btn-outline" (click)="cerrarModalBaja()" [disabled]="eliminando()">
+        <p id="alerta-baja-texto" class="alerta-confirmacion__texto">
+          {{ 'adminAirports.modalDeleteConfirm' | translate: { name: aEliminar.nombre, code: aEliminar.codigoIata } }}
+        </p>
+        <p class="alerta-confirmacion__advertencia">{{ 'adminAirports.confirmDeleteMessage' | translate }}</p>
+
+        <div class="alerta-confirmacion__acciones">
+          <button type="button" class="btn btn-primary" (click)="cancelarBaja()" [disabled]="eliminando()">
             {{ 'common.cancel' | translate }}
           </button>
           <button type="button" class="btn btn-danger" (click)="confirmarBaja()" [disabled]="eliminando()">
@@ -200,3 +184,12 @@
     </div>
   }
 </section>
+
+@if (toast(); as t) {
+  <div class="toast toast-admin" [class.error]="t.tipo === 'error'" [class.info]="t.tipo === 'info'"
+    [attr.role]="t.tipo === 'error' ? 'alert' : 'status'">
+    <span>{{ t.texto }}</span>
+    <button type="button" class="toast-admin__cerrar" [attr.aria-label]="'common.close' | translate"
+      (click)="cerrarToast()">&times;</button>
+  </div>
+}

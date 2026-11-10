@@ -15,7 +15,7 @@
 
       <div class="toolbar-actions">
         @if (busqueda() || tabActiva() !== 'TODAS') {
-          <button type="button" class="btn btn-outline" (click)="limpiarFiltros()">
+          <button type="button" class="btn btn-primary" (click)="limpiarFiltros()">
             {{ 'adminBookings.clearFilters' | translate }}
           </button>
         }
@@ -184,7 +184,7 @@
 
               <button
                 type="button"
-                class="btn-accion btn-baja"
+                class="btn-accion btn-accion--peligro"
                 [disabled]="reserva.estadoReserva === 'CANCELADA'"
                 (click)="abrirModalBaja(reserva, $event)"
               >
@@ -263,7 +263,7 @@
 
       <div class="pasajeros-header">
         <h4>{{ 'adminBookings.passengerSectionTitle' | translate: { count: altaPasajeros().length } }}</h4>
-        <button type="button" class="btn btn-outline btn-sm" (click)="agregarPasajeroAlta()">
+        <button type="button" class="btn btn-primary btn-sm" (click)="agregarPasajeroAlta()">
           {{ 'adminBookings.addPassenger' | translate }}
         </button>
       </div>
@@ -410,7 +410,7 @@
       </div>
 
       <div class="modal-acciones">
-        <button type="button" class="btn btn-outline" [disabled]="creando()" (click)="cerrarModalAlta()">
+        <button type="button" class="btn btn-primary" [disabled]="creando()" (click)="cerrarModalAlta()">
           {{ 'common.cancel' | translate }}
         </button>
         <button type="button" class="btn btn-dark" [disabled]="creando()" (click)="guardarNuevaReserva()">
@@ -493,7 +493,7 @@
       </div>
 
       <div class="modal-acciones">
-        <button type="button" class="btn btn-outline" [disabled]="guardandoEdicion()" (click)="cerrarModalEdicion()">
+        <button type="button" class="btn btn-primary" [disabled]="guardandoEdicion()" (click)="cerrarModalEdicion()">
           {{ 'common.cancel' | translate }}
         </button>
         <button type="button" class="btn btn-dark" [disabled]="guardandoEdicion()" (click)="guardarEdicionReserva()">
@@ -504,37 +504,27 @@
   </div>
 }
 
-<!-- ===================== MODAL CONFIRMACIÓN DE BAJA LÓGICA ===================== -->
+<!-- ===================== AVISO DE CONFIRMACIÓN DE BAJA LÓGICA (mismo estilo que vuelos-admin) ===================== -->
 @if (reservaParaBaja(); as rBaja) {
-  <div class="modal-overlay" (click)="cerrarModalBaja()">
+  <div class="modal-overlay modal-overlay--alerta" [class.cerrando]="cerrandoBaja()" (click)="cancelarBaja()">
     <div
-      class="modal-box"
-      role="dialog"
+      class="modal-box alerta-confirmacion"
+      role="alertdialog"
       aria-modal="true"
-      aria-labelledby="modal-baja-titulo"
+      aria-labelledby="alerta-baja-titulo"
+      aria-describedby="alerta-baja-texto"
       (click)="$event.stopPropagation()"
     >
-      <button
-        type="button"
-        class="modal-cerrar"
-        [attr.aria-label]="'common.close' | translate"
-        (click)="cerrarModalBaja()"
-      >
-        ✕
-      </button>
+      <div class="alerta-confirmacion__icono" aria-hidden="true">!</div>
+      <h3 id="alerta-baja-titulo" class="alerta-confirmacion__titulo">{{ 'adminBookings.cancelModalTitle' | translate }}</h3>
 
-      <span class="section-eyebrow">{{ codigoReserva(rBaja) }}</span>
-      <h3 id="modal-baja-titulo" class="modal-titulo">{{ 'adminBookings.cancelModalTitle' | translate }}</h3>
-      <p class="modal-subtitulo">
+      <p id="alerta-baja-texto" class="alerta-confirmacion__texto">
         {{ 'adminBookings.cancelModalDesc' | translate: { code: codigoReserva(rBaja) } }}
       </p>
+      <p class="alerta-confirmacion__advertencia">{{ 'adminBookings.cancelModalWarning' | translate }}</p>
 
-      @if (errorBaja()) {
-        <div class="alerta-error" role="alert">{{ errorBaja() }}</div>
-      }
-
-      <div class="modal-acciones">
-        <button type="button" class="btn btn-outline" [disabled]="procesandoBaja()" (click)="cerrarModalBaja()">
+      <div class="alerta-confirmacion__acciones">
+        <button type="button" class="btn btn-primary" [disabled]="procesandoBaja()" (click)="cancelarBaja()">
           {{ 'common.cancel' | translate }}
         </button>
         <button type="button" class="btn btn-danger" [disabled]="procesandoBaja()" (click)="confirmarBajaReserva()">
@@ -542,6 +532,15 @@
         </button>
       </div>
     </div>
+  </div>
+}
+
+@if (toast(); as t) {
+  <div class="toast toast-admin" [class.error]="t.tipo === 'error'" [class.info]="t.tipo === 'info'"
+    [attr.role]="t.tipo === 'error' ? 'alert' : 'status'">
+    <span>{{ t.texto }}</span>
+    <button type="button" class="toast-admin__cerrar" [attr.aria-label]="'common.close' | translate"
+      (click)="cerrarToast()">&times;</button>
   </div>
 }
 

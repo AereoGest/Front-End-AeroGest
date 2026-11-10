@@ -271,33 +271,29 @@
   display: inline-flex;
   gap: 8px;
 }
+/* Botones Modificar / Dar de baja (mismo estilo que vuelos-admin) */
 .btn-accion {
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
-  font-size: 12px;
+  padding: 6px 14px;
+  font-size: 13px;
   font-weight: 600;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: all var(--transition);
+  border-radius: var(--radius-xlg);
+  border: 1px solid var(--border-strong);
   background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color var(--transition), border-color var(--transition), color var(--transition);
 }
-.btn-accion--edit {
-  color: var(--accent-text);
-  border-color: var(--border);
-  background: var(--bg-inset);
-}
-.btn-accion--edit:hover {
+.btn-accion:hover {
   background: var(--accent-soft);
   border-color: var(--accent);
 }
-.btn-accion--delete {
-  color: #ef4444;
-  border-color: rgba(220, 38, 38, 0.2);
-  background: rgba(220, 38, 38, 0.05);
+.btn-accion--peligro {
+  color: var(--danger);
+  border-color: var(--danger-border);
 }
-.btn-accion--delete:hover {
-  background: rgba(220, 38, 38, 0.15);
-  border-color: #ef4444;
+.btn-accion--peligro:hover {
+  background: var(--danger-soft);
+  border-color: var(--danger);
 }
 
 .contador {
@@ -382,22 +378,17 @@
   margin-top: 16px;
 }
 
+/* Botón de peligro con el burgundy global (mismo formato que .btn, igual que en vuelos-admin) */
 .btn-danger {
-  background: #dc2626;
-  color: #ffffff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background var(--transition);
+  background: var(--danger);
+  color: var(--danger-contrast);
+  border-color: var(--danger);
 }
 .btn-danger:hover:not(:disabled) {
-  background: #b91c1c;
-}
-.btn-danger:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  background: var(--danger);
+  color: var(--danger-contrast);
+  filter: brightness(1.12);
+  box-shadow: var(--shadow-md);
 }
 
 /* ── Responsive ── */
@@ -416,4 +407,113 @@
   .form-row {
     grid-template-columns: 1fr;
   }
+}
+
+/* ── Aviso de confirmación de baja (mismo estilo que vuelos-admin) ── */
+.modal-overlay--alerta {
+  background: var(--overlay);
+  backdrop-filter: blur(3px);
+  animation: overlay-in 0.4s ease;
+}
+.modal-overlay--alerta.cerrando {
+  animation: overlay-out 0.4s ease forwards;
+}
+.alerta-confirmacion {
+  max-width: 440px;
+  padding: 32px;
+  text-align: center;
+  animation: modal-in 0.45s ease;
+}
+.modal-overlay--alerta.cerrando .alerta-confirmacion {
+  animation: modal-out 0.4s ease forwards;
+}
+.alerta-confirmacion__icono {
+  width: 56px;
+  height: 56px;
+  margin: 4px auto 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--danger-soft);
+  border: 2px solid var(--danger-border);
+  color: var(--danger);
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+}
+.alerta-confirmacion__titulo {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 22px;
+  margin: 0 0 12px;
+}
+.alerta-confirmacion__texto {
+  color: var(--text);
+  font-size: 15px;
+  margin: 0 0 10px;
+}
+.alerta-confirmacion__advertencia {
+  color: var(--danger);
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0 0 24px;
+}
+.alerta-confirmacion__acciones {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes overlay-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes modal-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(16px) scale(0.97); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay--alerta,
+  .alerta-confirmacion,
+  .modal-overlay--alerta.cerrando,
+  .modal-overlay--alerta.cerrando .alerta-confirmacion {
+    animation-duration: 0.01s;
+  }
+}
+
+/* ── Toast (reutiliza .toast global, igual que vuelos-admin) ── */
+.toast-admin {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-left-color: var(--success);
+}
+.toast-admin.info {
+  border-left-color: var(--accent);
+}
+.toast-admin.error {
+  border-left-color: var(--danger);
+}
+.toast-admin__cerrar {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.8;
+}
+.toast-admin__cerrar:hover {
+  opacity: 1;
 }

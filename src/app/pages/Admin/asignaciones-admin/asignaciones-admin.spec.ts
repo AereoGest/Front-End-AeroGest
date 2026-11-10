@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { AsignacionesAdmin } from './asignaciones-admin';
 import { Asignacion, EmpleadoAsignacion } from '../../../Models/Asignacion';
 import { Vuelo } from '../../../Models/Vuelo';
@@ -222,7 +222,8 @@ describe('AsignacionesAdmin', () => {
     expect(component.mensajeExito()).toBeTruthy();
   });
 
-  it('debe abrir modal de baja y confirmar eliminación', () => {
+  it('debe abrir el aviso de baja, confirmar y mostrar un toast', () => {
+    vi.useFakeTimers();
     component.abrirModalBaja(mockAsignaciones[0]);
     expect(component.modalBajaAbierto()).toBe(true);
     expect(component.asignacionAEliminar()).toEqual(mockAsignaciones[0]);
@@ -236,8 +237,21 @@ describe('AsignacionesAdmin', () => {
     // Recarga la lista
     httpMock.expectOne(`${environment.apiUrl}/asignacion`).flush([mockAsignaciones[1]]);
 
+    // El aviso queda "cerrando" mientras corre la animación de salida
+    expect(component.cerrandoBaja()).toBe(true);
+    expect(component.toast()?.tipo).toBe('exito');
+
+    vi.advanceTimersByTime(400);
     expect(component.modalBajaAbierto()).toBe(false);
-    expect(component.mensajeExito()).toBeTruthy();
+    vi.useRealTimers();
+  });
+
+  it('debe mostrar un toast informativo si se cancela la baja', () => {
+    component.abrirModalBaja(mockAsignaciones[0]);
+    component.cancelarBaja();
+
+    expect(component.toast()?.tipo).toBe('info');
+    expect(component.cerrandoBaja()).toBe(true);
   });
   // ── Pruebas específicas de filtros (Tarea 5) ──
   it('debe filtrar asignaciones por empleado seleccionado', () => {

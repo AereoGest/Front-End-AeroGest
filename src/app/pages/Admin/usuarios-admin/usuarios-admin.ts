@@ -1,10 +1,11 @@
-import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import type { TranslationKey } from '../../../i18n/es';
 import { UsuarioService } from '../../../services/usuario-service';
+import { I18nService } from '../../../services/i18n';
 import {
   ActualizarUsuarioRequest,
   CrearUsuarioRequest,
@@ -17,6 +18,10 @@ import {
 type FiltroRol = 'TODOS' | RolUsuario;
 type FiltroIdentificador = 'TODOS' | TipoIdentificador;
 type Orden = 'NOMBRE_ASC' | 'NOMBRE_DESC' | 'RECIENTES' | 'ANTIGUOS';
+type Toast = { texto: string; tipo: 'exito' | 'info' | 'error' };
+
+// Debe coincidir con la duración de las animaciones overlay-out / modal-out del CSS (igual que vuelos-admin)
+const DURACION_CIERRE_MS = 400;
 
 @Component({
   selector: 'app-usuarios-admin',
@@ -27,6 +32,7 @@ type Orden = 'NOMBRE_ASC' | 'NOMBRE_DESC' | 'RECIENTES' | 'ANTIGUOS';
 })
 export class UsuariosAdmin implements OnInit {
   private usuarioService = inject(UsuarioService);
+  private i18n = inject(I18nService);
 
   readonly roles: RolUsuario[] = ['ROLE_USUARIO', 'ROLE_EMPLEADO', 'ROLE_ADMIN', 'ROLE_INCOMPLETO'];
   readonly rolesAsignables: RolUsuario[] = ['ROLE_USUARIO', 'ROLE_EMPLEADO', 'ROLE_ADMIN'];
@@ -62,6 +68,12 @@ export class UsuariosAdmin implements OnInit {
   eliminando = signal(false);
   formularioError = signal<string | null>(null);
   usuarioSeleccionado = signal<Usuario | null>(null);
+  // Bandera de "cerrando": activa la animación de salida del aviso de baja
+  cerrandoBaja = signal(false);
+
+  // ── Toast de la baja (se oculta solo a los 4 segundos, igual que vuelos-admin) ──
+  toast = signal<Toast | null>(null);
+  private toastTimer?: ReturnType<typeof setTimeout>;
 
   // ── Campos formulario Alta ──
   altaNombre = signal('');
@@ -121,7 +133,7 @@ export class UsuariosAdmin implements OnInit {
   onEscape(): void {
     if (this.modalAltaAbierto()) this.cerrarModalAlta();
     if (this.modalEdicionAbierto()) this.cerrarModalEdicion();
-    if (this.modalBajaAbierto()) this.cerrarModalBaja();
+    if (this.modalBajaAbierto()) this.cancelarBaja();
   }
 
   ngOnInit(): void {
@@ -322,14 +334,17 @@ export class UsuariosAdmin implements OnInit {
   abrirModalBaja(u: Usuario): void {
     this.limpiarAlertas();
     this.formularioError.set(null);
+    this.cerrandoBaja.set(false);
     this.usuarioSeleccionado.set(u);
     this.modalBajaAbierto.set(true);
   }
 
-  cerrarModalBaja(): void {
-    this.modalBajaAbierto.set(false);
-    this.usuarioSeleccionado.set(null);
-    this.formularioError.set(null);
+  /** El usuario eligió no dar de baja: se cierra el aviso y se informa con un toast. */
+  cancelarBaja(): void {
+    const usuario = this.usuarioSeleccionado();
+    if (!usuario || this.eliminando() || this.cerrandoBaja()) return;
+    this.cerrarAlertaBaja();
+    this.mostrarToast(this.i18n.t('adminUsers.toastDeleteCancelled', { name: this.nombreCompleto(usuario) }), 'info');
   }
 
   confirmarBaja(): void {
@@ -342,16 +357,50 @@ export class UsuariosAdmin implements OnInit {
     this.usuarioService.eliminarUsuario(usuario.id).subscribe({
       next: () => {
         this.eliminando.set(false);
-        this.cerrarModalBaja();
-        this.mensajeExito.set('adminUsers.successDeleted');
+        this.cerrarAlertaBaja();
+        this.mostrarToast(this.i18n.t('adminUsers.successDeleted'), 'exito');
         this.cargar();
       },
       error: (err: HttpErrorResponse) => {
         this.eliminando.set(false);
-        const msg = err.error?.message || err.error?.error || 'adminUsers.errorGeneric';
-        this.formularioError.set(msg);
+        const msg = err.error?.message || err.error?.error || this.i18n.t('adminUsers.errorGeneric');
+        this.cerrarAlertaBaja();
+        this.mostrarToast(msg, 'error');
       },
     });
+  }
+
+  private cerrarAlertaBaja(): void {
+    this.cerrarConAnimacion(this.cerrandoBaja, () => {
+      this.modalBajaAbierto.set(false);
+      this.usuarioSeleccionado.set(null);
+      this.formularioError.set(null);
+    });
+  }
+
+  /**
+   * Marca el aviso como "cerrando" para que corra el fade-out (clase .cerrando)
+   * y recién cuando termina la animación lo saca del DOM.
+   */
+  private cerrarConAnimacion(cerrando: WritableSignal<boolean>, quitar: () => void): void {
+    if (cerrando()) return;
+    cerrando.set(true);
+    setTimeout(() => {
+      quitar();
+      cerrando.set(false);
+    }, DURACION_CIERRE_MS);
+  }
+
+  // ── Toast ──
+  private mostrarToast(texto: string, tipo: Toast['tipo']): void {
+    clearTimeout(this.toastTimer);
+    this.toast.set({ texto, tipo });
+    this.toastTimer = setTimeout(() => this.toast.set(null), 4000);
+  }
+
+  cerrarToast(): void {
+    clearTimeout(this.toastTimer);
+    this.toast.set(null);
   }
 
   limpiarAlertas(): void {

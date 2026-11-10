@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { UsuariosAdmin } from './usuarios-admin';
 import { Usuario } from '../../../Models/Usuario';
 import { environment } from '../../../../environments/environment';
@@ -178,7 +178,8 @@ describe('UsuariosAdmin', () => {
     expect(component.mensajeExito()).toBe('adminUsers.successUpdated');
   });
 
-  it('deletes a user successfully', () => {
+  it('deletes a user successfully, closes the alert with animation and shows a toast', () => {
+    vi.useFakeTimers();
     expectInitialLoad();
     const userToDelete = mockUsuarios[0];
     component.abrirModalBaja(userToDelete);
@@ -197,11 +198,16 @@ describe('UsuariosAdmin', () => {
     reqReload.flush(mockUsuarios.filter(u => u.id !== userToDelete.id));
 
     expect(component.eliminando()).toBe(false);
+    // El aviso queda "cerrando" mientras corre la animación de salida
+    expect(component.cerrandoBaja()).toBe(true);
+    expect(component.toast()?.tipo).toBe('exito');
+
+    vi.advanceTimersByTime(400);
     expect(component.modalBajaAbierto()).toBe(false);
-    expect(component.mensajeExito()).toBe('adminUsers.successDeleted');
+    vi.useRealTimers();
   });
 
-  it('handles error when delete is rejected due to active reservations', () => {
+  it('shows an error toast when delete is rejected due to active reservations', () => {
     expectInitialLoad();
     const userToDelete = mockUsuarios[0];
     component.abrirModalBaja(userToDelete);
@@ -214,10 +220,19 @@ describe('UsuariosAdmin', () => {
     );
 
     expect(component.eliminando()).toBe(false);
-    expect(component.modalBajaAbierto()).toBe(true);
-    expect(component.formularioError()).toBe(
-      'No se puede eliminar el usuario porque tiene reservas registradas en el sistema.'
-    );
+    expect(component.toast()).toEqual({
+      texto: 'No se puede eliminar el usuario porque tiene reservas registradas en el sistema.',
+      tipo: 'error',
+    });
+  });
+
+  it('shows an info toast when the delete is cancelled', () => {
+    expectInitialLoad();
+    component.abrirModalBaja(mockUsuarios[0]);
+    component.cancelarBaja();
+
+    expect(component.toast()?.tipo).toBe('info');
+    expect(component.cerrandoBaja()).toBe(true);
   });
 
   it('closes modals on escape key press', () => {

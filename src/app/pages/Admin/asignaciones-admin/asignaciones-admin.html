@@ -145,21 +145,11 @@
                 <span class="badge estado--{{ a.vuelo.estado.toLowerCase() }}">{{ estadoKey(a.vuelo.estado) | translate }}</span>
               </td>
               <td class="tabla__acciones">
-                <button
-                  type="button"
-                  class="btn-icon"
-                  [title]="'adminAssignments.edit' | translate"
-                  [attr.aria-label]="'adminAssignments.edit' | translate"
-                  (click)="abrirModalEdicion(a)">
-                  ✎
+                <button type="button" class="btn-accion" (click)="abrirModalEdicion(a)">
+                  {{ 'adminAssignments.edit' | translate }}
                 </button>
-                <button
-                  type="button"
-                  class="btn-icon btn-icon--danger"
-                  [title]="'adminAssignments.delete' | translate"
-                  [attr.aria-label]="'adminAssignments.delete' | translate"
-                  (click)="abrirModalBaja(a)">
-                  🗑
+                <button type="button" class="btn-accion btn-accion--peligro" (click)="abrirModalBaja(a)">
+                  {{ 'adminAssignments.delete' | translate }}
                 </button>
               </td>
             </tr>
@@ -215,7 +205,7 @@
           </div>
 
           <div class="modal-acciones">
-            <button type="button" class="btn btn-outline" (click)="cerrarModalAlta()" [disabled]="guardando()">
+            <button type="button" class="btn btn-primary" (click)="cerrarModalAlta()" [disabled]="guardando()">
               {{ 'common.cancel' | translate }}
             </button>
             <button type="submit" class="btn btn-dark" [disabled]="guardando()">
@@ -270,7 +260,7 @@
           </div>
 
           <div class="modal-acciones">
-            <button type="button" class="btn btn-outline" (click)="cerrarModalEdicion()" [disabled]="guardando()">
+            <button type="button" class="btn btn-primary" (click)="cerrarModalEdicion()" [disabled]="guardando()">
               {{ 'common.cancel' | translate }}
             </button>
             <button type="submit" class="btn btn-dark" [disabled]="guardando()">
@@ -282,23 +272,28 @@
     </div>
   }
 
-  <!-- ================= Modal Confirmación Baja ================= -->
+  <!-- ================= Aviso de confirmación de baja (mismo estilo que vuelos-admin) ================= -->
   @if (modalBajaAbierto() && asignacionAEliminar(); as aEliminar) {
-    <div class="modal-overlay" (click)="cerrarModalBaja()">
-      <div class="modal-box modal-box--baja" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-labelledby]="'modal-baja-title'">
-        <button type="button" class="modal-cerrar" (click)="cerrarModalBaja()" aria-label="Cerrar">&times;</button>
-        <span class="section-eyebrow">{{ 'adminAssignments.eyebrow' | translate }}</span>
-        <h2 id="modal-baja-title" class="modal-titulo">{{ 'adminAssignments.confirmDeleteTitle' | translate }}</h2>
-        <p class="modal-subtitulo">{{ 'adminAssignments.confirmDeleteMessage' | translate }}</p>
+    <div class="modal-overlay modal-overlay--alerta" [class.cerrando]="cerrandoBaja()" (click)="cancelarBaja()">
+      <div class="modal-box alerta-confirmacion" role="alertdialog" aria-modal="true"
+        aria-labelledby="alerta-baja-titulo" aria-describedby="alerta-baja-texto"
+        (click)="$event.stopPropagation()">
 
-        <div class="baja-resumen">
-          <p><strong>{{ 'adminAssignments.colFlight' | translate }}:</strong> #{{ aEliminar.vuelo.id }} ({{ aEliminar.vuelo.aeropuertoOrigen?.codigoIata }} → {{ aEliminar.vuelo.aeropuertoDestino?.codigoIata }})</p>
-          <p><strong>{{ 'adminAssignments.colEmployee' | translate }}:</strong> {{ nombreEmpleado(aEliminar) }}</p>
-          <p><strong>{{ 'adminAssignments.colRole' | translate }}:</strong> {{ rolKey(aEliminar.rolEmpleado) | translate }}</p>
-        </div>
+        <div class="alerta-confirmacion__icono" aria-hidden="true">!</div>
+        <h2 id="alerta-baja-titulo" class="alerta-confirmacion__titulo">{{ 'adminAssignments.confirmDeleteTitle' | translate }}</h2>
 
-        <div class="modal-acciones">
-          <button type="button" class="btn btn-outline" (click)="cerrarModalBaja()" [disabled]="eliminando()">
+        <p id="alerta-baja-texto" class="alerta-confirmacion__texto">
+          {{ 'adminAssignments.modalDeleteConfirm' | translate: {
+            employee: nombreEmpleado(aEliminar),
+            role: (rolKey(aEliminar.rolEmpleado) | translate),
+            flight: aEliminar.vuelo.id,
+            route: (aEliminar.vuelo.aeropuertoOrigen?.codigoIata ?? '') + ' → ' + (aEliminar.vuelo.aeropuertoDestino?.codigoIata ?? '')
+          } }}
+        </p>
+        <p class="alerta-confirmacion__advertencia">{{ 'adminAssignments.confirmDeleteMessage' | translate }}</p>
+
+        <div class="alerta-confirmacion__acciones">
+          <button type="button" class="btn btn-primary" (click)="cancelarBaja()" [disabled]="eliminando()">
             {{ 'common.cancel' | translate }}
           </button>
           <button type="button" class="btn btn-danger" (click)="confirmarBaja()" [disabled]="eliminando()">
@@ -309,3 +304,12 @@
     </div>
   }
 </section>
+
+@if (toast(); as t) {
+  <div class="toast toast-admin" [class.error]="t.tipo === 'error'" [class.info]="t.tipo === 'info'"
+    [attr.role]="t.tipo === 'error' ? 'alert' : 'status'">
+    <span>{{ t.texto }}</span>
+    <button type="button" class="toast-admin__cerrar" [attr.aria-label]="'common.close' | translate"
+      (click)="cerrarToast()">&times;</button>
+  </div>
+}

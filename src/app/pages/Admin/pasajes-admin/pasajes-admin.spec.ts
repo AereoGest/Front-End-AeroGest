@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { PasajesAdmin } from './pasajes-admin';
 import { Reserva } from '../../../Models/Reserva';
 import { I18nService } from '../../../services/i18n';
@@ -135,6 +135,7 @@ describe('PasajesAdmin', () => {
   });
 
   it('debería cancelar un pasaje asociado mediante DELETE /api/pasajes/{id}?reservaId={reservaId}', () => {
+    vi.useFakeTimers();
     const reserva = component['reservas']()[0];
     const pasaje = reserva.pasajes![0];
 
@@ -148,7 +149,23 @@ describe('PasajesAdmin', () => {
     delReq.flush(null);
 
     httpMock.expectOne(`${environment.apiUrl}/reservas`).flush([]);
+
+    // El aviso se cierra con la animación de salida y se informa con un toast
+    expect(component['cerrandoBaja']()).toBe(true);
+    expect(component['toast']()?.tipo).toBe('exito');
+    vi.advanceTimersByTime(400);
+    vi.useRealTimers();
+
     expect(component['itemParaCancelar']()).toBeNull();
+  });
+
+  it('debería mostrar un toast informativo si se cancela la baja del pasaje', () => {
+    const reserva = component['reservas']()[0];
+    component['abrirModalCancelacion'](reserva, reserva.pasajes![0]);
+    component['cancelarBaja']();
+
+    expect(component['toast']()?.tipo).toBe('info');
+    expect(component['cerrandoBaja']()).toBe(true);
   });
 
   it('traduce los textos en español e inglés y soporta dark/light mode', async () => {
