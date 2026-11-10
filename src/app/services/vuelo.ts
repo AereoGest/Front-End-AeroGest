@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { ValidacionVuelo, Vuelo, VueloRequest } from '../Models/Vuelo';
+import { ImpactoCancelacion, ValidacionVuelo, Vuelo, VueloRequest } from '../Models/Vuelo';
 import { Aeropuerto } from '../Models/Aeropuerto';
 import { Avion } from '../Models/Avion';
 import { FiltroVuelos } from '../Models/FiltroVuelos';
@@ -49,6 +49,11 @@ export class VueloService {
   validar(vuelo: VueloRequest, vueloId?: number): Observable<ValidacionVuelo> {
     const params = vueloId != null ? new HttpParams().set('vueloId', vueloId) : undefined;
     return this.http.post<ValidacionVuelo>(`${this.baseUrl}/validar`, vuelo, { params });
+  }
+
+  /** Cuántas reservas activas se cancelarían (y cuánto se reembolsaría) si se cancela el vuelo. */
+  obtenerImpactoCancelacion(id: number): Observable<ImpactoCancelacion> {
+    return this.http.get<ImpactoCancelacion>(`${this.baseUrl}/${id}/impacto-cancelacion`);
   }
 
   /** Aeropuertos para armar el formulario de alta/modificación. */

@@ -660,3 +660,31 @@
     justify-content: center;
   }
 }
+
+/* ── Reservas afectadas al cancelar un vuelo ── */
+.impacto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 0 20px;
+  padding: 12px 16px;
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius-md);
+  background: var(--warning-soft);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: left;
+}
+.impacto strong {
+  color: var(--warning);
+  font-size: 14px;
+}
+.impacto--neutro {
+  border-color: var(--border);
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+}
+.form-vuelo .impacto {
+  margin: -18px 0 0;
+}

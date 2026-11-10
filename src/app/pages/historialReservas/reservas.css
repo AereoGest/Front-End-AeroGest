@@ -453,3 +453,18 @@
   font-weight: 500;
   color: var(--text-subtle);
 }
+
+/* Motivo y reembolso de una reserva cancelada */
+.booking-cancelacion {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+.booking-cancelacion strong {
+  color: var(--danger);
+  font-weight: 600;
+}

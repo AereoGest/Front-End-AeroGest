@@ -323,13 +323,16 @@
         @if (modo === 'EDICION') {
           <div class="field">
             <select id="f-estado" class="field-input" name="estado"
-              [ngModel]="fEstado()" (ngModelChange)="fEstado.set($event)">
+              [ngModel]="fEstado()" (ngModelChange)="cambiarEstado($event)">
               @for (e of estados; track e) {
                 <option [ngValue]="e">{{ e }}</option>
               }
             </select>
             <label class="field-label" for="f-estado">{{ 'flights.status' | translate }}</label>
           </div>
+          @if (avisoCancelacionVisible()) {
+            <ng-container [ngTemplateOutlet]="impactoReservas" />
+          }
         } @else {
           <p class="aviso-catalogos">{{ 'adminFlights.createStatusHint' | translate }}</p>
         }
@@ -383,6 +386,8 @@
       </p>
       <p class="alerta-confirmacion__advertencia">{{ 'adminFlights.modalDeleteWarning' | translate }}</p>
 
+      <ng-container [ngTemplateOutlet]="impactoReservas" />
+
       <div class="alerta-confirmacion__acciones">
         <button type="button" class="btn btn-primary" (click)="cancelarBaja()" [disabled]="guardando()">
           {{ 'adminFlights.btnCancel' | translate }}
@@ -403,3 +408,20 @@
       (click)="cerrarToast()">&times;</button>
   </div>
 }
+
+<!-- Qué pasa con las reservas de los clientes si se cancela el vuelo -->
+<ng-template #impactoReservas>
+  @if (cargandoImpacto()) {
+    <p class="impacto impacto--neutro" role="status">{{ 'adminFlights.impactLoading' | translate }}</p>
+  } @else if (impactoCancelacion(); as imp) {
+    @if (imp.reservas > 0) {
+      <div class="impacto" role="note">
+        <strong>{{ 'adminFlights.impactTitle' | translate: { count: imp.reservas, passengers: imp.pasajeros } }}</strong>
+        <span>{{ 'adminFlights.impactRefund' | translate: { amount: (imp.montoReembolso | number: '1.0-2') } }}</span>
+        <span>{{ 'adminFlights.impactEmail' | translate }}</span>
+      </div>
+    } @else {
+      <p class="impacto impacto--neutro">{{ 'adminFlights.impactNone' | translate }}</p>
+    }
+  }
+</ng-template>
