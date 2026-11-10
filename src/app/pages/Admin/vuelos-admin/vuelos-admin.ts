@@ -9,6 +9,7 @@ import { EstadoVuelo, ValidacionVuelo, Vuelo, VueloRequest } from '../../../Mode
 import { Aeropuerto } from '../../../Models/Aeropuerto';
 import { Avion } from '../../../Models/Avion';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { AeropuertoAutocompletar } from '../../../components/aeropuerto-autocompletar/aeropuerto-autocompletar';
 import { I18nService } from '../../../services/i18n';
 import type { TranslationKey } from '../../../i18n/es';
 
@@ -33,7 +34,7 @@ const MINUTOS = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '
 @Component({
   selector: 'app-vuelos-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, AeropuertoAutocompletar],
   templateUrl: './vuelos-admin.html',
   styleUrl: './vuelos-admin.css',
 })
@@ -71,6 +72,11 @@ export class VuelosAdmin implements OnInit {
   // Campos del formulario (compartido entre alta y edición)
   protected readonly fOrigenId = signal<number | null>(null);
   protected readonly fDestinoId = signal<number | null>(null);
+
+  // Los campos de origen y destino se escriben y se eligen entre sugerencias
+  // (componente app-aeropuerto-autocompletar). true = hay texto que no es un aeropuerto elegido.
+  protected readonly origenTextoInvalido = signal(false);
+  protected readonly destinoTextoInvalido = signal(false);
   protected readonly fAvionId = signal<number | null>(null);
   protected readonly fFechaSalida = signal('');
   protected readonly fSalidaHora = signal('');
@@ -156,6 +162,10 @@ export class VuelosAdmin implements OnInit {
       if (origen.id === destino.id) e.destino = 'adminFlights.errorSameAirport';
       else if (this.mismaCiudad(origen, destino)) e.destino = 'adminFlights.errorSameCity';
     }
+
+    // Escribió algo pero no eligió ninguna sugerencia de la lista
+    if (!this.fOrigenId() && this.origenTextoInvalido()) e.origen = 'adminFlights.errorAirportNotInList';
+    if (!this.fDestinoId() && this.destinoTextoInvalido()) e.destino = 'adminFlights.errorAirportNotInList';
 
     const precio = this.fPrecio();
     if (precio !== null && precio !== undefined && String(precio) !== '' && Number(precio) <= 0) {
@@ -413,6 +423,8 @@ export class VuelosAdmin implements OnInit {
     this.formularioError.set(null);
     this.errorServidor.set(null);
     this.intentoGuardar.set(false);
+    this.origenTextoInvalido.set(false);
+    this.destinoTextoInvalido.set(false);
     this.vueloEditado.set(vuelo);
 
     const [sh, sm] = this.partesHora(vuelo?.horaSalida);
@@ -543,12 +555,6 @@ export class VuelosAdmin implements OnInit {
   }
 
   // ── Helpers del formulario ──
-  /** Deshabilita aeropuertos de la misma ciudad que el elegido en el otro select (ej. EZE / AEP). */
-  protected aeropuertoBloqueado(a: Aeropuerto, otroId: number | null): boolean {
-    const otro = this.aeropuertoPorId(otroId);
-    return !!otro && (otro.id === a.id || this.mismaCiudad(a, otro));
-  }
-
   private aeropuertoPorId(id: number | null): Aeropuerto | undefined {
     if (id === null || id === undefined) return undefined;
     return this.aeropuertos().find((a) => a.id === Number(id));
@@ -575,10 +581,6 @@ export class VuelosAdmin implements OnInit {
     if (!hora) return ['', ''];
     const [h, m] = hora.split(':');
     return [h ?? '', m ?? ''];
-  }
-
-  protected etiquetaAeropuerto(a: Aeropuerto): string {
-    return `${a.ciudad} (${a.codigoIata}) · ${a.nombre}`;
   }
 
   protected etiquetaAvion(a: Avion): string {

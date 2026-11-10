@@ -193,35 +193,24 @@
 
       <form class="form-vuelo" (ngSubmit)="guardar()" novalidate>
         <div class="form-row">
-          <div class="field">
-            <select id="f-origen" class="field-input" name="origen"
-              [attr.aria-invalid]="!!errores().origen"
-              [ngModel]="fOrigenId()" (ngModelChange)="fOrigenId.set($event)">
-              <option [ngValue]="null" disabled>{{ 'adminFlights.selectPlaceholder' | translate }}</option>
-              @for (a of aeropuertos(); track a.id) {
-                <option [ngValue]="a.id" [disabled]="aeropuertoBloqueado(a, fDestinoId())">{{ etiquetaAeropuerto(a) }}</option>
-              }
-            </select>
-            <label class="field-label" for="f-origen">{{ 'flights.origin' | translate }}</label>
-            @if (errores().origen; as e) {
-              <p class="field-error">{{ e | translate }}</p>
-            }
-          </div>
+          <!-- Origen y destino: se escriben y se eligen entre las sugerencias (aeropuertos existentes) -->
+          <app-aeropuerto-autocompletar inputId="f-origen"
+            [label]="'flights.origin' | translate"
+            [aeropuertos]="aeropuertos()"
+            [(seleccionado)]="fOrigenId"
+            [(textoInvalido)]="origenTextoInvalido"
+            [bloqueadoPor]="fDestinoId()"
+            motivoBloqueo="adminFlights.sameCityAsDestination"
+            [error]="errores().origen" />
 
-          <div class="field">
-            <select id="f-destino" class="field-input" name="destino"
-              [attr.aria-invalid]="!!errores().destino"
-              [ngModel]="fDestinoId()" (ngModelChange)="fDestinoId.set($event)">
-              <option [ngValue]="null" disabled>{{ 'adminFlights.selectPlaceholder' | translate }}</option>
-              @for (a of aeropuertos(); track a.id) {
-                <option [ngValue]="a.id" [disabled]="aeropuertoBloqueado(a, fOrigenId())">{{ etiquetaAeropuerto(a) }}</option>
-              }
-            </select>
-            <label class="field-label" for="f-destino">{{ 'flights.destination' | translate }}</label>
-            @if (errores().destino; as e) {
-              <p class="field-error">{{ e | translate }}</p>
-            }
-          </div>
+          <app-aeropuerto-autocompletar inputId="f-destino"
+            [label]="'flights.destination' | translate"
+            [aeropuertos]="aeropuertos()"
+            [(seleccionado)]="fDestinoId"
+            [(textoInvalido)]="destinoTextoInvalido"
+            [bloqueadoPor]="fOrigenId()"
+            motivoBloqueo="adminFlights.sameCityAsOrigin"
+            [error]="errores().destino" />
         </div>
 
         <div class="field">
