@@ -16,6 +16,7 @@ import { Pago } from './pages/pago/pago';
 import { checkoutPagoGuard } from './guards/checkoutPagoGuard';
 import { adminGuard } from './guards/admin.guard';
 import { VuelosAdmin } from './pages/Admin/vuelos-admin/vuelos-admin';
+import { AvionesAdmin } from './pages/Admin/aviones-admin/aviones-admin';
 import { ReservasAdmin } from './pages/Admin/reservas-admin/reservas-admin';
 import { PasajesAdmin } from './pages/Admin/pasajes-admin/pasajes-admin';
 import { AdminPanel } from './pages/Admin/admin-panel/admin-panel';
@@ -36,6 +37,7 @@ export const routes: Routes = [
     { path: "vuelos", component: Vuelos },
     { path: "adminPanel", component: AdminPanel, canActivate: [adminGuard] },
     { path: "vuelosAdmin", component: VuelosAdmin, canActivate: [adminGuard] },
+    { path: "avionesAdmin", component: AvionesAdmin, canActivate: [adminGuard] },
     { path: "reservasAdmin", component: ReservasAdmin, canActivate: [adminGuard] },
     { path: "pasajesAdmin", component: PasajesAdmin, canActivate: [adminGuard] },
     {path: "asignacionesAdmin", component: AsignacionesAdmin, canActivate: [adminGuard]},
