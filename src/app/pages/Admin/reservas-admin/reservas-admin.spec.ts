@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { ReservasAdmin } from './reservas-admin';
 import { Reserva } from '../../../Models/Reserva';
 import { I18nService } from '../../../services/i18n';
@@ -217,6 +217,7 @@ describe('ReservasAdmin', () => {
   });
 
   it('debería dar de baja lógicamente una reserva mediante DELETE /api/reservas/{id} y conservarla como CANCELADA', () => {
+    vi.useFakeTimers();
     const reserva = component['reservas']()[0];
     component['abrirModalBaja'](reserva);
     expect(component['reservaParaBaja']()?.id).toBe(101);
@@ -226,6 +227,12 @@ describe('ReservasAdmin', () => {
     const req = httpMock.expectOne(`${environment.apiUrl}/reservas/101`);
     expect(req.request.method).toBe('DELETE');
     req.flush(null);
+
+    // El aviso se cierra con la animación de salida y se informa con un toast
+    expect(component['cerrandoBaja']()).toBe(true);
+    expect(component['toast']()?.tipo).toBe('exito');
+    vi.advanceTimersByTime(400);
+    vi.useRealTimers();
 
     expect(component['reservaParaBaja']()).toBeNull();
     const actualizada = component['reservas']().find((r) => r.id === 101);

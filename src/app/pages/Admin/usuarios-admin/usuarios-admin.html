@@ -157,12 +157,12 @@
               </td>
               <td class="td-acciones">
                 <div class="acciones-grupo">
-                  <button type="button" class="btn-accion btn-accion--edit"
+                  <button type="button" class="btn-accion"
                           (click)="abrirModalEdicion(u)"
                           [title]="'adminUsers.btnEdit' | translate">
                     {{ 'adminUsers.btnEdit' | translate }}
                   </button>
-                  <button type="button" class="btn-accion btn-accion--delete"
+                  <button type="button" class="btn-accion btn-accion--peligro"
                           (click)="abrirModalBaja(u)"
                           [title]="'adminUsers.btnDelete' | translate">
                     {{ 'adminUsers.btnDelete' | translate }}
@@ -286,7 +286,7 @@
           </div>
 
           <div class="modal-acciones">
-            <button type="button" class="btn btn-outline" (click)="cerrarModalAlta()" [disabled]="guardando()">
+            <button type="button" class="btn btn-primary" (click)="cerrarModalAlta()" [disabled]="guardando()">
               {{ 'adminUsers.btnCancel' | translate }}
             </button>
             <button type="submit" class="btn btn-dark" [disabled]="guardando()">
@@ -407,7 +407,7 @@
           </div>
 
           <div class="modal-acciones">
-            <button type="button" class="btn btn-outline" (click)="cerrarModalEdicion()" [disabled]="guardando()">
+            <button type="button" class="btn btn-primary" (click)="cerrarModalEdicion()" [disabled]="guardando()">
               {{ 'adminUsers.btnCancel' | translate }}
             </button>
             <button type="submit" class="btn btn-dark" [disabled]="guardando()">
@@ -419,30 +419,23 @@
     </div>
   }
 
-  <!-- ================= Modal Baja ================= -->
+  <!-- ================= Aviso de confirmación de baja (mismo estilo que vuelos-admin) ================= -->
   @if (modalBajaAbierto() && usuarioSeleccionado(); as actual) {
-    <div class="modal-overlay" (click)="cerrarModalBaja()">
-      <div class="modal-box modal-box--danger" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="modal-baja-title">
-        <button type="button" class="modal-cerrar" (click)="cerrarModalBaja()" aria-label="Cerrar">&times;</button>
-        <span class="section-eyebrow">{{ 'adminUsers.eyebrow' | translate }}</span>
-        <h2 id="modal-baja-title" class="modal-titulo">{{ 'adminUsers.modalDeleteTitle' | translate }}</h2>
+    <div class="modal-overlay modal-overlay--alerta" [class.cerrando]="cerrandoBaja()" (click)="cancelarBaja()">
+      <div class="modal-box alerta-confirmacion" role="alertdialog" aria-modal="true"
+        aria-labelledby="alerta-baja-titulo" aria-describedby="alerta-baja-texto"
+        (click)="$event.stopPropagation()">
 
-        <p class="modal-baja-texto">
+        <div class="alerta-confirmacion__icono" aria-hidden="true">!</div>
+        <h2 id="alerta-baja-titulo" class="alerta-confirmacion__titulo">{{ 'adminUsers.modalDeleteTitle' | translate }}</h2>
+
+        <p id="alerta-baja-texto" class="alerta-confirmacion__texto">
           {{ 'adminUsers.modalDeleteConfirm' | translate: { name: nombreCompleto(actual), id: actual.id } }}
         </p>
+        <p class="alerta-confirmacion__advertencia">{{ 'adminUsers.modalDeleteWarning' | translate }}</p>
 
-        <p class="modal-baja-advertencia">
-          {{ 'adminUsers.modalDeleteWarning' | translate }}
-        </p>
-
-        @if (formularioError()) {
-          <div class="alerta alerta--error" role="alert">
-            <span>{{ formularioError() }}</span>
-          </div>
-        }
-
-        <div class="modal-acciones">
-          <button type="button" class="btn btn-outline" (click)="cerrarModalBaja()" [disabled]="eliminando()">
+        <div class="alerta-confirmacion__acciones">
+          <button type="button" class="btn btn-primary" (click)="cancelarBaja()" [disabled]="eliminando()">
             {{ 'adminUsers.btnCancel' | translate }}
           </button>
           <button type="button" class="btn btn-danger" (click)="confirmarBaja()" [disabled]="eliminando()">
@@ -453,3 +446,12 @@
     </div>
   }
 </section>
+
+@if (toast(); as t) {
+  <div class="toast toast-admin" [class.error]="t.tipo === 'error'" [class.info]="t.tipo === 'info'"
+    [attr.role]="t.tipo === 'error' ? 'alert' : 'status'">
+    <span>{{ t.texto }}</span>
+    <button type="button" class="toast-admin__cerrar" [attr.aria-label]="'common.close' | translate"
+      (click)="cerrarToast()">&times;</button>
+  </div>
+}

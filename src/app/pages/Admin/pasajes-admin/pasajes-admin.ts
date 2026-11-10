@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -24,6 +24,11 @@ export interface PasajeConReserva {
   reserva: Reserva;
   pasaje: PasajeReserva;
 }
+
+type Toast = { texto: string; tipo: 'exito' | 'info' | 'error' };
+
+// Debe coincidir con la duración de las animaciones overlay-out / modal-out del CSS (igual que vuelos-admin)
+const DURACION_CIERRE_MS = 400;
 
 const SOLO_LETRAS = /^\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+(\s+[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)*\s*$/;
 const DNI_REGEX = /^\d{7,8}$/;
@@ -91,7 +96,12 @@ export class PasajesAdmin implements OnInit {
   // ── Modal Cancelación de pasaje ──
   protected readonly itemParaCancelar = signal<PasajeConReserva | null>(null);
   protected readonly procesandoCancelacion = signal(false);
-  protected readonly errorCancelacion = signal('');
+  // Bandera de "cerrando": activa la animación de salida del aviso de baja
+  protected readonly cerrandoBaja = signal(false);
+
+  // ── Toast de la baja (se oculta solo a los 4 segundos, igual que vuelos-admin) ──
+  protected readonly toast = signal<Toast | null>(null);
+  private toastTimer?: ReturnType<typeof setTimeout>;
 
   protected readonly reservasConPasajes = computed(() =>
     this.reservas().filter((r) => r.pasajes && r.pasajes.length > 0)
@@ -270,13 +280,19 @@ export class PasajesAdmin implements OnInit {
     if (reserva.estadoReserva === 'CANCELADA') return;
 
     this.limpiarMensajes();
-    this.errorCancelacion.set('');
+    this.cerrandoBaja.set(false);
     this.itemParaCancelar.set({ reserva, pasaje });
   }
 
-  protected cerrarModalCancelacion(): void {
-    if (this.procesandoCancelacion()) return;
-    this.itemParaCancelar.set(null);
+  /** El usuario eligió no dar de baja: se cierra el aviso y se informa con un toast. */
+  protected cancelarBaja(): void {
+    const item = this.itemParaCancelar();
+    if (!item || this.procesandoCancelacion() || this.cerrandoBaja()) return;
+    this.cerrarAlertaBaja();
+    this.mostrarToast(
+      this.i18n.t('adminTickets.toastDeleteCancelled', { code: item.pasaje.codigoPasaje }),
+      'info'
+    );
   }
 
   protected confirmarCancelacionPasaje(): void {
@@ -284,21 +300,50 @@ export class PasajesAdmin implements OnInit {
     if (!item) return;
 
     this.procesandoCancelacion.set(true);
-    this.errorCancelacion.set('');
 
     this.reservaService
       .cancelarPasaje(item.pasaje.id, item.reserva.id)
       .subscribe({
         next: () => {
-          this.itemParaCancelar.set(null);
-          this.mostrarExito(this.i18n.t('adminTickets.canceledSuccess'));
+          this.cerrarAlertaBaja();
+          this.mostrarToast(this.i18n.t('adminTickets.canceledSuccess'), 'exito');
           this.cargarReservas();
         },
         error: (err: HttpErrorResponse) => {
-          this.errorCancelacion.set(err.error?.message || this.i18n.t('common.error'));
+          this.cerrarAlertaBaja();
+          this.mostrarToast(err.error?.message || this.i18n.t('common.error'), 'error');
         },
       })
       .add(() => this.procesandoCancelacion.set(false));
+  }
+
+  private cerrarAlertaBaja(): void {
+    this.cerrarConAnimacion(this.cerrandoBaja, () => this.itemParaCancelar.set(null));
+  }
+
+  /**
+   * Marca el aviso como "cerrando" para que corra el fade-out (clase .cerrando)
+   * y recién cuando termina la animación lo saca del DOM.
+   */
+  private cerrarConAnimacion(cerrando: WritableSignal<boolean>, quitar: () => void): void {
+    if (cerrando()) return;
+    cerrando.set(true);
+    setTimeout(() => {
+      quitar();
+      cerrando.set(false);
+    }, DURACION_CIERRE_MS);
+  }
+
+  // ── Toast ──
+  private mostrarToast(texto: string, tipo: Toast['tipo']): void {
+    clearTimeout(this.toastTimer);
+    this.toast.set({ texto, tipo });
+    this.toastTimer = setTimeout(() => this.toast.set(null), 4000);
+  }
+
+  protected cerrarToast(): void {
+    clearTimeout(this.toastTimer);
+    this.toast.set(null);
   }
 
   // ===================== Helpers =====================
@@ -347,7 +392,7 @@ export class PasajesAdmin implements OnInit {
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.itemParaCancelar()) {
-      this.cerrarModalCancelacion();
+      this.cancelarBaja();
     } else if (this.itemEnEdicion()) {
       this.cerrarModalEdicion();
     }

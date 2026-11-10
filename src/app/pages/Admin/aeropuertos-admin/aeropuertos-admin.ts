@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -10,6 +10,11 @@ import { I18nService } from '../../../services/i18n';
 // Mismas reglas que valida el backend en AeropuertoDTO
 const CODIGO_IATA = /^[A-Za-z]{3}$/;
 const SOLO_LETRAS = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/;
+
+type Toast = { texto: string; tipo: 'exito' | 'info' | 'error' };
+
+// Debe coincidir con la duración de las animaciones overlay-out / modal-out del CSS (igual que vuelos-admin)
+const DURACION_CIERRE_MS = 400;
 
 @Component({
   selector: 'app-aeropuertos-admin',
@@ -27,9 +32,12 @@ export class AeropuertosAdmin implements OnInit {
   cargando = signal(true);
   error = signal(false);
 
-  // ── Alertas de operación ──
+  // ── Alertas de operación (alta y modificación) ──
   mensajeExito = signal<string | null>(null);
-  mensajeError = signal<string | null>(null);
+
+  // ── Toast de la baja (se oculta solo a los 4 segundos, igual que vuelos-admin) ──
+  toast = signal<Toast | null>(null);
+  private toastTimer?: ReturnType<typeof setTimeout>;
 
   // ── Filtros (se aplican en el front, sin volver a pedir al backend) ──
   nombre = signal('');
@@ -55,6 +63,8 @@ export class AeropuertosAdmin implements OnInit {
 
   // Modal Baja
   aeropuertoAEliminar = signal<Aeropuerto | null>(null);
+  // Bandera de "cerrando": activa la animación de salida del aviso de baja
+  cerrandoBaja = signal(false);
 
   filtrados = computed(() => {
     const nombre = this.normalizar(this.nombre());
@@ -79,7 +89,7 @@ export class AeropuertosAdmin implements OnInit {
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.modalFormularioAbierto()) this.cerrarModalFormulario();
-    if (this.modalBajaAbierto()) this.cerrarModalBaja();
+    if (this.modalBajaAbierto()) this.cancelarBaja();
   }
 
   cargar(): void {
@@ -100,7 +110,6 @@ export class AeropuertosAdmin implements OnInit {
 
   limpiarAlertas(): void {
     this.mensajeExito.set(null);
-    this.mensajeError.set(null);
   }
 
   limpiarFiltros(): void {
@@ -198,13 +207,17 @@ export class AeropuertosAdmin implements OnInit {
 
   abrirModalBaja(a: Aeropuerto): void {
     this.limpiarAlertas();
+    this.cerrandoBaja.set(false);
     this.aeropuertoAEliminar.set(a);
     this.modalBajaAbierto.set(true);
   }
 
-  cerrarModalBaja(): void {
-    this.modalBajaAbierto.set(false);
-    this.aeropuertoAEliminar.set(null);
+  /** El usuario eligió no dar de baja: se cierra el aviso y se informa con un toast. */
+  cancelarBaja(): void {
+    const a = this.aeropuertoAEliminar();
+    if (!a || this.eliminando() || this.cerrandoBaja()) return;
+    this.cerrarAlertaBaja();
+    this.mostrarToast(this.i18n.t('adminAirports.toastDeleteCancelled', { code: a.codigoIata }), 'info');
   }
 
   confirmarBaja(): void {
@@ -215,8 +228,8 @@ export class AeropuertosAdmin implements OnInit {
     this.aeropuertoService.eliminarAeropuerto(a.id).subscribe({
       next: () => {
         this.eliminando.set(false);
-        this.cerrarModalBaja();
-        this.mensajeExito.set(this.i18n.t('adminAirports.successDeleted'));
+        this.cerrarAlertaBaja();
+        this.mostrarToast(this.i18n.t('adminAirports.successDeleted'), 'exito');
         this.cargar();
       },
       error: (err: HttpErrorResponse) => {
@@ -226,10 +239,42 @@ export class AeropuertosAdmin implements OnInit {
           err.status === 409
             ? this.i18n.t('adminAirports.errInUse')
             : err.error?.message || this.i18n.t('common.error');
-        this.mensajeError.set(msg);
-        this.cerrarModalBaja();
+        this.cerrarAlertaBaja();
+        this.mostrarToast(msg, 'error');
       },
     });
+  }
+
+  private cerrarAlertaBaja(): void {
+    this.cerrarConAnimacion(this.cerrandoBaja, () => {
+      this.modalBajaAbierto.set(false);
+      this.aeropuertoAEliminar.set(null);
+    });
+  }
+
+  /**
+   * Marca el aviso como "cerrando" para que corra el fade-out (clase .cerrando)
+   * y recién cuando termina la animación lo saca del DOM.
+   */
+  private cerrarConAnimacion(cerrando: WritableSignal<boolean>, quitar: () => void): void {
+    if (cerrando()) return;
+    cerrando.set(true);
+    setTimeout(() => {
+      quitar();
+      cerrando.set(false);
+    }, DURACION_CIERRE_MS);
+  }
+
+  // ---- Toast ----
+  private mostrarToast(texto: string, tipo: Toast['tipo']): void {
+    clearTimeout(this.toastTimer);
+    this.toast.set({ texto, tipo });
+    this.toastTimer = setTimeout(() => this.toast.set(null), 4000);
+  }
+
+  cerrarToast(): void {
+    clearTimeout(this.toastTimer);
+    this.toast.set(null);
   }
 
   // ---- Helpers ----

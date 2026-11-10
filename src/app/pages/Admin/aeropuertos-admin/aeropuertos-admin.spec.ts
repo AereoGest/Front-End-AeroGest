@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { AeropuertosAdmin } from './aeropuertos-admin';
 import { Aeropuerto } from '../../../Models/Aeropuerto';
 import { I18nService } from '../../../services/i18n';
@@ -136,7 +136,8 @@ describe('AeropuertosAdmin', () => {
     expect(component.mensajeExito()).toBeTruthy();
   });
 
-  it('debe eliminar un aeropuerto y recargar el listado', () => {
+  it('debe dar de baja un aeropuerto, cerrar el aviso con animación y mostrar un toast', () => {
+    vi.useFakeTimers();
     component.abrirModalBaja(mockAeropuertos[1]);
     expect(component.modalBajaAbierto()).toBe(true);
 
@@ -148,11 +149,25 @@ describe('AeropuertosAdmin', () => {
 
     httpMock.expectOne(`${environment.apiUrl}/aeropuertos`).flush([mockAeropuertos[0], mockAeropuertos[2]]);
 
+    // El aviso queda "cerrando" mientras corre la animación de salida
+    expect(component.cerrandoBaja()).toBe(true);
+    expect(component.toast()?.tipo).toBe('exito');
+
+    vi.advanceTimersByTime(400);
     expect(component.modalBajaAbierto()).toBe(false);
-    expect(component.mensajeExito()).toBeTruthy();
+    expect(component.cerrandoBaja()).toBe(false);
+    vi.useRealTimers();
   });
 
-  it('debe avisar que no se puede eliminar si hay vuelos que lo usan (409)', () => {
+  it('debe mostrar un toast informativo si se cancela la baja', () => {
+    component.abrirModalBaja(mockAeropuertos[0]);
+    component.cancelarBaja();
+
+    expect(component.toast()?.tipo).toBe('info');
+    expect(component.cerrandoBaja()).toBe(true);
+  });
+
+  it('debe avisar con un toast de error que no se puede dar de baja si hay vuelos que lo usan (409)', () => {
     component.abrirModalBaja(mockAeropuertos[0]);
     component.confirmarBaja();
 
@@ -160,6 +175,9 @@ describe('AeropuertosAdmin', () => {
       .expectOne(`${environment.apiUrl}/aeropuertos/1`)
       .flush({ message: 'Ya existe un registro con esos datos' }, { status: 409, statusText: 'Conflict' });
 
-    expect(component.mensajeError()).toBe(TestBed.inject(I18nService).t('adminAirports.errInUse'));
+    expect(component.toast()).toEqual({
+      texto: TestBed.inject(I18nService).t('adminAirports.errInUse'),
+      tipo: 'error',
+    });
   });
 });
