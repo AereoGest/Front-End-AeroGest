@@ -29,4 +29,10 @@ describe('TranslatePipe', () => {
   it('debería soportar parámetros interpolados', () => {
     expect(pipe.transform('Bienvenido {user}', { user: 'Carlos' })).toBe('Bienvenido Carlos');
   });
+
+  it('debería traducir mensajes de error de backend automáticamente', () => {
+    expect(pipe.transform('Email o contraseña incorrectos')).toBe('Email o contraseña incorrectos');
+    service.setLang('en');
+    expect(pipe.transform('Email o contraseña incorrectos')).toBe('Incorrect email or password');
+  });
 });

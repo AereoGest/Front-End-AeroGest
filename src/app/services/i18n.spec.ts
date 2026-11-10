@@ -56,4 +56,13 @@ describe('I18nService', () => {
   it('devuelve la clave original si la traducción no existe en ningún diccionario', () => {
     expect(service.t('clave.inexistente')).toBe('clave.inexistente');
   });
+
+  it('traduce mensajes de error del backend según el idioma activo', () => {
+    expect(service.translateBackendMessage('Email o contraseña incorrectos')).toBe('Email o contraseña incorrectos');
+    service.setLang('en');
+    expect(service.translateBackendMessage('Email o contraseña incorrectos')).toBe('Incorrect email or password');
+    expect(service.translateBackendMessage('Formato de JSON inválido: sintaxis')).toBe('Invalid JSON format: sintaxis');
+    service.setLang('es');
+    expect(service.translateBackendMessage('Incorrect email or password')).toBe('Email o contraseña incorrectos');
+  });
 });

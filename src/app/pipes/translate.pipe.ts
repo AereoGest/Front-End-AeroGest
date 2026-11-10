@@ -12,6 +12,11 @@ export class TranslatePipe implements PipeTransform {
   transform(key: string, params?: Record<string, any>): string {
     // Escucha el signal actual para registrar la dependencia si se usa en un contexto de signal
     this.i18n.currentLang();
-    return this.i18n.t(key, params);
+    if (!key) return '';
+    const translated = this.i18n.t(key, params);
+    if (translated === key) {
+      return this.i18n.translateBackendMessage(key);
+    }
+    return translated;
   }
 }

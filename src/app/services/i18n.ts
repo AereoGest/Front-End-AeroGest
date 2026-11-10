@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { en } from '../i18n/en';
 import { es, type TranslationKey } from '../i18n/es';
+import { translateBackendMessage } from '../i18n/backend-messages';
 
 export type Lang = 'es' | 'en';
 
@@ -66,6 +67,13 @@ export class I18nService {
     }
 
     return translation;
+  }
+
+  /**
+   * Traduce mensajes devueltos por el backend hacia el idioma actual ('es' o 'en').
+   */
+  translateBackendMessage(message: string | null | undefined): string {
+    return translateBackendMessage(message, this.idioma());
   }
 
   private idiomaInicial(): Lang {

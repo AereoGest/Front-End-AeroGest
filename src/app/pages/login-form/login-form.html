@@ -74,7 +74,7 @@
           </div>
 
           @if (mensajeError()) {
-            <p class="mensaje-error" role="alert">{{ mensajeError() }}</p>
+            <p class="mensaje-error" role="alert">{{ mensajeError() | translate }}</p>
           }
           <div class="auth-actions">
             @if (mensajeError() && mostrarReenviarVerificacion()) {
@@ -131,7 +131,7 @@
           </div>
 
           @if (mensajeError()) {
-            <p class="mensaje-error" role="alert">{{ mensajeError() }}</p>
+            <p class="mensaje-error" role="alert">{{ mensajeError() | translate }}</p>
           }
           <div class="auth-actions">
             <button
