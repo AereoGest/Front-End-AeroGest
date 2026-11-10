@@ -30,25 +30,6 @@
     </div>
   }
 
-  <!-- Pestañas por rol -->
-  <div class="tabs" role="tablist">
-    <button type="button" role="tab" class="tab"
-            [class.active]="rolFiltro() === 'TODOS'"
-            (click)="rolFiltro.set('TODOS')">
-      {{ 'adminUsers.tabAll' | translate }}
-      <span class="tab__count">{{ porTexto().length }}</span>
-    </button>
-
-    @for (r of roles; track r) {
-      <button type="button" role="tab" class="tab"
-              [class.active]="rolFiltro() === r"
-              (click)="rolFiltro.set(r)">
-        {{ tabKey(r) | translate }}
-        <span class="tab__count">{{ cantidad(r) }}</span>
-      </button>
-    }
-  </div>
-
   <!-- Barra de filtros -->
   <div class="filtros">
     <div class="field filtros__busqueda">
