@@ -69,7 +69,7 @@
               autocomplete="tel" [formField]="facturacion.telefono" />
             @if (facturacion.telefono().touched() && facturacion.telefono().invalid()) {
               <small class="form-error" role="alert">
-                {{ 'profile.phone' | translate }}
+                {{ 'payment.phoneInvalid' | translate }}
               </small>
             }
           </label>
@@ -80,7 +80,7 @@
               inputmode="numeric" [formField]="facturacion.cuil" />
             @if (facturacion.cuil().touched() && facturacion.cuil().invalid()) {
               <small class="form-error" role="alert">
-                {{ 'payment.cuil' | translate }}
+                {{ 'payment.cuilInvalid' | translate }}
               </small>
             }
           </label>

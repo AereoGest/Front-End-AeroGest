@@ -23,6 +23,7 @@ import { PagoRequest, PagoResponse, SituacionFiscal } from '../../Models/Pago';
 import { CheckoutService } from '../../services/checkout-service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { I18nService } from '../../services/i18n';
+import { Auth } from '../../services/auth';
 
 // Lo carga el script del SDK de Mercado Pago en index.html.
 declare const MercadoPago: any;
@@ -72,6 +73,7 @@ function soloDigitosCuil(cuil: string): string {
 export class Pago implements OnDestroy {
   private readonly checkout = inject(CheckoutService);
   protected readonly i18n = inject(I18nService);
+  private readonly auth = inject(Auth);
 
   // <form #formularioPago> del html, donde se monta el SDK de Mercado Pago.
   private readonly formularioPago = viewChild<ElementRef<HTMLFormElement>>('formularioPago');
@@ -95,7 +97,7 @@ export class Pago implements OnDestroy {
 
   // Formulario de facturación con signals.
   protected readonly datosFacturacion = signal<Facturacion>({
-    email: '',
+    email: this.auth.emailUsuario() ?? '',
     telefono: '',
     cuil: '',
     situacionFiscal: 'Consumidor Final',
@@ -165,12 +167,15 @@ export class Pago implements OnDestroy {
   }
 
   private enviar(): void {
+    if (this.ocupado()) {
+      return;
+    }
     this.intentoPagar.set(true);
     this.errorTarjeta.set(null);
     this.estadoPago.set(null);
 
     submit(this.facturacion, async () => {
-      if (!this.tarjetaMontada) {
+      if (!this.tarjetaMontada || !this.formularioTarjeta) {
         this.errorTarjeta.set('tarjetaCargando');
         return undefined;
       }
@@ -178,9 +183,14 @@ export class Pago implements OnDestroy {
       this.generandoToken.set(true);
 
       try {
-        const token = (await this.formularioTarjeta.createCardToken()) as { id: string };
+        const token = (await this.formularioTarjeta.createCardToken()) as { id?: string };
+        if (!token?.id) {
+          this.errorTarjeta.set('tarjetaInvalida');
+          return undefined;
+        }
         this.pagar(this.armarPago(token.id));
-      } catch {
+      } catch (err) {
+        console.error('Error al tokenizar tarjeta:', err);
         this.errorTarjeta.set('tarjetaInvalida');
       } finally {
         this.generandoToken.set(false);
@@ -197,7 +207,8 @@ export class Pago implements OnDestroy {
       next: (respuesta) => this.procesarRespuesta(respuesta),
       error: (error: unknown) => {
         if (error instanceof HttpErrorResponse) {
-          this.mensajeServidor.set(error.error?.message ?? '');
+          const msg = error.error?.message || (typeof error.error === 'string' ? error.error : '');
+          this.mensajeServidor.set(msg);
         }
         this.estadoPago.set('error');
       }
@@ -217,24 +228,36 @@ export class Pago implements OnDestroy {
   }
 
   private armarPago(token: string): PagoRequest {
-    const datosTarjeta = this.formularioTarjeta.getCardFormData();
+    const datosTarjeta = this.formularioTarjeta?.getCardFormData() ?? {};
     const facturacion = this.datosFacturacion();
+
+    const cuilLimpio = soloDigitosCuil(facturacion.cuil);
+    const primerPasajeroDoc = this.pasajeros()[0]?.documento || '';
 
     return {
       token,
       installments: Number(datosTarjeta.installments) || 1,
-      paymentMethodId: datosTarjeta.paymentMethodId,
+      paymentMethodId: datosTarjeta.paymentMethodId || 'visa',
       issuerId: datosTarjeta.issuerId || null,
       payerEmail: facturacion.email.trim(),
-      payerDocType: datosTarjeta.identificationType,
-      payerDocNumber: datosTarjeta.identificationNumber,
-      cuil: soloDigitosCuil(facturacion.cuil),
+      payerDocType: (datosTarjeta.identificationType || 'DNI').trim(),
+      payerDocNumber: (datosTarjeta.identificationNumber || cuilLimpio || primerPasajeroDoc || '11111111').trim(),
+      cuil: cuilLimpio,
       situacionFiscal: facturacion.situacionFiscal,
     };
   }
 
   private montarFormularioTarjeta(monto: number): void {
     if (this.formularioTarjeta && monto === this.montoTarjeta) {
+      return;
+    }
+
+    if (typeof MercadoPago === 'undefined') {
+      setTimeout(() => {
+        if (typeof MercadoPago !== 'undefined' && this.formularioPago() && this.publicKey()) {
+          this.montarFormularioTarjeta(this.total());
+        }
+      }, 500);
       return;
     }
 
