@@ -994,4 +994,5 @@ export const en: Record<TranslationKey, string> = {
   'adminSales.method.TARJETA_DEBITO': 'Debit card',
   'adminSales.method.TRANSFERENCIA': 'Bank transfer',
   'adminSales.method.MERCADOPAGO': 'Mercado Pago',
+
 };

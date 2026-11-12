@@ -65,8 +65,9 @@ export class MisAsignaciones implements OnInit {
 
   /** Va al historial si el vuelo ya llegó o si fue cancelado. */
   terminada(a: Asignacion): boolean {
-    return a.vuelo.estado === 'CANCELADO' || this.llegada(a) < new Date();
-  }
+  return a.estadoAsignacion === 'CANCELADA' ||
+         a.estadoAsignacion === 'FINALIZADA';
+}
 
   /** '14:30:00' -> '14:30' */
   hora(h: string): string {

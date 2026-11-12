@@ -34,6 +34,7 @@ export interface Asignacion {
   vuelo: VueloAsignacion;
   empleado?: EmpleadoAsignacion;
   rolEmpleado: RolEmpleado;
+  estadoAsignacion: 'ASIGNADA' | 'CANCELADA' | 'FINALIZADA';
 }
 
 export interface EmpleadoAsignacion {

@@ -1,4 +1,14 @@
-import { Component, ElementRef, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  computed,
+  inject,
+  signal
+} from '@angular/core';
+
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Auth } from '../../services/auth';
 import { I18nService } from '../../services/i18n';
@@ -13,9 +23,11 @@ import type { TranslationKey } from '../../i18n/es';
   templateUrl: './header.html',
 })
 export class Header implements OnInit {
+
   protected readonly auth = inject(Auth);
   protected readonly theme = inject(ThemeService);
   protected readonly i18n = inject(I18nService);
+
   private readonly router = inject(Router);
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
@@ -24,7 +36,9 @@ export class Header implements OnInit {
   protected readonly nombreCorto = computed(() => {
     const email = this.auth.emailUsuario();
     const fallback = this.i18n.t('nav.myAccount');
+
     if (!email) return fallback;
+
     const localPart = email.split('@')[0];
     return localPart || fallback;
   });
@@ -62,7 +76,9 @@ export class Header implements OnInit {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (!this.menuAbierto()) return;
+
     const target = event.target as Node | null;
+
     if (target && !this.elementRef.nativeElement.contains(target)) {
       this.cerrarMenu();
     }
