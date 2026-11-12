@@ -9,7 +9,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const auth = inject(Auth);
   const i18n = inject(I18nService);
-  const token = localStorage.getItem('token');
+  const token = auth.obtenerToken();
 
   const headers: Record<string, string> = {
     'Accept-Language': i18n.currentLang()

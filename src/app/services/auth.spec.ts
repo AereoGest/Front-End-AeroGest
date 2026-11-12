@@ -1,9 +1,15 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { Auth } from './auth';
+import { Auth, decodificarToken, esTokenExpirado } from './auth';
 import { AuthResponse } from '../Models/Perfil';
+
+function crearJwtMock(payload: Record<string, unknown>): string {
+  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const payloadBase64 = btoa(JSON.stringify(payload));
+  return `${header}.${payloadBase64}.signature`;
+}
 
 describe('Auth Service', () => {
   let service: Auth;
@@ -27,9 +33,46 @@ describe('Auth Service', () => {
     expect(service).toBeTruthy();
   });
 
-  it('guardarSesion almacena token, email, userId, perfilCompleto e isVerified y expone el rol confiable en memoria sin guardarlo en localStorage', () => {
+  it('decodificarToken extrae correctamente los claims del token en base64url', () => {
+    const jwt = crearJwtMock({
+      sub: 'test@aerogest.com',
+      userId: 42,
+      role: 'ROLE_ADMIN',
+      isVerified: true,
+      perfilCompleto: true,
+      exp: Math.floor(Date.now() / 1000) + 3600,
+    });
+
+    const payload = decodificarToken(jwt);
+    expect(payload).not.toBeNull();
+    expect(payload?.sub).toBe('test@aerogest.com');
+    expect(payload?.userId).toBe(42);
+    expect(payload?.role).toBe('ROLE_ADMIN');
+    expect(payload?.isVerified).toBe(true);
+    expect(payload?.perfilCompleto).toBe(true);
+  });
+
+  it('esTokenExpirado detecta tokens vencidos correctamente', () => {
+    const expirado = { exp: Math.floor(Date.now() / 1000) - 60 };
+    const valido = { exp: Math.floor(Date.now() / 1000) + 3600 };
+
+    expect(esTokenExpirado(expirado)).toBe(true);
+    expect(esTokenExpirado(valido)).toBe(false);
+    expect(esTokenExpirado(null)).toBe(false);
+  });
+
+  it('guardarSesion almacena únicamente el token en localStorage y jamás expone email, userId, isVerified ni role', () => {
+    const validJwt = crearJwtMock({
+      sub: 'user@aerogest.com',
+      userId: 5,
+      role: 'ROLE_USUARIO',
+      isVerified: true,
+      perfilCompleto: true,
+      exp: Math.floor(Date.now() / 1000) + 3600,
+    });
+
     const mockResponse: AuthResponse = {
-      token: 'jwt.sample.token',
+      token: validJwt,
       email: 'user@aerogest.com',
       userId: 5,
       perfilCompleto: true,
@@ -40,49 +83,50 @@ describe('Auth Service', () => {
 
     service.guardarSesion(mockResponse);
 
-    expect(localStorage.getItem('token')).toBe('jwt.sample.token');
-    expect(localStorage.getItem('email')).toBe('user@aerogest.com');
-    expect(localStorage.getItem('userId')).toBe('5');
-    expect(localStorage.getItem('perfilCompleto')).toBe('true');
+    // Solo el token debe existir en localStorage
+    expect(localStorage.getItem('token')).toBe(validJwt);
+    expect(localStorage.getItem('email')).toBeNull();
+    expect(localStorage.getItem('userId')).toBeNull();
+    expect(localStorage.getItem('perfilCompleto')).toBeNull();
     expect(localStorage.getItem('role')).toBeNull();
-    expect(localStorage.getItem('isVerified')).toBe('true');
+    expect(localStorage.getItem('isVerified')).toBeNull();
+
+    // El estado reactivo en memoria refleja los datos seguros
     expect(service.estaAutenticado()).toBe(true);
     expect(service.estaVerificado()).toBe(true);
+    expect(service.emailUsuario()).toBe('user@aerogest.com');
+    expect(service.userId()).toBe(5);
     expect(service.getRole()).toBe('ROLE_USUARIO');
     expect(service.rolUsuario()).toBe('ROLE_USUARIO');
     expect(service.esAdmin()).toBe(false);
   });
 
-  it('no confía en un rol manipulado en localStorage y obtiene el rol real desde el servidor', () => {
-    localStorage.setItem('token', 'jwt.sample.token');
-    localStorage.setItem('role', 'ROLE_ADMIN');
-
-    expect(service.getRole()).toBeNull();
-    expect(service.esAdmin()).toBe(false);
-
-    service.sincronizarRolDesdeServidor().subscribe((rol) => {
-      expect(rol).toBe('ROLE_USUARIO');
-    });
-
-    const req = httpMock.expectOne('/api/auth/perfil');
-    expect(req.request.method).toBe('GET');
-    req.flush({
-      personaId: 1,
-      nombre: 'Ana',
-      apellido: 'Gomez',
-      email: 'ana@aerogest.com',
-      telefono: '123456',
-      numeroIdentificador: '12345678',
-      identificador: 'DNI',
-      fechaNacimiento: '1995-05-10',
-      sexo: 'FEMENINO',
-      twoFactorEnabled: false,
-      isVerified: true,
+  it('no confía en un rol o isVerified manipulados manualmente en localStorage', () => {
+    const validJwt = crearJwtMock({
+      sub: 'user@aerogest.com',
+      userId: 5,
       role: 'ROLE_USUARIO',
+      isVerified: false,
+      exp: Math.floor(Date.now() / 1000) + 3600,
     });
 
-    expect(service.rolUsuario()).toBe('ROLE_USUARIO');
-    expect(service.esAdmin()).toBe(false);
+    localStorage.setItem('token', validJwt);
+    localStorage.setItem('role', 'ROLE_ADMIN');
+    localStorage.setItem('isVerified', 'true');
+
+    // Al reconfigurar el módulo para instanciar el servicio con el token ya existente
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [Auth, provideHttpClient(), provideHttpClientTesting()],
+    });
+    const nuevoServicio = TestBed.inject(Auth);
+    expect(nuevoServicio.getRole()).toBe('ROLE_USUARIO');
+    expect(nuevoServicio.esAdmin()).toBe(false);
+    expect(nuevoServicio.estaVerificado()).toBe(false);
+
+    // Las claves manipuladas son purgadas de localStorage
+    expect(localStorage.getItem('role')).toBeNull();
+    expect(localStorage.getItem('isVerified')).toBeNull();
   });
 
   it('cerrarSesion limpia el almacenamiento local y el estado reactivo', () => {

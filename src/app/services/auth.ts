@@ -6,7 +6,53 @@ import { AuthResponse, DatosPerfil, Perfil, Rol } from '../Models/Perfil';
 import { Login } from '../Models/Login';
 import { User } from '../Models/User';
 
-const STORAGE_KEYS = ['token', 'email', 'userId', 'perfilCompleto', 'role', 'isVerified'];
+/**
+ * Claves sensibles o redundantes que nunca deben persistirse en localStorage
+ * para evitar exposición de datos y manipulación del estado del cliente.
+ */
+export const SENSITIVE_STORAGE_KEYS = ['email', 'userId', 'perfilCompleto', 'role', 'isVerified'] as const;
+
+export interface JwtPayload {
+  sub?: string;
+  email?: string;
+  userId?: number;
+  role?: string;
+  isVerified?: boolean;
+  perfilCompleto?: boolean;
+  exp?: number;
+  iat?: number;
+  [key: string]: unknown;
+}
+
+/**
+ * Decodifica de forma segura el payload de un JWT (formato base64url) sin dependencias externas.
+ */
+export function decodificarToken(token: string | null): JwtPayload | null {
+  if (!token || typeof token !== 'string') return null;
+  const partes = token.split('.');
+  if (partes.length !== 3) return null;
+  try {
+    const base64 = partes[1].replace(/-/g, '+').replace(/_/g, '/');
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(json) as JwtPayload;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Verifica si el token JWT ya expiró basándose en su claim `exp`.
+ */
+export function esTokenExpirado(payload: JwtPayload | null): boolean {
+  if (!payload || typeof payload.exp !== 'number') return false;
+  return payload.exp * 1000 <= Date.now();
+}
+
 const ROLES_VALIDOS: readonly Rol[] = [
   'ROLE_ADMIN',
   'ROLE_EMPLEADO',
@@ -20,23 +66,34 @@ const ROLES_VALIDOS: readonly Rol[] = [
 export class Auth {
   private readonly baseUrl = `${environment.apiUrl}/auth`;
 
-  private readonly sesion = signal<boolean>(this.haySesion());
+  private readonly sesion = signal<boolean>(false);
   readonly usuarioAutenticado = computed(() => this.sesion());
 
-  private readonly emailActual = signal<string | null>(this.leerEmail());
+  private readonly emailActual = signal<string | null>(null);
   readonly emailUsuario = this.emailActual.asReadonly();
 
+  private readonly userIdActual = signal<number | null>(null);
+  readonly userId = this.userIdActual.asReadonly();
+
+  private readonly verificadoActual = signal<boolean>(false);
+  readonly esVerificado = this.verificadoActual.asReadonly();
+
+  private readonly perfilCompletoActual = signal<boolean>(false);
+  readonly perfilCompleto = this.perfilCompletoActual.asReadonly();
+
   /**
-   * Rol obtenido únicamente desde una fuente confiable del servidor (login, 2FA,
-   * verificación de cuenta, actualización de perfil o consulta a GET /api/auth/perfil).
-   * Nunca se inicializa desde localStorage para impedir manipulación por el cliente.
+   * Rol obtenido únicamente desde una fuente confiable (claims del JWT firmado
+   * o consulta a GET /api/auth/perfil en el servidor).
+   * Nunca se almacena en localStorage.
    */
   private readonly rolActual = signal<Rol | null>(null);
   readonly rolUsuario = this.rolActual.asReadonly();
   readonly esAdmin = computed(() => this.rolActual() === 'ROLE_ADMIN');
   readonly esEmpleado = computed(() => this.rolActual() === 'ROLE_EMPLEADO');
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.inicializarSesionSegura();
+  }
 
   iniciarSesion(credenciales: Login): Observable<AuthResponse> {
     return this.http
@@ -59,6 +116,9 @@ export class Auth {
       tap((perfil) => {
         if (perfil?.email) {
           this.emailActual.set(perfil.email);
+        }
+        if (typeof perfil?.isVerified === 'boolean') {
+          this.verificadoActual.set(perfil.isVerified);
         }
         this.fijarRolConfiable(perfil?.role);
       })
@@ -139,25 +199,104 @@ export class Auth {
     return this.rolActual();
   }
 
+  getUserId(): number | null {
+    return this.userIdActual();
+  }
+
   estaVerificado(): boolean {
-    return localStorage.getItem('isVerified') === 'true';
+    return this.verificadoActual();
+  }
+
+  estaPerfilCompleto(): boolean {
+    return this.perfilCompletoActual();
+  }
+
+  obtenerToken(): string | null {
+    if (!this.haySesion()) {
+      return null;
+    }
+    return typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+  }
+
+  private inicializarSesionSegura(): void {
+    this.purgarClavesInnecesarias();
+    const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) {
+      return;
+    }
+
+    const payload = decodificarToken(token);
+    if (esTokenExpirado(payload)) {
+      this.limpiarSesion();
+      return;
+    }
+
+    this.cargarDesdePayload(payload);
+    this.sesion.set(true);
   }
 
   private aplicarRespuesta(data: AuthResponse): void {
     if (!data || data.requires2fa || !data.token) {
       return;
     }
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('email', data.email);
-    localStorage.setItem('userId', String(data.userId));
-    localStorage.setItem('perfilCompleto', String(data.perfilCompleto ?? false));
-    if (data.isVerified !== undefined) {
-      localStorage.setItem('isVerified', String(data.isVerified));
+
+    // Únicamente se almacena el token JWT. Jamás se guardan datos de usuario en localStorage.
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('token', data.token);
     }
-    localStorage.removeItem('role');
-    this.fijarRolConfiable(data.role);
-    this.emailActual.set(data.email);
+    this.purgarClavesInnecesarias();
+
+    // 1. Extraer claims seguros desde el token firmado
+    const payload = decodificarToken(data.token);
+    this.cargarDesdePayload(payload);
+
+    // 2. Si la respuesta contiene datos en memoria, sincronizarlos
+    if (data.email) {
+      this.emailActual.set(data.email);
+    }
+    if (data.userId != null) {
+      this.userIdActual.set(Number(data.userId));
+    }
+    if (data.role) {
+      this.fijarRolConfiable(data.role);
+    }
+    if (typeof data.isVerified === 'boolean') {
+      this.verificadoActual.set(data.isVerified);
+    }
+    if (typeof data.perfilCompleto === 'boolean') {
+      this.perfilCompletoActual.set(data.perfilCompleto);
+    }
+
     this.sesion.set(true);
+  }
+
+  private cargarDesdePayload(payload: JwtPayload | null): void {
+    if (!payload) {
+      return;
+    }
+    const email = (payload.sub || payload.email || null) as string | null;
+    if (email) {
+      this.emailActual.set(email);
+    }
+    if (payload.userId != null) {
+      this.userIdActual.set(Number(payload.userId));
+    }
+    if (payload.role) {
+      this.fijarRolConfiable(payload.role as string);
+    }
+    if (typeof payload.isVerified === 'boolean') {
+      this.verificadoActual.set(payload.isVerified);
+    }
+    if (typeof payload.perfilCompleto === 'boolean') {
+      this.perfilCompletoActual.set(payload.perfilCompleto);
+    }
+  }
+
+  private purgarClavesInnecesarias(): void {
+    if (typeof localStorage === 'undefined') return;
+    for (const key of SENSITIVE_STORAGE_KEYS) {
+      localStorage.removeItem(key);
+    }
   }
 
   private fijarRolConfiable(rol?: string | null): void {
@@ -170,17 +309,28 @@ export class Auth {
   }
 
   private limpiarSesion(): void {
-    STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('token');
+    }
+    this.purgarClavesInnecesarias();
     this.emailActual.set(null);
+    this.userIdActual.set(null);
     this.rolActual.set(null);
+    this.verificadoActual.set(false);
+    this.perfilCompletoActual.set(false);
     this.sesion.set(false);
   }
 
   private haySesion(): boolean {
-    return !!localStorage.getItem('token');
-  }
+    if (typeof localStorage === 'undefined') return false;
+    const token = localStorage.getItem('token');
+    if (!token) return false;
 
-  private leerEmail(): string | null {
-    return localStorage.getItem('email');
+    const payload = decodificarToken(token);
+    if (esTokenExpirado(payload)) {
+      this.limpiarSesion();
+      return false;
+    }
+    return true;
   }
 }
