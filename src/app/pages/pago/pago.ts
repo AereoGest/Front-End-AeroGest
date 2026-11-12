@@ -183,13 +183,24 @@ export class Pago implements OnDestroy {
       this.generandoToken.set(true);
 
       try {
-        const token = (await this.formularioTarjeta.createCardToken()) as { id?: string; [key: string]: unknown };
-        if (!token?.id) {
-          console.warn('[MercadoPago] No se pudo generar token de tarjeta:', token);
+        const respuestaToken = (await this.formularioTarjeta.createCardToken()) as
+          | { id?: string; token?: string; [key: string]: unknown }
+          | string
+          | undefined;
+
+        const tokenId =
+          typeof respuestaToken === 'string'
+            ? respuestaToken
+            : (respuestaToken?.id ||
+               respuestaToken?.token ||
+               (this.formularioTarjeta.getCardFormData?.() as { token?: string } | undefined)?.token);
+
+        if (!tokenId) {
+          console.warn('[MercadoPago] No se pudo generar token de tarjeta:', respuestaToken);
           this.errorTarjeta.set('tarjetaInvalida');
           return undefined;
         }
-        this.pagar(this.armarPago(token.id));
+        this.pagar(this.armarPago(tokenId));
       } catch (err) {
         console.error('Error al tokenizar tarjeta:', err);
         this.errorTarjeta.set('tarjetaInvalida');
