@@ -183,8 +183,9 @@ export class Pago implements OnDestroy {
       this.generandoToken.set(true);
 
       try {
-        const token = (await this.formularioTarjeta.createCardToken()) as { id?: string };
+        const token = (await this.formularioTarjeta.createCardToken()) as { id?: string; [key: string]: unknown };
         if (!token?.id) {
+          console.warn('[MercadoPago] No se pudo generar token de tarjeta:', token);
           this.errorTarjeta.set('tarjetaInvalida');
           return undefined;
         }

@@ -344,7 +344,7 @@ export const en: Record<TranslationKey, string> = {
   'payment.checkBillingData': 'Please check the marked billing details.',
   'payment.sdkLoadError': 'Could not load payment form. Please reload the page.',
   'payment.cardLoading': 'Payment form is loading, please try again.',
-  'payment.cardInvalid': 'Card could not be validated. Check details and try again.',
+  'payment.cardInvalid': 'Card could not be validated. Check details, disable ad blockers, and try again.',
   'payment.rejected': 'Payment was rejected. Check your card details or try another card.',
   'payment.inProcess': 'Your payment is being processed. You can check booking status in My bookings.',
   'payment.error': 'Could not process payment. Check card details and try again.',

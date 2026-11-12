@@ -342,7 +342,7 @@ export const es = {
   'payment.checkBillingData': 'Revisá los datos de facturación marcados.',
   'payment.sdkLoadError': 'No se pudo cargar el formulario de pago. Recargá la página.',
   'payment.cardLoading': 'El formulario de pago se está cargando, intentá de nuevo.',
-  'payment.cardInvalid': 'No se pudo validar la tarjeta. Revisá los datos e intentá nuevamente.',
+  'payment.cardInvalid': 'No se pudo validar la tarjeta. Revisá los datos o desactivá bloqueadores de anuncios (AdBlock) e intentá nuevamente.',
   'payment.rejected': 'El pago fue rechazado. Revisá los datos de la tarjeta o probá con otra.',
   'payment.inProcess': 'Tu pago está en proceso. Podés ver el estado de la reserva en Mis reservas.',
   'payment.error': 'No se pudo procesar el pago. Revisá los datos de la tarjeta e intentá nuevamente.',
