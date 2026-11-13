@@ -1009,6 +1009,7 @@ export const es = {
   'adminSales.method.TARJETA_DEBITO': 'Tarjeta de débito',
   'adminSales.method.TRANSFERENCIA': 'Transferencia',
   'adminSales.method.MERCADOPAGO': 'Mercado Pago',
+
 };
 
 export type TranslationKey = keyof typeof es;

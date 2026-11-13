@@ -58,7 +58,9 @@
     } @else {
       <ul class="lista">
         @for (a of visibles(); track a.id) {
-          <li class="card" [class.card--cancelada]="a.vuelo.estado === 'CANCELADO'">
+          <li class="card"
+    [class.card--cancelada]="a.estadoAsignacion === 'CANCELADA'"
+    [class.card--finalizada]="a.estadoAsignacion === 'FINALIZADA'">
             <div class="card__fecha">
               <span class="dia">{{ salida(a) | date: 'dd' }}</span>
               <span class="mes">{{ salida(a) | date: 'MMM' }}</span>
@@ -83,7 +85,9 @@
 
             <div class="card__badges">
               <span class="rol rol--{{ a.rolEmpleado.toLowerCase() }}">{{ rolKey(a.rolEmpleado) | translate }}</span>
-              <span class="estado estado--{{ a.vuelo.estado.toLowerCase() }}">{{ estadoKey(a.vuelo.estado) | translate }}</span>
+              <span class="estado estado--{{ a.estadoAsignacion.toLowerCase() }}">
+  {{ estadoKey(a.estadoAsignacion) | translate }}
+</span>
             </div>
           </li>
         }
