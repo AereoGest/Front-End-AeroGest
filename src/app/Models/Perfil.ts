@@ -18,8 +18,15 @@ export interface Perfil {
   fechaNacimiento: string | null;
   sexo: Genero | null;
   twoFactorEnabled: boolean;
+  totpEnabled?: boolean;
   isVerified: boolean;
   role: Rol;
+}
+
+export interface TotpSetupResponse {
+  secret: string;
+  otpauthUrl: string;
+  qrCodeUrl: string;
 }
 
 export interface DatosPerfil {
@@ -38,6 +45,8 @@ export interface AuthResponse {
   userId: number;
   perfilCompleto: boolean;
   requires2fa: boolean;
+  twoFactorEnabled?: boolean;
+  totpEnabled?: boolean;
   role?: Rol;
   isVerified?: boolean;
 }

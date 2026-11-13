@@ -50,6 +50,8 @@ export class LoginForm {
 
   paso2FA = signal(false);
   email2FA = signal('');
+  totpRequerido = signal(false);
+  emailRequerido = signal(false);
   intentoEnviar = signal(false);
   intentoEnviar2FA = signal(false);
   cargando = signal(false);
@@ -72,6 +74,8 @@ export class LoginForm {
       next: (data) => {
         if (data.requires2fa) {
           this.email2FA.set(data.email || this.datos().email);
+          this.totpRequerido.set(!!data.totpEnabled);
+          this.emailRequerido.set(!!data.twoFactorEnabled);
           this.paso2FA.set(true);
           return;
         }

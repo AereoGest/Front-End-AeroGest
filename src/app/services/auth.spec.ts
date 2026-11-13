@@ -156,4 +156,40 @@ describe('Auth Service', () => {
     expect(req.request.body).toEqual({ email: 'test@aerogest.com' });
     req.flush({ message: 'Email enviado' });
   });
+
+  it('setupTotp solicita inicialización TOTP al backend', () => {
+    service.setupTotp().subscribe((res) => {
+      expect(res.secret).toBe('BASE32SECRET');
+      expect(res.qrCodeUrl).toContain('create-qr-code');
+    });
+
+    const req = httpMock.expectOne('/api/auth/2fa/totp/setup');
+    expect(req.request.method).toBe('GET');
+    req.flush({
+      secret: 'BASE32SECRET',
+      otpauthUrl: 'otpauth://totp/AeroGest:test@aerogest.com?secret=BASE32SECRET',
+      qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?data=otpauth',
+    });
+  });
+
+  it('activarTotp envía clave y código para habilitar el autenticador móvil', () => {
+    service.activarTotp('BASE32SECRET', '123456').subscribe((res) => {
+      expect(res).toBe('Autenticador activado');
+    });
+
+    const req = httpMock.expectOne('/api/auth/2fa/totp/activar');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ secret: 'BASE32SECRET', code: '123456' });
+    req.flush('Autenticador activado');
+  });
+
+  it('desactivarTotp envía solicitud para inhabilitar el autenticador móvil', () => {
+    service.desactivarTotp().subscribe((res) => {
+      expect(res).toBe('Autenticador desactivado');
+    });
+
+    const req = httpMock.expectOne('/api/auth/2fa/totp/desactivar');
+    expect(req.request.method).toBe('POST');
+    req.flush('Autenticador desactivado');
+  });
 });

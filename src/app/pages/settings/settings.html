@@ -178,18 +178,28 @@
             </div>
           </div>
 
-          <!-- Auth Móvil (Futuro) -->
-          <div class="settings-item item-disabled">
+          <!-- Auth Móvil (Google Authenticator / TOTP) -->
+          <div class="settings-item">
             <div class="settings-item-info">
               <div class="title-with-badge">
                 <span class="settings-item-title">{{ 'settings.twoFactorApp' | translate }}</span>
-                <span class="status-badge badge-pending">{{ 'settings.comingSoon' | translate }}</span>
+                <span
+                  class="status-badge"
+                  [class.badge-active]="perfil()?.totpEnabled"
+                  [class.badge-inactive]="!perfil()?.totpEnabled">
+                  {{ (perfil()?.totpEnabled ? 'settings.active' : 'settings.inactive') | translate }}
+                </span>
               </div>
               <span class="settings-item-desc">{{ 'settings.twoFactorAppDesc' | translate }}</span>
             </div>
             <div class="settings-control">
-              <label class="switch switch-disabled" [attr.aria-label]="'settings.twoFactorApp' | translate">
-                <input type="checkbox" id="switch-2fa-app" disabled />
+              <label class="switch" [attr.aria-label]="'settings.twoFactorApp' | translate">
+                <input
+                  type="checkbox"
+                  id="switch-2fa-app"
+                  [checked]="perfil()?.totpEnabled ?? false"
+                  [disabled]="cargando() || guardandoTotp()"
+                  (change)="toggleTotp()" />
                 <span class="slider round"></span>
               </label>
             </div>
@@ -197,5 +207,66 @@
         </div>
       </section>
     </div>
+
+    <!-- Modal de Configuración de Autenticador Móvil -->
+    @if (modalTotpAbierto() && totpSetupData()) {
+      <div class="totp-modal-backdrop" (click)="cerrarModalTotp()">
+        <div class="totp-modal" (click)="$event.stopPropagation()" role="dialog" aria-labelledby="totp-modal-title">
+          <div class="totp-modal-header">
+            <h3 id="totp-modal-title" class="totp-modal-title">{{ 'settings.totpModalTitle' | translate }}</h3>
+            <button type="button" class="totp-close-btn" (click)="cerrarModalTotp()" aria-label="Cerrar">✕</button>
+          </div>
+
+          <div class="totp-modal-body">
+            <p class="totp-instructions">{{ 'settings.totpModalSubtitle' | translate }}</p>
+
+            <div class="totp-qr-wrapper">
+              <img [src]="totpSetupData()!.qrCodeUrl" alt="Código QR de autenticación TOTP" class="totp-qr-img" />
+            </div>
+
+            <div class="totp-manual-box">
+              <span class="totp-manual-label">{{ 'settings.totpManualKey' | translate }}</span>
+              <div class="totp-secret-row">
+                <code class="totp-secret-text">{{ totpSetupData()!.secret }}</code>
+                <button type="button" class="btn-copy" (click)="copiarClave()">
+                  {{ (claveCopiada() ? 'settings.totpCopied' : 'settings.totpCopyKey') | translate }}
+                </button>
+              </div>
+            </div>
+
+            <div class="totp-input-group">
+              <label for="input-totp-code" class="totp-code-label">{{ 'settings.totpCodeLabel' | translate }}</label>
+              <input
+                id="input-totp-code"
+                type="text"
+                maxlength="6"
+                inputmode="numeric"
+                class="totp-code-input"
+                [placeholder]="'settings.totpCodePlaceholder' | translate"
+                [value]="codigoTotp()"
+                (input)="codigoTotp.set($any($event.target).value)"
+                (keydown.enter)="confirmarYActivarTotp()"
+                autocomplete="one-time-code"
+              />
+            </div>
+
+            @if (errorModalTotp()) {
+              <div class="totp-error-alert" role="alert">
+                <span>{{ errorModalTotp() }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="totp-modal-footer">
+            <button type="button" class="btn btn-outline" (click)="cerrarModalTotp()" [disabled]="guardandoTotp()">
+              {{ 'settings.totpCancelBtn' | translate }}
+            </button>
+            <button type="button" class="btn btn-primary auth-btn-accent" (click)="confirmarYActivarTotp()" [disabled]="guardandoTotp() || !codigoTotp().trim()">
+              {{ guardandoTotp() ? ('settings.updating' | translate) : ('settings.totpVerifyBtn' | translate) }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
   </div>
 </section>

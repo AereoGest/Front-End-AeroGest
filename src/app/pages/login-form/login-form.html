@@ -14,8 +14,12 @@
         <p class="auth-subtitle">
           @if (!paso2FA()) {
             {{ 'auth.loginSubtitle' | translate }}
+          } @else if (totpRequerido() && !emailRequerido()) {
+            {{ 'auth.verifyTotpSubtitle' | translate }}
+          } @else if (emailRequerido() && !totpRequerido()) {
+            {{ 'auth.verifyEmailSubtitle' | translate }}
           } @else {
-            {{ 'auth.verifyCodeSubtitle' | translate }}
+            {{ 'auth.verifyBothSubtitle' | translate }}
           }
         </p>
       </div>

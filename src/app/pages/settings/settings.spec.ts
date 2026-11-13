@@ -81,4 +81,81 @@ describe('Settings', () => {
 
     expect(component['mensajeExito']()).toBe('2FA habilitado');
   });
+
+  it('toggleTotp cuando está desactivado abre el modal y solicita setup TOTP', () => {
+    component.toggleTotp();
+
+    const req = httpMock.expectOne('/api/auth/2fa/totp/setup');
+    expect(req.request.method).toBe('GET');
+    req.flush({
+      secret: 'SECRETBASE32ABCDEF',
+      otpauthUrl: 'otpauth://totp/AeroGest:test@aerogest.com?secret=SECRETBASE32ABCDEF',
+      qrCodeUrl: 'https://api.qrserver.com/qr.png',
+    });
+
+    expect(component['modalTotpAbierto']()).toBe(true);
+    expect(component['totpSetupData']()?.secret).toBe('SECRETBASE32ABCDEF');
+  });
+
+  it('confirmarYActivarTotp valida el código de 6 dígitos y activa TOTP', () => {
+    component['totpSetupData'].set({
+      secret: 'SECRETBASE32ABCDEF',
+      otpauthUrl: 'otpauth://...',
+      qrCodeUrl: 'https://...',
+    });
+    component['modalTotpAbierto'].set(true);
+    component['codigoTotp'].set('123456');
+
+    component.confirmarYActivarTotp();
+
+    const req = httpMock.expectOne('/api/auth/2fa/totp/activar');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ secret: 'SECRETBASE32ABCDEF', code: '123456' });
+    req.flush('Autenticador móvil activado exitosamente.');
+
+    const reqReload = httpMock.expectOne('/api/auth/perfil');
+    reqReload.flush({
+      id: 1,
+      email: 'test@aerogest.com',
+      twoFactorEnabled: false,
+      totpEnabled: true,
+    });
+
+    expect(component['modalTotpAbierto']()).toBe(false);
+    expect(component['mensajeExito']()).toContain('Autenticador móvil activado');
+  });
+
+  it('toggleTotp cuando está activado envía petición de desactivación', () => {
+    component['perfil'].set({
+      personaId: 1,
+      nombre: 'Juan',
+      apellido: 'Perez',
+      email: 'test@aerogest.com',
+      telefono: '123',
+      numeroIdentificador: null,
+      identificador: null,
+      fechaNacimiento: null,
+      sexo: null,
+      twoFactorEnabled: false,
+      totpEnabled: true,
+      isVerified: true,
+      role: 'ROLE_USUARIO',
+    });
+
+    component.toggleTotp();
+
+    const req = httpMock.expectOne('/api/auth/2fa/totp/desactivar');
+    expect(req.request.method).toBe('POST');
+    req.flush('Autenticador móvil desactivado exitosamente.');
+
+    const reqReload = httpMock.expectOne('/api/auth/perfil');
+    reqReload.flush({
+      id: 1,
+      email: 'test@aerogest.com',
+      twoFactorEnabled: false,
+      totpEnabled: false,
+    });
+
+    expect(component['mensajeExito']()).toContain('Autenticador móvil desactivado');
+  });
 });

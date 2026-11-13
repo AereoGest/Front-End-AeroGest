@@ -2,7 +2,7 @@ import { Injectable, computed, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, of, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { AuthResponse, DatosPerfil, Perfil, Rol } from '../Models/Perfil';
+import { AuthResponse, DatosPerfil, Perfil, Rol, TotpSetupResponse } from '../Models/Perfil';
 import { Login } from '../Models/Login';
 import { User } from '../Models/User';
 
@@ -162,6 +162,18 @@ export class Auth {
 
   toggle2fa(): Observable<string> {
     return this.http.post(`${this.baseUrl}/toggle-2fa`, {}, { responseType: 'text' });
+  }
+
+  setupTotp(): Observable<TotpSetupResponse> {
+    return this.http.get<TotpSetupResponse>(`${this.baseUrl}/2fa/totp/setup`);
+  }
+
+  activarTotp(secret: string, code: string): Observable<string> {
+    return this.http.post(`${this.baseUrl}/2fa/totp/activar`, { secret, code }, { responseType: 'text' });
+  }
+
+  desactivarTotp(): Observable<string> {
+    return this.http.post(`${this.baseUrl}/2fa/totp/desactivar`, {}, { responseType: 'text' });
   }
 
   forgotPassword(email: string): Observable<{ message: string }> {

@@ -363,6 +363,196 @@ input:checked + .slider:before {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Modal de Configuración TOTP ── */
+.totp-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.totp-modal {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 16px);
+  max-width: 460px;
+  width: 100%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.totp-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.totp-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.totp-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.totp-close-btn:hover {
+  background: var(--bg-inset);
+  color: var(--text);
+}
+
+.totp-modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+}
+
+.totp-instructions {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.totp-qr-wrapper {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  display: inline-block;
+}
+
+.totp-qr-img {
+  width: 180px;
+  height: 180px;
+  display: block;
+}
+
+.totp-manual-box {
+  width: 100%;
+  background: var(--bg-inset);
+  padding: 12px;
+  border-radius: 10px;
+  text-align: left;
+}
+
+.totp-manual-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.totp-secret-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.totp-secret-text {
+  font-family: monospace;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--accent-text);
+  word-break: break-all;
+}
+
+.btn-copy {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+
+.btn-copy:hover {
+  opacity: 0.9;
+}
+
+.totp-input-group {
+  width: 100%;
+  text-align: left;
+}
+
+.totp-code-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.totp-code-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 6px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  color: var(--text);
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.totp-code-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.totp-error-alert {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--danger-soft, rgba(211, 47, 47, 0.1));
+  color: var(--danger, #d32f2f);
+  border: 1px solid var(--danger-border, rgba(211, 47, 47, 0.3));
+  border-radius: 8px;
+  font-size: 13px;
+  text-align: left;
+}
+
+.totp-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-card);
+}
+
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .settings-item {
