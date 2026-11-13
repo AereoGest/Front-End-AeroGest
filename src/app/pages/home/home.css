@@ -286,7 +286,9 @@
 
 .why-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* columnas según la cantidad de tarjetas, centradas */
+  grid-template-columns: repeat(auto-fit, minmax(240px, 300px));
+  justify-content: center;
   gap: 32px;
 }
 .why-card {
