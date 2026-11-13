@@ -216,7 +216,12 @@
                   <td>
                     <span class="badge estado--{{ t.estadoReserva.toLowerCase() }}">{{ estadoKey(t.estadoReserva) | translate }}</span>
                   </td>
-                  <td class="num"><strong>{{ moneda(t.total) }}</strong></td>
+                                    <td class="num">
+                    <strong>{{ moneda(t.totalNeto) }}</strong>
+                    @if (t.montoReembolso > 0) {
+                      <small>Cobrado {{ moneda(t.total) }} · Devuelto {{ moneda(t.montoReembolso) }}</small>
+                    }
+                  </td>
                 </tr>
               }
             </tbody>

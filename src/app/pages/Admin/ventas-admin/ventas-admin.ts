@@ -89,7 +89,7 @@ export class VentasAdmin implements OnInit {
       .filter(t => !texto || this.normalizar(`${t.codigoReserva} ${t.cliente} ${t.cuil} ${t.facturaId}`).includes(texto));
   });
 
-  totalFiltrado = computed(() => this.transaccionesFiltradas().reduce((s, t) => s + t.total, 0));
+ totalFiltrado = computed(() => this.transaccionesFiltradas().reduce((s, t) => s + t.totalNeto, 0));
 
   hayFiltros = computed(() => !!this.busqueda() || !!this.metodo() || !!this.diaSeleccionado());
 
