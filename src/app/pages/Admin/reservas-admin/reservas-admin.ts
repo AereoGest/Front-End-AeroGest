@@ -46,6 +46,21 @@ export interface PasajeroAdminForm {
 const SOLO_LETRAS = /^\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+(\s+[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)*\s*$/;
 const DNI_REGEX = /^\d{7,8}$/;
 const PASAPORTE_REGEX = /^[A-Z0-9]{6,20}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type CampoPasajero = 'nombre' | 'apellido' | 'fechaNacimiento' | 'documento' | 'email' | 'asiento';
+type ErroresPasajero = Partial<Record<CampoPasajero, TranslationKey>>;
+
+interface ErroresAlta {
+  cliente?: TranslationKey;
+  vuelo?: TranslationKey;
+  pasajeros: ErroresPasajero[];
+}
+
+interface ErroresEdicion {
+  cliente?: TranslationKey;
+  valor?: TranslationKey;
+}
 
 function normalizarDocumento(doc: string): string {
   return doc.replace(/[\s.\-]/g, '').toUpperCase();
@@ -105,6 +120,8 @@ export class ReservasAdmin implements OnInit {
   protected readonly altaPersonaId = signal<number | null>(null);
   protected readonly altaVueloId = signal<number | null>(null);
   protected readonly altaPasajeros = signal<PasajeroAdminForm[]>([this.crearPasajeroVacio()]);
+    /** Se activa al intentar guardar: recién ahí se marcan los obligatorios vacíos (igual que vuelos-admin). */
+  protected readonly intentoGuardarAlta = signal(false);
 
   // ── Modal Modificación ──
   protected readonly reservaEnEdicion = signal<Reserva | null>(null);
@@ -113,6 +130,7 @@ export class ReservasAdmin implements OnInit {
   protected readonly edicionClienteId = signal<number | null>(null);
   protected readonly edicionEstado = signal<EstadoReserva>('PROCESANDO');
   protected readonly edicionValor = signal<number>(0);
+  protected readonly intentoGuardarEdicion = signal(false);
 
   // ── Modal Baja (Confirmar cancelación lógica) ──
   protected readonly reservaParaBaja = signal<Reserva | null>(null);
@@ -188,6 +206,82 @@ export class ReservasAdmin implements OnInit {
     this.asientosAvion().filter((a) => !a.ocupado)
   );
 
+    /** Errores del alta, por campo y por pasajero. */
+  protected readonly erroresAlta = computed<ErroresAlta>(() => {
+    const intento = this.intentoGuardarAlta();
+    const hoy = hoyLocal();
+    const docsVistos = new Set<string>();
+    const asientosVistos = new Set<number>();
+
+    const pasajeros = this.altaPasajeros().map((p) => {
+      const e: ErroresPasajero = {};
+
+      // Nombre y apellido: formato en vivo, obligatorio al guardar
+      const nombre = p.nombre.trim();
+      if (nombre && !SOLO_LETRAS.test(nombre)) e.nombre = 'booking.namePattern';
+      else if (!nombre && intento) e.nombre = 'booking.nameRequired';
+
+      const apellido = p.apellido.trim();
+      if (apellido && !SOLO_LETRAS.test(apellido)) e.apellido = 'booking.lastNamePattern';
+      else if (!apellido && intento) e.apellido = 'booking.lastNameRequired';
+
+      // Fecha de nacimiento: tiene que ser anterior a hoy
+      if (p.fechaNacimiento && p.fechaNacimiento >= hoy) e.fechaNacimiento = 'booking.birthDateFuture';
+      else if (!p.fechaNacimiento && intento) e.fechaNacimiento = 'booking.birthDateRequired';
+
+      // Documento: formato según el tipo y que no se repita entre pasajeros
+      const doc = normalizarDocumento(p.documento);
+      if (doc) {
+        const esDni = p.tipoDocumento === 'DNI';
+        const valido = esDni ? DNI_REGEX.test(doc) : PASAPORTE_REGEX.test(doc);
+        if (!valido) {
+          e.documento = esDni ? 'booking.dniPattern' : 'booking.passportPattern';
+        } else {
+          const clave = `${p.tipoDocumento}-${doc}`;
+          if (docsVistos.has(clave)) e.documento = 'adminBookings.validationDuplicateDoc';
+          docsVistos.add(clave);
+        }
+      } else if (intento) {
+        e.documento = 'booking.docRequired';
+      }
+
+      // Email: opcional, pero si se escribe tiene que ser válido
+      const email = p.email.trim();
+      if (email && !EMAIL_REGEX.test(email)) e.email = 'booking.emailInvalid';
+
+      // Asiento: opcional, pero no puede repetirse
+      if (p.asientoId !== null && p.asientoId !== undefined) {
+        const n = Number(p.asientoId);
+        if (asientosVistos.has(n)) e.asiento = 'adminBookings.validationDuplicateSeat';
+        asientosVistos.add(n);
+      }
+
+      return e;
+    });
+
+    return {
+      cliente: intento && !this.altaPersonaId() ? 'adminBookings.validationClientRequired' : undefined,
+      vuelo: intento && !this.altaVueloId() ? 'adminBookings.validationFlightRequired' : undefined,
+      pasajeros,
+    };
+  });
+
+  protected readonly hayErroresAlta = computed(() => {
+    const e = this.erroresAlta();
+    return !!e.cliente || !!e.vuelo || e.pasajeros.some((p) => Object.keys(p).length > 0);
+  });
+
+  /** Errores de la modificación. */
+  protected readonly erroresEdicion = computed<ErroresEdicion>(() => {
+    const e: ErroresEdicion = {};
+    if (this.intentoGuardarEdicion() && !this.edicionClienteId()) {
+      e.cliente = 'adminBookings.validationClientRequired';
+    }
+    const valor = Number(this.edicionValor());
+    if (Number.isNaN(valor) || valor < 0) e.valor = 'adminBookings.validationValueInvalid';
+    return e;
+  });
+
   ngOnInit(): void {
     this.cargarReservas();
     this.cargarCatalogosAuxiliares();
@@ -243,9 +337,10 @@ export class ReservasAdmin implements OnInit {
 
   // ===================== Alta de reserva =====================
 
-  protected abrirModalAlta(): void {
+   protected abrirModalAlta(): void {
     this.limpiarMensajes();
     this.errorFormularioAlta.set('');
+    this.intentoGuardarAlta.set(false);
     this.altaPersonaId.set(null);
     this.altaVueloId.set(null);
     this.asientosAvion.set([]);
@@ -286,6 +381,16 @@ export class ReservasAdmin implements OnInit {
     this.altaPasajeros.update((lista) => lista.filter((_, i) => i !== index));
   }
 
+    protected actualizarPasajero<K extends keyof PasajeroAdminForm>(
+    index: number,
+    campo: K,
+    valor: PasajeroAdminForm[K]
+  ): void {
+    this.altaPasajeros.update((lista) =>
+      lista.map((p, i) => (i === index ? { ...p, [campo]: valor } : p))
+    );
+  }
+
   protected alternarEquipajePasajero(index: number, equipajeId: number, checked: boolean): void {
     this.altaPasajeros.update((lista) =>
       lista.map((p, i) => {
@@ -299,57 +404,14 @@ export class ReservasAdmin implements OnInit {
     );
   }
 
-  protected guardarNuevaReserva(): void {
+    protected guardarNuevaReserva(): void {
     this.errorFormularioAlta.set('');
+    this.intentoGuardarAlta.set(true);
 
-    const personaId = this.altaPersonaId();
-    if (!personaId) {
-      this.errorFormularioAlta.set(this.i18n.t('adminBookings.validationClientRequired'));
-      return;
-    }
+    // Los errores ya se muestran debajo de cada campo
+    if (this.hayErroresAlta()) return;
 
-    const vueloId = this.altaVueloId();
-    if (!vueloId) {
-      this.errorFormularioAlta.set(this.i18n.t('adminBookings.validationFlightRequired'));
-      return;
-    }
-
-    const pasajeros = this.altaPasajeros();
-    const hoy = hoyLocal();
-    const docsVistos = new Set<string>();
-    const asientosVistos = new Set<number>();
-
-    for (const p of pasajeros) {
-      const nombreValido = SOLO_LETRAS.test(p.nombre);
-      const apellidoValido = SOLO_LETRAS.test(p.apellido);
-      const docNorm = normalizarDocumento(p.documento);
-      const docValido =
-        p.tipoDocumento === 'DNI' ? DNI_REGEX.test(docNorm) : PASAPORTE_REGEX.test(docNorm);
-      const fechaValida = !!p.fechaNacimiento && p.fechaNacimiento < hoy;
-
-      if (!nombreValido || !apellidoValido || !docValido || !fechaValida) {
-        this.errorFormularioAlta.set(this.i18n.t('adminBookings.validationPassengerFields'));
-        return;
-      }
-
-      const claveDoc = `${p.tipoDocumento}-${docNorm}`;
-      if (docsVistos.has(claveDoc)) {
-        this.errorFormularioAlta.set(this.i18n.t('adminBookings.validationDuplicateDoc'));
-        return;
-      }
-      docsVistos.add(claveDoc);
-
-      if (p.asientoId !== null && p.asientoId !== undefined) {
-        const asientoNum = Number(p.asientoId);
-        if (asientosVistos.has(asientoNum)) {
-          this.errorFormularioAlta.set(this.i18n.t('adminBookings.validationDuplicateSeat'));
-          return;
-        }
-        asientosVistos.add(asientoNum);
-      }
-    }
-
-    const pasajesPayload: PasajeRequest[] = pasajeros.map((p) => ({
+    const pasajesPayload: PasajeRequest[] = this.altaPasajeros().map((p) => ({
       clasesVuelo: p.clasesVuelo,
       asientoId: p.asientoId ? Number(p.asientoId) : undefined,
       equipajeIds: p.equipajeIds,
@@ -363,8 +425,8 @@ export class ReservasAdmin implements OnInit {
     }));
 
     const payload: ReservaAdminRequest = {
-      personaId: Number(personaId),
-      vueloId: Number(vueloId),
+      personaId: Number(this.altaPersonaId()),
+      vueloId: Number(this.altaVueloId()),
       cantidadPasajes: pasajesPayload.length,
       pasajes: pasajesPayload,
     };
@@ -379,12 +441,12 @@ export class ReservasAdmin implements OnInit {
           this.mostrarExito(this.i18n.t('adminBookings.createdSuccess'));
         },
         error: (err: HttpErrorResponse) => {
+          // Solo los errores del backend quedan arriba, como mensaje general
           this.errorFormularioAlta.set(err.error?.message || this.i18n.t('common.error'));
         },
       })
       .add(() => this.creando.set(false));
   }
-
   private crearPasajeroVacio(): PasajeroAdminForm {
     return {
       nombre: '',
@@ -408,6 +470,7 @@ export class ReservasAdmin implements OnInit {
 
     this.limpiarMensajes();
     this.errorFormularioEdicion.set('');
+    this.intentoGuardarEdicion.set(false);
     this.reservaEnEdicion.set(reserva);
     this.edicionClienteId.set(reserva.persona?.id ?? null);
     this.edicionEstado.set(reserva.estadoReserva);
@@ -419,27 +482,18 @@ export class ReservasAdmin implements OnInit {
     this.reservaEnEdicion.set(null);
   }
 
-  protected guardarEdicionReserva(): void {
+    protected guardarEdicionReserva(): void {
     const reserva = this.reservaEnEdicion();
     if (!reserva) return;
 
     this.errorFormularioEdicion.set('');
-    const clienteId = this.edicionClienteId();
-    if (!clienteId) {
-      this.errorFormularioEdicion.set(this.i18n.t('adminBookings.validationClientRequired'));
-      return;
-    }
-
-    const valor = Number(this.edicionValor());
-    if (Number.isNaN(valor) || valor < 0) {
-      this.errorFormularioEdicion.set(this.i18n.t('adminBookings.validationValueInvalid'));
-      return;
-    }
+    this.intentoGuardarEdicion.set(true);
+    if (Object.keys(this.erroresEdicion()).length > 0) return;
 
     const dto: ReservaUpdateDTO = {
-      clienteId: Number(clienteId),
+      clienteId: Number(this.edicionClienteId()),
       estadoReserva: this.edicionEstado(),
-      valor,
+      valor: Number(this.edicionValor()),
       cantidadPasajes: reserva.pasajes?.length ?? reserva.cantidadPasajes,
       fechaReserva: reserva.fechaReserva,
     };

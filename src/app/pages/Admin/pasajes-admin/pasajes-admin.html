@@ -1,6 +1,13 @@
-<section class="tickets-admin-bar">
+<section class="section resultados-pasajes">
   <div class="container">
-    <div class="tickets-toolbar">
+    <div class="section-header">
+      <span class="section-eyebrow">{{ 'adminTickets.eyebrow' | translate }}</span>
+      <h2 class="section-title">{{ 'adminTickets.title' | translate }}</h2>
+      <p class="section-subtitle">{{ 'adminTickets.subtitle' | translate }}</p>
+    </div>
+
+    <!-- Buscador, debajo del título -->
+    <div class="tickets-toolbar tickets-toolbar--debajo">
       <fieldset class="field search-field">
         <input
           id="admin-buscar-pasaje"
@@ -36,17 +43,6 @@
         </button>
       }
     </div>
-  </div>
-</section>
-
-<section class="section resultados-pasajes">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-eyebrow">{{ 'adminTickets.eyebrow' | translate }}</span>
-      <h2 class="section-title">{{ 'adminTickets.title' | translate }}</h2>
-      <p class="section-subtitle">{{ 'adminTickets.subtitle' | translate }}</p>
-    </div>
-
     @if (mensajeExito()) {
       <div class="alerta-exito" role="status">{{ mensajeExito() }}</div>
     }
@@ -184,44 +180,62 @@
       <h3 id="modal-edit-pasaje-title" class="modal-titulo">{{ 'adminTickets.editModalTitle' | translate }}</h3>
       <p class="modal-subtitulo">{{ 'adminTickets.editModalSubtitle' | translate }}</p>
 
+            <!-- Solo errores del backend -->
       @if (errorEdicion()) {
         <div class="alerta-error" role="alert">{{ errorEdicion() }}</div>
       }
 
+      @let err = erroresEdicion();
       <div class="form-grid-3">
-        <div class="form-group">
+        <!-- Nombre -->
+        <div class="form-group" [class.form-group--error]="!!err.nombre">
           <label for="p-nombre" class="form-label">{{ 'adminBookings.firstName' | translate }}</label>
           <input
             id="p-nombre"
             type="text"
             class="form-control"
+            [attr.aria-invalid]="!!err.nombre"
             [ngModel]="editNombre()"
             (ngModelChange)="editNombre.set($event)"
           />
+          @if (err.nombre; as e) {
+            <p class="field-error">{{ e | translate }}</p>
+          }
         </div>
 
-        <div class="form-group">
+        <!-- Apellido -->
+        <div class="form-group" [class.form-group--error]="!!err.apellido">
           <label for="p-apellido" class="form-label">{{ 'adminBookings.lastName' | translate }}</label>
           <input
             id="p-apellido"
             type="text"
             class="form-control"
+            [attr.aria-invalid]="!!err.apellido"
             [ngModel]="editApellido()"
             (ngModelChange)="editApellido.set($event)"
           />
+          @if (err.apellido; as e) {
+            <p class="field-error">{{ e | translate }}</p>
+          }
         </div>
 
-        <div class="form-group">
+        <!-- Fecha de nacimiento -->
+        <div class="form-group" [class.form-group--error]="!!err.fechaNacimiento">
           <label for="p-fecha-nac" class="form-label">{{ 'adminBookings.birthDate' | translate }}</label>
           <input
             id="p-fecha-nac"
             type="date"
             class="form-control"
+            [attr.aria-invalid]="!!err.fechaNacimiento"
             [ngModel]="editFechaNacimiento()"
             (ngModelChange)="editFechaNacimiento.set($event)"
           />
+          @if (err.fechaNacimiento; as e) {
+            <p class="field-error">{{ e | translate }}</p>
+          }
         </div>
 
+        <!-- Tipo de documento -->
         <div class="form-group">
           <label for="p-tipo-doc" class="form-label">{{ 'adminBookings.docType' | translate }}</label>
           <select
@@ -236,28 +250,39 @@
           </select>
         </div>
 
-        <div class="form-group">
+        <!-- Número de documento -->
+        <div class="form-group" [class.form-group--error]="!!err.documento">
           <label for="p-doc" class="form-label">{{ 'adminBookings.docNumber' | translate }}</label>
           <input
             id="p-doc"
             type="text"
             class="form-control"
+            [attr.aria-invalid]="!!err.documento"
             [ngModel]="editDocumento()"
             (ngModelChange)="editDocumento.set($event)"
           />
+          @if (err.documento; as e) {
+            <p class="field-error">{{ e | translate }}</p>
+          }
         </div>
 
-        <div class="form-group">
+        <!-- Email -->
+        <div class="form-group" [class.form-group--error]="!!err.email">
           <label for="p-email" class="form-label">{{ 'adminBookings.email' | translate }}</label>
           <input
             id="p-email"
             type="email"
             class="form-control"
+            [attr.aria-invalid]="!!err.email"
             [ngModel]="editEmail()"
             (ngModelChange)="editEmail.set($event)"
           />
+          @if (err.email; as e) {
+            <p class="field-error">{{ e | translate }}</p>
+          }
         </div>
 
+        <!-- Clase -->
         <div class="form-group">
           <label for="p-clase" class="form-label">{{ 'adminBookings.flightClass' | translate }}</label>
           <select
@@ -272,6 +297,7 @@
           </select>
         </div>
 
+        <!-- Asiento -->
         <div class="form-group">
           <label for="p-asiento" class="form-label">{{ 'adminBookings.seat' | translate }}</label>
           <select
@@ -289,6 +315,7 @@
           </select>
         </div>
 
+        <!-- Asistencia -->
         <div class="form-group">
           <label for="p-asistencia" class="form-label">{{ 'adminBookings.assistance' | translate }}</label>
           <select

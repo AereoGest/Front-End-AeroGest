@@ -1,6 +1,13 @@
-<section class="booking-admin-bar">
+<section class="section resultados-reservas">
   <div class="container">
-    <div class="booking-toolbar">
+    <div class="section-header">
+      <span class="section-eyebrow">{{ 'adminBookings.eyebrow' | translate }}</span>
+      <h2 class="section-title">{{ 'adminBookings.title' | translate }}</h2>
+      <p class="section-subtitle">{{ 'adminBookings.subtitle' | translate }}</p>
+    </div>
+
+    <!-- Buscador, debajo del título -->
+    <div class="booking-toolbar booking-toolbar--debajo">
       <fieldset class="field search-field">
         <input
           id="admin-buscar-reserva"
@@ -24,17 +31,7 @@
         </button>
       </div>
     </div>
-  </div>
-</section>
-
-<section class="section resultados-reservas">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-eyebrow">{{ 'adminBookings.eyebrow' | translate }}</span>
-      <h2 class="section-title">{{ 'adminBookings.title' | translate }}</h2>
-      <p class="section-subtitle">{{ 'adminBookings.subtitle' | translate }}</p>
-    </div>
-
+    
     @if (mensajeExito()) {
       <div class="alerta-exito" role="status">{{ mensajeExito() }}</div>
     }
@@ -204,6 +201,7 @@
 
 <!-- ===================== MODAL ALTA DE RESERVA ===================== -->
 @if (modalAltaAbierto()) {
+  @let errAlta = erroresAlta();
   <div class="modal-overlay" (click)="cerrarModalAlta()">
     <div
       class="modal-box modal-box-lg"
@@ -212,29 +210,24 @@
       aria-labelledby="modal-alta-titulo"
       (click)="$event.stopPropagation()"
     >
-      <button
-        type="button"
-        class="modal-cerrar"
-        [attr.aria-label]="'common.close' | translate"
-        (click)="cerrarModalAlta()"
-      >
-        ✕
-      </button>
+      <button type="button" class="modal-cerrar" [attr.aria-label]="'common.close' | translate" (click)="cerrarModalAlta()">✕</button>
 
       <span class="section-eyebrow">{{ 'adminBookings.eyebrow' | translate }}</span>
       <h3 id="modal-alta-titulo" class="modal-titulo">{{ 'adminBookings.createModalTitle' | translate }}</h3>
       <p class="modal-subtitulo">{{ 'adminBookings.createModalSubtitle' | translate }}</p>
 
+      <!-- Solo errores del backend -->
       @if (errorFormularioAlta()) {
         <div class="alerta-error" role="alert">{{ errorFormularioAlta() }}</div>
       }
 
       <div class="form-grid-2">
-        <div class="form-group">
+        <div class="form-group" [class.form-group--error]="!!errAlta.cliente">
           <label for="alta-cliente" class="form-label">{{ 'adminBookings.selectClient' | translate }}</label>
           <select
             id="alta-cliente"
             class="form-control"
+            [attr.aria-invalid]="!!errAlta.cliente"
             [ngModel]="altaPersonaId()"
             (ngModelChange)="altaPersonaId.set($event ? +$event : null)"
           >
@@ -243,13 +236,17 @@
               <option [ngValue]="c.id">{{ etiquetaCliente(c) }}</option>
             }
           </select>
+          @if (errAlta.cliente; as e) {
+            <p class="field-error">{{ e | translate }}</p>
+          }
         </div>
 
-        <div class="form-group">
+        <div class="form-group" [class.form-group--error]="!!errAlta.vuelo">
           <label for="alta-vuelo" class="form-label">{{ 'adminBookings.selectFlight' | translate }}</label>
           <select
             id="alta-vuelo"
             class="form-control"
+            [attr.aria-invalid]="!!errAlta.vuelo"
             [ngModel]="altaVueloId()"
             (ngModelChange)="alCambiarVueloAlta($event)"
           >
@@ -258,6 +255,9 @@
               <option [ngValue]="+v.id!">{{ etiquetaVuelo(v) }}</option>
             }
           </select>
+          @if (errAlta.vuelo; as e) {
+            <p class="field-error">{{ e | translate }}</p>
+          }
         </div>
       </div>
 
@@ -270,6 +270,7 @@
 
       <div class="pasajeros-lista">
         @for (pasajero of altaPasajeros(); track $index; let idx = $index) {
+           @let err = errAlta.pasajeros[idx];
           <div class="pasajero-card">
             <div class="pasajero-card-header">
               <strong>{{ 'adminBookings.passengerNum' | translate: { num: idx + 1 } }}</strong>
@@ -281,41 +282,65 @@
             </div>
 
             <div class="form-grid-3">
-              <div class="form-group">
-                <label class="form-label">{{ 'adminBookings.firstName' | translate }}</label>
+              <!-- Nombre -->
+              <div class="form-group" [class.form-group--error]="!!err.nombre">
+                <label class="form-label" [for]="'p-nombre-' + idx">{{ 'adminBookings.firstName' | translate }}</label>
                 <input
+                  [id]="'p-nombre-' + idx"
                   type="text"
                   class="form-control"
-                  [(ngModel)]="pasajero.nombre"
+                  [attr.aria-invalid]="!!err.nombre"
+                  [ngModel]="pasajero.nombre"
+                  (ngModelChange)="actualizarPasajero(idx, 'nombre', $event)"
                   [ngModelOptions]="{ standalone: true }"
                 />
+                @if (err.nombre; as e) {
+                  <p class="field-error">{{ e | translate }}</p>
+                }
               </div>
 
-              <div class="form-group">
-                <label class="form-label">{{ 'adminBookings.lastName' | translate }}</label>
+              <!-- Apellido -->
+              <div class="form-group" [class.form-group--error]="!!err.apellido">
+                <label class="form-label" [for]="'p-apellido-' + idx">{{ 'adminBookings.lastName' | translate }}</label>
                 <input
+                  [id]="'p-apellido-' + idx"
                   type="text"
                   class="form-control"
-                  [(ngModel)]="pasajero.apellido"
+                  [attr.aria-invalid]="!!err.apellido"
+                  [ngModel]="pasajero.apellido"
+                  (ngModelChange)="actualizarPasajero(idx, 'apellido', $event)"
                   [ngModelOptions]="{ standalone: true }"
                 />
+                @if (err.apellido; as e) {
+                  <p class="field-error">{{ e | translate }}</p>
+                }
               </div>
 
-              <div class="form-group">
-                <label class="form-label">{{ 'adminBookings.birthDate' | translate }}</label>
+              <!-- Fecha de nacimiento -->
+              <div class="form-group" [class.form-group--error]="!!err.fechaNacimiento">
+                <label class="form-label" [for]="'p-nac-' + idx">{{ 'adminBookings.birthDate' | translate }}</label>
                 <input
+                  [id]="'p-nac-' + idx"
                   type="date"
                   class="form-control"
-                  [(ngModel)]="pasajero.fechaNacimiento"
+                  [attr.aria-invalid]="!!err.fechaNacimiento"
+                  [ngModel]="pasajero.fechaNacimiento"
+                  (ngModelChange)="actualizarPasajero(idx, 'fechaNacimiento', $event)"
                   [ngModelOptions]="{ standalone: true }"
                 />
+                @if (err.fechaNacimiento; as e) {
+                  <p class="field-error">{{ e | translate }}</p>
+                }
               </div>
 
+              <!-- Tipo de documento -->
               <div class="form-group">
-                <label class="form-label">{{ 'adminBookings.docType' | translate }}</label>
+                <label class="form-label" [for]="'p-tipodoc-' + idx">{{ 'adminBookings.docType' | translate }}</label>
                 <select
+                  [id]="'p-tipodoc-' + idx"
                   class="form-control"
-                  [(ngModel)]="pasajero.tipoDocumento"
+                  [ngModel]="pasajero.tipoDocumento"
+                  (ngModelChange)="actualizarPasajero(idx, 'tipoDocumento', $event)"
                   [ngModelOptions]="{ standalone: true }"
                 >
                   @for (t of tiposDocumento; track t.valor) {
@@ -324,31 +349,48 @@
                 </select>
               </div>
 
-              <div class="form-group">
-                <label class="form-label">{{ 'adminBookings.docNumber' | translate }}</label>
+              <!-- Número de documento -->
+              <div class="form-group" [class.form-group--error]="!!err.documento">
+                <label class="form-label" [for]="'p-doc-' + idx">{{ 'adminBookings.docNumber' | translate }}</label>
                 <input
+                  [id]="'p-doc-' + idx"
                   type="text"
                   class="form-control"
-                  [(ngModel)]="pasajero.documento"
+                  [attr.aria-invalid]="!!err.documento"
+                  [ngModel]="pasajero.documento"
+                  (ngModelChange)="actualizarPasajero(idx, 'documento', $event)"
                   [ngModelOptions]="{ standalone: true }"
                 />
+                @if (err.documento; as e) {
+                  <p class="field-error">{{ e | translate }}</p>
+                }
               </div>
 
-              <div class="form-group">
-                <label class="form-label">{{ 'adminBookings.email' | translate }}</label>
+              <!-- Email -->
+              <div class="form-group" [class.form-group--error]="!!err.email">
+                <label class="form-label" [for]="'p-email-' + idx">{{ 'adminBookings.email' | translate }}</label>
                 <input
+                  [id]="'p-email-' + idx"
                   type="email"
                   class="form-control"
-                  [(ngModel)]="pasajero.email"
+                  [attr.aria-invalid]="!!err.email"
+                  [ngModel]="pasajero.email"
+                  (ngModelChange)="actualizarPasajero(idx, 'email', $event)"
                   [ngModelOptions]="{ standalone: true }"
                 />
+                @if (err.email; as e) {
+                  <p class="field-error">{{ e | translate }}</p>
+                }
               </div>
 
+              <!-- Clase -->
               <div class="form-group">
-                <label class="form-label">{{ 'adminBookings.flightClass' | translate }}</label>
+                <label class="form-label" [for]="'p-clase-' + idx">{{ 'adminBookings.flightClass' | translate }}</label>
                 <select
+                  [id]="'p-clase-' + idx"
                   class="form-control"
-                  [(ngModel)]="pasajero.clasesVuelo"
+                  [ngModel]="pasajero.clasesVuelo"
+                  (ngModelChange)="actualizarPasajero(idx, 'clasesVuelo', $event)"
                   [ngModelOptions]="{ standalone: true }"
                 >
                   @for (cl of clasesVuelo; track cl) {
@@ -357,11 +399,15 @@
                 </select>
               </div>
 
-              <div class="form-group">
-                <label class="form-label">{{ 'adminBookings.seat' | translate }}</label>
+              <!-- Asiento -->
+              <div class="form-group" [class.form-group--error]="!!err.asiento">
+                <label class="form-label" [for]="'p-asiento-' + idx">{{ 'adminBookings.seat' | translate }}</label>
                 <select
+                  [id]="'p-asiento-' + idx"
                   class="form-control"
-                  [(ngModel)]="pasajero.asientoId"
+                  [attr.aria-invalid]="!!err.asiento"
+                  [ngModel]="pasajero.asientoId"
+                  (ngModelChange)="actualizarPasajero(idx, 'asientoId', $event)"
                   [ngModelOptions]="{ standalone: true }"
                 >
                   <option [ngValue]="null">{{ 'adminBookings.seatAuto' | translate }}</option>
@@ -371,13 +417,19 @@
                     </option>
                   }
                 </select>
+                @if (err.asiento; as e) {
+                  <p class="field-error">{{ e | translate }}</p>
+                }
               </div>
 
+              <!-- Asistencia -->
               <div class="form-group">
-                <label class="form-label">{{ 'adminBookings.assistance' | translate }}</label>
+                <label class="form-label" [for]="'p-asist-' + idx">{{ 'adminBookings.assistance' | translate }}</label>
                 <select
+                  [id]="'p-asist-' + idx"
                   class="form-control"
-                  [(ngModel)]="pasajero.asistenciaId"
+                  [ngModel]="pasajero.asistenciaId"
+                  (ngModelChange)="actualizarPasajero(idx, 'asistenciaId', $event)"
                   [ngModelOptions]="{ standalone: true }"
                 >
                   <option [ngValue]="null">{{ 'adminBookings.noAssistance' | translate }}</option>
@@ -448,12 +500,14 @@
         <div class="alerta-error" role="alert">{{ errorFormularioEdicion() }}</div>
       }
 
+            @let errEdit = erroresEdicion();
       <div class="form-stack">
-        <div class="form-group">
+        <div class="form-group" [class.form-group--error]="!!errEdit.cliente">
           <label for="edit-cliente" class="form-label">{{ 'adminBookings.selectClient' | translate }}</label>
           <select
             id="edit-cliente"
             class="form-control"
+            [attr.aria-invalid]="!!errEdit.cliente"
             [ngModel]="edicionClienteId()"
             (ngModelChange)="edicionClienteId.set($event ? +$event : null)"
           >
@@ -462,6 +516,9 @@
               <option [ngValue]="c.id">{{ etiquetaCliente(c) }}</option>
             }
           </select>
+          @if (errEdit.cliente; as e) {
+            <p class="field-error">{{ e | translate }}</p>
+          }
         </div>
 
         <div class="form-group">
@@ -478,7 +535,7 @@
           </select>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" [class.form-group--error]="!!errEdit.valor">
           <label for="edit-valor" class="form-label">{{ 'adminBookings.valueLabel' | translate }}</label>
           <input
             id="edit-valor"
@@ -486,11 +543,15 @@
             min="0"
             step="100"
             class="form-control"
+            [attr.aria-invalid]="!!errEdit.valor"
             [ngModel]="edicionValor()"
             (ngModelChange)="edicionValor.set(+$event)"
           />
+          @if (errEdit.valor; as e) {
+            <p class="field-error">{{ e | translate }}</p>
+          }
         </div>
-      </div>
+         </div>
 
       <div class="modal-acciones">
         <button type="button" class="btn btn-primary" [disabled]="guardandoEdicion()" (click)="cerrarModalEdicion()">
