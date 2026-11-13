@@ -31,7 +31,7 @@ export class Asientos implements OnInit {
   readonly seatPrices: Record<string, number> = {
     Primera: 45000,
     Ejecutiva: 15000,
-    Económica: 5000
+    Económica: 0
   };
 
   readonly takenSeats = new Set([
