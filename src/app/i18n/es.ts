@@ -20,6 +20,7 @@ export const es = {
   'nav.adminPanel': 'Panel de administración',
   'nav.roleLabel': 'Rol',
   'nav.adminAssignments': 'Asignaciones',
+   'nav.counterCheckin': 'Check-in en mostrador',
 
   // Roles de usuario
   'role.ROLE_ADMIN': 'Administrador',
@@ -478,7 +479,7 @@ export const es = {
   'counterCheckin.connectionError': 'No se pudo conectar con el servidor.',
   'counterCheckin.forbidden': 'No tenés permisos para hacer check-in de otras personas.',
 
-  // Mis asignaciones (empleado)
+   // Mis asignaciones (empleado)
   'myAssignments.title': 'Mis asignaciones',
   'myAssignments.subtitle': 'Vuelos en los que tenés que trabajar',
   'myAssignments.loading': 'Cargando asignaciones...',
@@ -488,7 +489,7 @@ export const es = {
   'myAssignments.tabUpcoming': 'Próximas',
   'myAssignments.tabHistory': 'Historial',
   'myAssignments.emptyUpcoming': 'No tenés vuelos asignados por ahora.',
-  'myAssignments.emptyHistory': 'Todavía no tenés vuelos realizados ni cancelados.',
+  'myAssignments.emptyHistory': 'Todavía no tenés vuelos finalizados ni cancelados.',
   'myAssignments.time': '{time} hs',
   'myAssignments.departs': 'Sale {time} hs',
   'myAssignments.arrives': 'Llega {time} hs',
@@ -496,15 +497,24 @@ export const es = {
   'myAssignments.inProgress': 'en curso',
   'myAssignments.inMinutes': 'en {n} min',
   'myAssignments.inHours': 'en {n} h',
+  'myAssignments.inOneDay': 'mañana',
   'myAssignments.inDays': 'en {n} días',
+  // Rol del empleado en el vuelo
   'myAssignments.role.PILOTO': 'Piloto',
   'myAssignments.role.COPILOTO': 'Copiloto',
   'myAssignments.role.AZAFATA': 'Azafata',
+  // Estado de la asignación (estadoAsignacion)
+  'myAssignments.status.PROGRAMADA': 'Programada',
+  'myAssignments.status.EN_CURSO': 'En curso',
+  'myAssignments.status.FINALIZADA': 'Finalizada',
+  'myAssignments.status.CANCELADA': 'Cancelada',
+  // Estado del vuelo
   'myAssignments.status.PROGRAMADO': 'Programado',
   'myAssignments.status.BOARDING': 'Embarcando',
   'myAssignments.status.ACTIVO': 'En vuelo',
   'myAssignments.status.CANCELADO': 'Cancelado',
   'myAssignments.status.REPROGRAMADO': 'Reprogramado',
+    'myAssignments.status.ASIGNADA': 'Asignada',
 
   // Panel de administración (AdminPanel)
   'adminPanel.eyebrow': 'Administración AeroGest',
@@ -1010,6 +1020,8 @@ export const es = {
   'adminSales.method.TRANSFERENCIA': 'Transferencia',
   'adminSales.method.MERCADOPAGO': 'Mercado Pago',
 
+   // Común y utilidades:
+    'common.dateLocale': 'es-AR',
 };
 
 export type TranslationKey = keyof typeof es;

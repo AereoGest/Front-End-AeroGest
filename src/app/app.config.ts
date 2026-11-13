@@ -19,5 +19,6 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     provideHttpClient(withInterceptors([authInterceptor])),
+    { provide: LOCALE_ID, useValue: 'es-AR' },   // ← esto faltaba
   ]
 };

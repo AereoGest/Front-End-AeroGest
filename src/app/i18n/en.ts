@@ -22,6 +22,7 @@ export const en: Record<TranslationKey, string> = {
   'nav.adminPanel': 'Admin panel',
   'nav.roleLabel': 'Role',
   'nav.adminAssignments': 'Assignments',
+   'nav.counterCheckin': 'Counter check-in',
 
   // User roles
   'role.ROLE_ADMIN': 'Administrator',
@@ -498,15 +499,24 @@ export const en: Record<TranslationKey, string> = {
   'myAssignments.inProgress': 'in progress',
   'myAssignments.inMinutes': 'in {n} min',
   'myAssignments.inHours': 'in {n} h',
+  'myAssignments.inOneDay': 'tomorrow',
   'myAssignments.inDays': 'in {n} days',
+  // Employee role on the flight
   'myAssignments.role.PILOTO': 'Pilot',
   'myAssignments.role.COPILOTO': 'Co-pilot',
   'myAssignments.role.AZAFATA': 'Flight attendant',
+  // Assignment status (estadoAsignacion)
+  'myAssignments.status.PROGRAMADA': 'Scheduled',
+  'myAssignments.status.EN_CURSO': 'In progress',
+  'myAssignments.status.FINALIZADA': 'Completed',
+  'myAssignments.status.CANCELADA': 'Canceled',
+  // Flight status
   'myAssignments.status.PROGRAMADO': 'Scheduled',
   'myAssignments.status.BOARDING': 'Boarding',
   'myAssignments.status.ACTIVO': 'In flight',
   'myAssignments.status.CANCELADO': 'Canceled',
   'myAssignments.status.REPROGRAMADO': 'Rescheduled',
+  'myAssignments.status.ASIGNADA': 'Assigned',
 
   // Admin panel (AdminPanel)
   'adminPanel.eyebrow': 'AeroGest Administration',
@@ -1010,5 +1020,8 @@ export const en: Record<TranslationKey, string> = {
   'adminSales.method.TARJETA_DEBITO': 'Debit card',
   'adminSales.method.TRANSFERENCIA': 'Bank transfer',
   'adminSales.method.MERCADOPAGO': 'Mercado Pago',
+
+  // Común y utilidades:
+  'common.dateLocale': 'en-US',
 
 };

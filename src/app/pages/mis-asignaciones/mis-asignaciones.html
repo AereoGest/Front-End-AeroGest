@@ -13,12 +13,15 @@
     </div>
   } @else {
 
+    @let locale = 'common.dateLocale' | translate;
+
     @if (siguiente(); as s) {
       <article class="destacada">
         <span class="destacada__tag">
           {{ 'myAssignments.nextFlight' | translate }} ·
           {{ faltan(s).key | translate: { n: faltan(s).n } }}
         </span>
+
         <div class="ruta">
           <div>
             <strong>{{ s.vuelo.aeropuertoOrigen.codigoIata }}</strong>
@@ -30,8 +33,9 @@
             <small>{{ s.vuelo.aeropuertoDestino.ciudad }}</small>
           </div>
         </div>
+
         <p>
-          {{ salida(s) | date: 'EEEE d/MM' }} ·
+          {{ salida(s) | date: 'EEEE d/MM' : undefined : locale }} ·
           {{ 'myAssignments.time' | translate: { time: hora(s.vuelo.horaSalida) } }} ·
           <span class="rol">{{ rolKey(s.rolEmpleado) | translate }}</span>
         </p>
@@ -58,12 +62,10 @@
     } @else {
       <ul class="lista">
         @for (a of visibles(); track a.id) {
-          <li class="card"
-    [class.card--cancelada]="a.estadoAsignacion === 'CANCELADA'"
-    [class.card--finalizada]="a.estadoAsignacion === 'FINALIZADA'">
+          <li class="card" [class]="'card card--' + css(a.estadoAsignacion)">
             <div class="card__fecha">
-              <span class="dia">{{ salida(a) | date: 'dd' }}</span>
-              <span class="mes">{{ salida(a) | date: 'MMM' }}</span>
+              <span class="dia">{{ salida(a) | date: 'dd' : undefined : locale }}</span>
+              <span class="mes">{{ salida(a) | date: 'MMM' : undefined : locale }}</span>
             </div>
 
             <div class="card__info">
@@ -84,10 +86,12 @@
             </div>
 
             <div class="card__badges">
-              <span class="rol rol--{{ a.rolEmpleado.toLowerCase() }}">{{ rolKey(a.rolEmpleado) | translate }}</span>
-              <span class="estado estado--{{ a.estadoAsignacion.toLowerCase() }}">
-  {{ estadoKey(a.estadoAsignacion) | translate }}
-</span>
+              <span class="rol" [class]="'rol rol--' + css(a.rolEmpleado)">
+                {{ rolKey(a.rolEmpleado) | translate }}
+              </span>
+              <span class="estado" [class]="'estado estado--' + css(a.estadoAsignacion)">
+                {{ estadoKey(a.estadoAsignacion) | translate }}
+              </span>
             </div>
           </li>
         }
