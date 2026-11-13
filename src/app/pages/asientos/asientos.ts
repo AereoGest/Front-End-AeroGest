@@ -29,9 +29,9 @@ export class Asientos implements OnInit {
   destino = '—';
 
   readonly seatPrices: Record<string, number> = {
-    Primera: 300,
-    Ejecutiva: 80,
-    Económica: 0
+    Primera: 45000,
+    Ejecutiva: 15000,
+    Económica: 5000
   };
 
   readonly takenSeats = new Set([
@@ -57,6 +57,7 @@ export class Asientos implements OnInit {
     this.http.get<any>('/api/carrito').subscribe({
       next: (carrito) => {
         if (!carrito?.items?.length) {
+          this.cdr.detectChanges();
           return;
         }
 
@@ -75,14 +76,17 @@ export class Asientos implements OnInit {
 
             this.origen = vuelo?.aeropuertoOrigen?.ciudad || '—';
             this.destino = vuelo?.aeropuertoDestino?.ciudad || '—';
+            this.cdr.detectChanges();
           },
           error: (error) => {
             console.error('Error al cargar el vuelo:', error);
+            this.cdr.detectChanges();
           }
         });
       },
       error: (error) => {
         console.error('Error al cargar el carrito:', error);
+        this.cdr.detectChanges();
       }
     });
   }

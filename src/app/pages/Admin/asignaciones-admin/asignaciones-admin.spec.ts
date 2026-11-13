@@ -16,6 +16,7 @@ describe('AsignacionesAdmin', () => {
     {
       id: 1,
       rolEmpleado: 'PILOTO',
+      estadoAsignacion: 'ASIGNADA',
       vuelo: {
         id: 101,
         fechaSalida: '2026-12-01',
@@ -32,6 +33,7 @@ describe('AsignacionesAdmin', () => {
     {
       id: 2,
       rolEmpleado: 'AZAFATA',
+      estadoAsignacion: 'CANCELADA',
       vuelo: {
         id: 102,
         fechaSalida: '2026-10-01',
@@ -142,6 +144,7 @@ describe('AsignacionesAdmin', () => {
     const nueva: Asignacion = {
       id: 3,
       rolEmpleado: 'COPILOTO',
+      estadoAsignacion: 'ASIGNADA',
       vuelo: mockAsignaciones[0].vuelo,
       empleado: mockEmpleados[1],
     };
