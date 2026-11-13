@@ -71,15 +71,6 @@
   margin-bottom: 8px;
 }
 
-.resultados-pasajes .section-title {
-  color: var(--text);
-  margin-bottom: 8px;
-}
-
-.resultados-pasajes .section-subtitle {
-  color: var(--text-muted);
-  font-size: 15px;
-}
 
 /* ── Alertas ── */
 .alerta-exito,
@@ -610,4 +601,36 @@
 }
 .toast-admin__cerrar:hover {
   opacity: 1;
+}
+/* Buscador ubicado debajo del título */
+.tickets-toolbar--debajo {
+  margin: 1rem 0 1.5rem;
+}
+/* Título y descripción alineados a la izquierda, como en los demás paneles */
+.resultados-pasajes .section-header {
+  text-align: left;
+  align-items: flex-start;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.resultados-pasajes .section-subtitle {
+  margin-left: 0;
+  margin-right: 0;
+}
+/* ===== Errores por campo ===== */
+.field-error {
+  margin: .3rem 0 0;
+  font-size: .78rem;
+  font-weight: 500;
+  color: #dc2626;
+}
+
+.form-control[aria-invalid="true"] {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, .12);
+}
+
+.form-group--error .form-label {
+  color: #dc2626;
 }

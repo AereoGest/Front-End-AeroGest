@@ -1,6 +1,18 @@
-<section class="flight-search-bar">
+<section class="section resultados">
   <div class="container">
-    <form class="search-bar-form" (submit)="onBuscar($event)">
+    <div class="section-header encabezado-abm">
+      <div>
+        <span class="section-eyebrow">{{ 'adminFlights.eyebrow' | translate }}</span>
+        <h2 class="section-title">{{ 'adminFlights.title' | translate }}</h2>
+        <p class="section-subtitle">{{ 'adminFlights.subtitle' | translate }}</p>
+      </div>
+      <button type="button" class="btn btn-dark btn-alta" (click)="abrirAlta()">
+        {{ 'adminFlights.btnNew' | translate }}
+      </button>
+    </div>
+
+    <!-- Buscador, debajo del título -->
+    <form class="search-bar-form search-bar-form--debajo" (submit)="onBuscar($event)">
       <fieldset class="field">
         <input id="a-origen" type="text" class="field-input" [placeholder]="'flights.originPlaceholder' | translate"
           [value]="origen()" (input)="origen.set($any($event.target).value)" />
@@ -23,21 +35,6 @@
         {{ 'adminFlights.clearFilters' | translate }}
       </button>
     </form>
-  </div>
-</section>
-
-<section class="section resultados">
-  <div class="container">
-    <div class="section-header encabezado-abm">
-      <div>
-        <span class="section-eyebrow">{{ 'adminFlights.eyebrow' | translate }}</span>
-        <h2 class="section-title">{{ 'adminFlights.title' | translate }}</h2>
-        <p class="section-subtitle">{{ 'adminFlights.subtitle' | translate }}</p>
-      </div>
-      <button type="button" class="btn btn-dark btn-alta" (click)="abrirAlta()">
-        {{ 'adminFlights.btnNew' | translate }}
-      </button>
-    </div>
 
     <div class="tabs-estado" role="tablist" [attr.aria-label]="'adminFlights.filterByStatus' | translate">
       <button type="button" role="tab" class="tab" [class.activa]="filtroEstado() === 'ACTIVOS'"

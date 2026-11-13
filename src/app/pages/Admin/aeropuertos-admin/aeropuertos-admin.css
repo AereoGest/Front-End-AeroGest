@@ -452,3 +452,15 @@
 .toast-admin__cerrar:hover {
   opacity: 1;
 }
+/* ===== Errores por campo (igual que vuelos-admin) ===== */
+.field-error {
+  margin: .3rem 0 0;
+  font-size: .78rem;
+  font-weight: 500;
+  color: #dc2626;
+}
+
+.field-input[aria-invalid="true"] {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, .12);
+}

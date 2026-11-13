@@ -688,3 +688,7 @@
 .form-vuelo .impacto {
   margin: -18px 0 0;
 }
+/* Buscador ubicado debajo del título */
+.search-bar-form--debajo {
+  margin: 1rem 0 1.5rem;
+}

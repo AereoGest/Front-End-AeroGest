@@ -33,6 +33,10 @@ const DURACION_CIERRE_MS = 400;
 const SOLO_LETRAS = /^\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+(\s+[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)*\s*$/;
 const DNI_REGEX = /^\d{7,8}$/;
 const PASAPORTE_REGEX = /^[A-Z0-9]{6,20}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type CampoPasaje = 'nombre' | 'apellido' | 'fechaNacimiento' | 'documento' | 'email';
+type ErroresPasaje = Partial<Record<CampoPasaje, TranslationKey>>;
 
 function normalizarDocumento(doc: string): string {
   return doc.replace(/[\s.\-]/g, '').toUpperCase();
@@ -92,6 +96,8 @@ export class PasajesAdmin implements OnInit {
   protected readonly editAsientoId = signal<number | null>(null);
   protected readonly editAsistenciaId = signal<number | null>(null);
   protected readonly editEquipajeIds = signal<number[]>([]);
+    /** Se activa al intentar guardar: recién ahí se marcan los obligatorios vacíos. */
+  protected readonly intentoGuardar = signal(false);
 
   // ── Modal Cancelación de pasaje ──
   protected readonly itemParaCancelar = signal<PasajeConReserva | null>(null);
@@ -140,6 +146,43 @@ export class PasajesAdmin implements OnInit {
       (a) => !a.ocupado || (actualAsiento && a.id === actualAsiento.id)
     );
   });
+  
+  /** Errores del formulario de modificación, por campo (igual que vuelos-admin). */
+  protected readonly erroresEdicion = computed<ErroresPasaje>(() => {
+    const e: ErroresPasaje = {};
+    const intento = this.intentoGuardar();
+
+    // Nombre y apellido: formato en vivo, obligatorio al guardar
+    const nombre = this.editNombre().trim();
+    if (nombre && !SOLO_LETRAS.test(nombre)) e.nombre = 'booking.namePattern';
+    else if (!nombre && intento) e.nombre = 'booking.nameRequired';
+
+    const apellido = this.editApellido().trim();
+    if (apellido && !SOLO_LETRAS.test(apellido)) e.apellido = 'booking.lastNamePattern';
+    else if (!apellido && intento) e.apellido = 'booking.lastNameRequired';
+
+    // Fecha de nacimiento: opcional, pero si está tiene que ser anterior a hoy
+    const fechaNac = this.editFechaNacimiento();
+    if (fechaNac && fechaNac >= hoyLocal()) e.fechaNacimiento = 'booking.birthDateFuture';
+
+    // Documento: formato según el tipo, obligatorio al guardar
+    const doc = normalizarDocumento(this.editDocumento());
+    const esDni = this.editTipoDocumento() === 'DNI';
+    if (doc) {
+      const valido = esDni ? DNI_REGEX.test(doc) : PASAPORTE_REGEX.test(doc);
+      if (!valido) e.documento = esDni ? 'booking.dniPattern' : 'booking.passportPattern';
+    } else if (intento) {
+      e.documento = 'booking.docRequired';
+    }
+
+    // Email: opcional, pero si se escribe tiene que ser válido
+    const email = this.editEmail().trim();
+    if (email && !EMAIL_REGEX.test(email)) e.email = 'booking.emailInvalid';
+
+    return e;
+  });
+
+  protected readonly hayErroresEdicion = computed(() => Object.keys(this.erroresEdicion()).length > 0);
 
   ngOnInit(): void {
     this.cargarReservas();
@@ -186,6 +229,7 @@ export class PasajesAdmin implements OnInit {
 
     this.limpiarMensajes();
     this.errorEdicion.set('');
+    this.intentoGuardar.set(false);
     this.itemEnEdicion.set({ reserva, pasaje });
 
     this.editNombre.set(pasaje.nombre ?? '');
@@ -221,27 +265,17 @@ export class PasajesAdmin implements OnInit {
     });
   }
 
-  protected guardarEdicionPasaje(): void {
+    protected guardarEdicionPasaje(): void {
     const item = this.itemEnEdicion();
     if (!item) return;
 
     this.errorEdicion.set('');
-    const nombre = this.editNombre().trim();
-    const apellido = this.editApellido().trim();
-    const tipoDoc = this.editTipoDocumento();
-    const docNorm = normalizarDocumento(this.editDocumento());
+    this.intentoGuardar.set(true);
+
+    // Los errores ya se muestran debajo de cada campo
+    if (this.hayErroresEdicion()) return;
+
     const fechaNac = this.editFechaNacimiento();
-
-    const nombreValido = SOLO_LETRAS.test(nombre);
-    const apellidoValido = SOLO_LETRAS.test(apellido);
-    const docValido = tipoDoc === 'DNI' ? DNI_REGEX.test(docNorm) : PASAPORTE_REGEX.test(docNorm);
-    const fechaValida = !fechaNac || fechaNac < hoyLocal();
-
-    if (!nombreValido || !apellidoValido || !docValido || !fechaValida) {
-      this.errorEdicion.set(this.i18n.t('adminTickets.validationFields'));
-      return;
-    }
-
     const dto: PasajeUpdateDTO = {
       codigoPasaje: item.pasaje.codigoPasaje,
       reservaId: item.reserva.id,
@@ -250,10 +284,10 @@ export class PasajesAdmin implements OnInit {
       clasesVuelo: this.editClase(),
       equipajeIds: this.editEquipajeIds(),
       asistenciaId: this.editAsistenciaId() ? Number(this.editAsistenciaId()) : null,
-      nombre,
-      apellido,
-      tipoDocumento: tipoDoc,
-      documento: docNorm,
+      nombre: this.editNombre().trim(),
+      apellido: this.editApellido().trim(),
+      tipoDocumento: this.editTipoDocumento(),
+      documento: normalizarDocumento(this.editDocumento()),
       fechaNacimiento: fechaNac || null,
       email: this.editEmail().trim() || null,
     };
@@ -268,6 +302,7 @@ export class PasajesAdmin implements OnInit {
           this.cargarReservas();
         },
         error: (err: HttpErrorResponse) => {
+          // Solo los errores del backend quedan arriba, como mensaje general
           this.errorEdicion.set(err.error?.message || this.i18n.t('common.error'));
         },
       })

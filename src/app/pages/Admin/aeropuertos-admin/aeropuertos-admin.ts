@@ -6,12 +6,15 @@ import { AeropuertoService } from '../../../services/aeropuerto-service';
 import { Aeropuerto } from '../../../Models/Aeropuerto';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { I18nService } from '../../../services/i18n';
+import type { TranslationKey } from '../../../i18n/es';
 
 // Mismas reglas que valida el backend en AeropuertoDTO
 const CODIGO_IATA = /^[A-Za-z]{3}$/;
 const SOLO_LETRAS = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/;
 
 type Toast = { texto: string; tipo: 'exito' | 'info' | 'error' };
+type CampoAeropuerto = 'nombre' | 'iata' | 'ciudad' | 'pais';
+type ErroresAeropuerto = Partial<Record<CampoAeropuerto, TranslationKey>>;
 
 // Debe coincidir con la duración de las animaciones overlay-out / modal-out del CSS (igual que vuelos-admin)
 const DURACION_CIERRE_MS = 400;
@@ -60,6 +63,8 @@ export class AeropuertosAdmin implements OnInit {
   formCodigoIata = signal('');
   formCiudad = signal('');
   formPais = signal('');
+    /** Se activa al intentar guardar: recién ahí se marcan los obligatorios vacíos. */
+  intentoGuardar = signal(false);
 
   // Modal Baja
   aeropuertoAEliminar = signal<Aeropuerto | null>(null);
@@ -81,6 +86,31 @@ export class AeropuertosAdmin implements OnInit {
   });
 
   hayFiltros = computed(() => !!(this.nombre() || this.codigoIata() || this.ciudad() || this.pais()));
+  
+  /**
+   * Errores por campo (igual que vuelos-admin): el formato se avisa en vivo,
+   * los obligatorios vacíos recién al intentar guardar.
+   */
+  errores = computed<ErroresAeropuerto>(() => {
+    const e: ErroresAeropuerto = {};
+    const intento = this.intentoGuardar();
+
+    const nombre = this.formNombre().trim();
+    if (!nombre && intento) e.nombre = 'adminAirports.errNameRequired';
+
+    // IATA: si tiene algo que no es letra se avisa enseguida; si le faltan letras, al guardar
+    const iata = this.formCodigoIata().trim();
+    if (iata && /[^A-Za-z]/.test(iata)) e.iata = 'adminAirports.errIataInvalid';
+    else if (intento && !CODIGO_IATA.test(iata)) e.iata = 'adminAirports.errIataInvalid';
+
+    const ciudad = this.formCiudad().trim();
+    if ((ciudad && !SOLO_LETRAS.test(ciudad)) || (!ciudad && intento)) e.ciudad = 'adminAirports.errCityInvalid';
+
+    const pais = this.formPais().trim();
+    if ((pais && !SOLO_LETRAS.test(pais)) || (!pais && intento)) e.pais = 'adminAirports.errCountryInvalid';
+
+    return e;
+  });
 
   ngOnInit(): void {
     this.cargar();
@@ -129,6 +159,7 @@ export class AeropuertosAdmin implements OnInit {
   abrirModalAlta(): void {
     this.limpiarAlertas();
     this.formularioError.set(null);
+   this.intentoGuardar.set(false);
     this.aeropuertoEnEdicion.set(null);
     this.formNombre.set('');
     this.formCodigoIata.set('');
@@ -140,6 +171,7 @@ export class AeropuertosAdmin implements OnInit {
   abrirModalEdicion(a: Aeropuerto): void {
     this.limpiarAlertas();
     this.formularioError.set(null);
+    this.intentoGuardar.set(false);
     this.aeropuertoEnEdicion.set(a);
     this.formNombre.set(a.nombre);
     this.formCodigoIata.set(a.codigoIata);
@@ -160,22 +192,9 @@ export class AeropuertosAdmin implements OnInit {
     const ciudad = this.formCiudad().trim();
     const pais = this.formPais().trim();
 
-    if (!nombre) {
-      this.formularioError.set(this.i18n.t('adminAirports.errNameRequired'));
-      return;
-    }
-    if (!CODIGO_IATA.test(codigoIata)) {
-      this.formularioError.set(this.i18n.t('adminAirports.errIataInvalid'));
-      return;
-    }
-    if (!SOLO_LETRAS.test(ciudad)) {
-      this.formularioError.set(this.i18n.t('adminAirports.errCityInvalid'));
-      return;
-    }
-    if (!SOLO_LETRAS.test(pais)) {
-      this.formularioError.set(this.i18n.t('adminAirports.errCountryInvalid'));
-      return;
-    }
+        this.intentoGuardar.set(true);
+    // Los errores ya se muestran debajo de cada campo
+    if (Object.keys(this.errores()).length > 0) return;
 
     this.guardando.set(true);
     this.formularioError.set(null);

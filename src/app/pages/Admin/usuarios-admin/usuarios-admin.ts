@@ -23,6 +23,31 @@ type Toast = { texto: string; tipo: 'exito' | 'info' | 'error' };
 // Debe coincidir con la duración de las animaciones overlay-out / modal-out del CSS (igual que vuelos-admin)
 const DURACION_CIERRE_MS = 400;
 
+
+const SOLO_LETRAS = /^\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+(\s+[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)*\s*$/;
+const DNI_REGEX = /^\d{7,8}$/;
+const PASAPORTE_REGEX = /^[A-Z0-9]{6,20}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type CampoUsuario = 'nombre' | 'apellido' | 'documento' | 'fechaNacimiento' | 'email' | 'telefono' | 'password';
+type ErroresUsuario = Partial<Record<CampoUsuario, TranslationKey>>;
+
+interface DatosUsuario {
+  nombre: string;
+  apellido: string;
+  tipoDoc: TipoIdentificador;
+  documento: string;
+  fechaNacimiento: string;
+  email: string;
+  telefono: string;
+  password: string;
+}
+
+function hoyLocal(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 @Component({
   selector: 'app-usuarios-admin',
   standalone: true,
@@ -98,6 +123,10 @@ export class UsuariosAdmin implements OnInit {
   editTelefono = signal('');
   editPassword = signal('');
   editRole = signal<RolUsuario>('ROLE_USUARIO');
+  
+  // Se activan al intentar guardar: recién ahí se marcan los obligatorios vacíos
+  intentoAlta = signal(false);
+  intentoEdicion = signal(false);
 
   /** Indica si la pestaña activa es la de Empleados. */
   esVistaEmpleados = computed(() => this.rolFiltro() === 'ROLE_EMPLEADO');
@@ -129,6 +158,84 @@ export class UsuariosAdmin implements OnInit {
       this.orden() !== 'NOMBRE_ASC'
   );
 
+  
+  /** Errores por campo del alta (la contraseña es obligatoria). */
+  erroresAlta = computed(() =>
+    this.validar(
+      {
+        nombre: this.altaNombre(),
+        apellido: this.altaApellido(),
+        tipoDoc: this.altaIdentificador(),
+        documento: this.altaNumeroIdentificador(),
+        fechaNacimiento: this.altaFechaNacimiento(),
+        email: this.altaEmail(),
+        telefono: this.altaTelefono(),
+        password: this.altaPassword(),
+      },
+      this.intentoAlta(),
+      true
+    )
+  );
+
+  /** Errores por campo de la edición (la contraseña es opcional). */
+  erroresEdicion = computed(() =>
+    this.validar(
+      {
+        nombre: this.editNombre(),
+        apellido: this.editApellido(),
+        tipoDoc: this.editIdentificador(),
+        documento: this.editNumeroIdentificador(),
+        fechaNacimiento: this.editFechaNacimiento(),
+        email: this.editEmail(),
+        telefono: this.editTelefono(),
+        password: this.editPassword(),
+      },
+      this.intentoEdicion(),
+      false
+    )
+  );
+
+  /**
+   * Mismas reglas para alta y edición. Los errores de formato se muestran en vivo;
+   * los obligatorios vacíos, recién al intentar guardar (igual que vuelos-admin).
+   */
+  private validar(d: DatosUsuario, intento: boolean, passwordObligatoria: boolean): ErroresUsuario {
+    const e: ErroresUsuario = {};
+
+    const nombre = d.nombre.trim();
+    if (nombre && !SOLO_LETRAS.test(nombre)) e.nombre = 'booking.namePattern';
+    else if (!nombre && intento) e.nombre = 'booking.nameRequired';
+
+    const apellido = d.apellido.trim();
+    if (apellido && !SOLO_LETRAS.test(apellido)) e.apellido = 'booking.lastNamePattern';
+    else if (!apellido && intento) e.apellido = 'booking.lastNameRequired';
+
+    const doc = d.documento.replace(/[\s.\-]/g, '').toUpperCase();
+    const esDni = d.tipoDoc === 'DNI';
+    if (doc) {
+      const valido = esDni ? DNI_REGEX.test(doc) : PASAPORTE_REGEX.test(doc);
+      if (!valido) e.documento = esDni ? 'booking.dniPattern' : 'booking.passportPattern';
+    } else if (intento) {
+      e.documento = 'booking.docRequired';
+    }
+
+    if (d.fechaNacimiento && d.fechaNacimiento >= hoyLocal()) e.fechaNacimiento = 'booking.birthDateFuture';
+    else if (!d.fechaNacimiento && intento) e.fechaNacimiento = 'booking.birthDateRequired';
+
+    const email = d.email.trim();
+    if (email && !EMAIL_REGEX.test(email)) e.email = 'booking.emailInvalid';
+    else if (!email && intento) e.email = 'auth.emailRequired';
+
+    const digitos = d.telefono.replace(/\D/g, '');
+    if (d.telefono.trim() && (digitos.length < 10 || digitos.length > 11)) e.telefono = 'payment.phoneInvalid';
+    else if (!d.telefono.trim() && intento) e.telefono = 'adminFlights.errorFieldRequired';
+
+    const password = d.password.trim();
+   if (password && password.length < 8) e.password = 'auth.passwordMinLength';
+    else if (!password && intento && passwordObligatoria) e.password = 'auth.passwordRequired';
+
+    return e;
+  }
   @HostListener('window:keydown.escape')
   onEscape(): void {
     if (this.modalAltaAbierto()) this.cerrarModalAlta();
@@ -184,6 +291,7 @@ export class UsuariosAdmin implements OnInit {
   abrirModalAlta(): void {
     this.limpiarAlertas();
     this.formularioError.set(null);
+    this.intentoAlta.set(false);
     this.altaNombre.set('');
     this.altaApellido.set('');
     this.altaIdentificador.set('DNI');
@@ -203,23 +311,9 @@ export class UsuariosAdmin implements OnInit {
   }
 
   crearUsuario(): void {
-    if (
-      !this.altaNombre().trim() ||
-      !this.altaApellido().trim() ||
-      !this.altaNumeroIdentificador().trim() ||
-      !this.altaFechaNacimiento() ||
-      !this.altaEmail().trim() ||
-      !this.altaTelefono().trim() ||
-      !this.altaPassword().trim()
-    ) {
-      this.formularioError.set('Por favor completá todos los campos obligatorios.');
-      return;
-    }
-
-    if (this.altaPassword().trim().length < 6) {
-      this.formularioError.set('La contraseña debe tener al menos 6 caracteres.');
-      return;
-    }
+        this.intentoAlta.set(true);
+    // Los errores ya se muestran debajo de cada campo
+    if (Object.keys(this.erroresAlta()).length > 0) return;
 
     const payload: CrearUsuarioRequest = {
       nombre: this.altaNombre().trim(),
@@ -282,22 +376,10 @@ export class UsuariosAdmin implements OnInit {
     const usuario = this.usuarioSeleccionado();
     if (!usuario) return;
 
-    if (
-      !this.editNombre().trim() ||
-      !this.editApellido().trim() ||
-      !this.editNumeroIdentificador().trim() ||
-      !this.editFechaNacimiento() ||
-      !this.editEmail().trim() ||
-      !this.editTelefono().trim()
-    ) {
-      this.formularioError.set('Por favor completá todos los campos obligatorios.');
-      return;
-    }
-
-    if (this.editPassword().trim() && this.editPassword().trim().length < 6) {
-      this.formularioError.set('La nueva contraseña debe tener al menos 6 caracteres.');
-      return;
-    }
+       this.intentoEdicion.set(true);
+    // Los errores ya se muestran debajo de cada campo
+    if (Object.keys(this.erroresEdicion()).length > 0) return;
+        this.intentoEdicion.set(false);
 
     const payload: ActualizarUsuarioRequest = {
       nombre: this.editNombre().trim(),
