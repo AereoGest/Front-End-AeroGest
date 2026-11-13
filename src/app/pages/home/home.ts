@@ -57,11 +57,6 @@ export class Home {
       tituloKey: 'home.whyPunctuality',
       descKey: 'home.whyPunctualityDesc',
     },
-    {
-      icono: '🎁',
-      tituloKey: 'home.whyPoints',
-      descKey: 'home.whyPointsDesc',
-    },
   ];
 
     destinos: Destino[] = [

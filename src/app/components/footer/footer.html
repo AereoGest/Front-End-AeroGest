@@ -28,9 +28,8 @@
 
         <ul class="footer-links">
           <li><a routerLink="/vuelos">{{ 'footer.searchFlights' | translate }}</a></li>
-          <li><a routerLink="/vuelos">{{ 'footer.cheapFlights' | translate }}</a></li>
-          <li><a routerLink="/vuelos">{{ 'footer.international' | translate }}</a></li>
-          <li><a routerLink="/vuelos">{{ 'footer.domestic' | translate }}</a></li>
+          <li><a routerLink="/vuelos" [queryParams]="{ orden: 'precio' }">{{ 'footer.cheapFlights' | translate }}</a></li>
+          <li><a routerLink="/">{{ 'home.popularDestinations' | translate }}</a></li>
         </ul>
       </div>
 
@@ -40,9 +39,9 @@
 
         <ul class="footer-links">
           <li><a routerLink="/reservas">{{ 'footer.myBookings' | translate }}</a></li>
-          <li><a routerLink="/check-in">{{ 'footer.checkinOnline' | translate }}</a></li>
-          <li><a routerLink="/equipaje">{{ 'footer.baggage' | translate }}</a></li>
-          <li><a routerLink="/viajero-frecuente">{{ 'footer.frequentFlyer' | translate }}</a></li>
+          <li><a routerLink="/reservas">{{ 'footer.checkinOnline' | translate }}</a></li>
+          <li><a routerLink="/carrito">{{ 'nav.cart' | translate }}</a></li>
+          <li><a routerLink="/favoritos">{{ 'nav.favorites' | translate }}</a></li>
         </ul>
       </div>
 
@@ -51,10 +50,9 @@
         <p class="footer-heading">{{ 'footer.help' | translate }}</p>
 
         <ul class="footer-links">
-          <li><a routerLink="/ayuda">{{ 'footer.helpCenter' | translate }}</a></li>
-          <li><a routerLink="/contacto">{{ 'footer.contact' | translate }}</a></li>
-          <li><a routerLink="/politicas">{{ 'footer.policies' | translate }}</a></li>
-          <li><a routerLink="/accesibilidad">{{ 'footer.accessibility' | translate }}</a></li>
+          <li><a href="mailto:soporte@aerogest.com">{{ 'footer.contact' | translate }}</a></li>
+          <li><a routerLink="/perfil">{{ 'nav.profile' | translate }}</a></li>
+          <li><a routerLink="/settings">{{ 'nav.settings' | translate }}</a></li>
         </ul>
       </div>
 
@@ -63,11 +61,6 @@
     <!-- Pie inferior -->
     <div class="footer-bottom">
       <span>{{ 'footer.rights' | translate }}</span>
-
-      <div class="footer-legal-links">
-        <a routerLink="/privacidad">{{ 'footer.privacy' | translate }}</a>
-        <a routerLink="/terminos">{{ 'footer.terms' | translate }}</a>
-      </div>
     </div>
   </div>
 </footer>
