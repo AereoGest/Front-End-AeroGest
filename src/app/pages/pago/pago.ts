@@ -90,6 +90,7 @@ export class Pago implements OnDestroy {
   protected readonly tarifas = this.checkout.tarifas;
   protected readonly tarifaBase = this.checkout.tarifaBase;
   protected readonly lineasExtras = this.checkout.lineasExtras;
+  protected readonly totalAsientos = this.checkout.totalAsientos;
   protected readonly impuestos = this.checkout.impuestos;
   protected readonly servicio = this.checkout.servicio;
   protected readonly total = this.checkout.total;

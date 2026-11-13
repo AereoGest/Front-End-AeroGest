@@ -201,10 +201,12 @@
           <dt class="summary-line-label">{{ 'booking.baseFare' | translate:{ count: pasajeros().length } }}</dt>
           <dd>{{ formatearPrecio(tarifaBase()) }}</dd>
         </div>
-        <div class="summary-line">
-          <dt class="summary-line-label">{{ 'seats.extraSeats' | translate }} {{ asientosTexto() }}</dt>
-          <dd>{{ 'booking.freeOfCharge' | translate }}</dd>
-        </div>
+        @if (asientosTexto() !== '—') {
+          <div class="summary-line">
+            <dt class="summary-line-label">{{ 'seats.extraSeats' | translate }} {{ asientosTexto() }}</dt>
+            <dd>{{ totalAsientos() > 0 ? ('+' + formatearPrecio(totalAsientos())) : ('booking.freeOfCharge' | translate) }}</dd>
+          </div>
+        }
         @for (linea of lineasExtras(); track $index) {
           <div class="summary-line">
             <dt class="summary-line-label">{{ linea.etiqueta }}</dt>
