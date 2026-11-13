@@ -171,11 +171,7 @@ export class CheckoutService {
             (a, b) => ORDEN_EQUIPAJE.indexOf(a.tipo) - ORDEN_EQUIPAJE.indexOf(b.tipo)
           )
         );
-        this.asistencias.set(
-          (datos.asistencias ?? []).filter(
-            (a) => a && (a.precio ?? 0) > 0 && !a.nombrePlan?.toLowerCase().includes('sin asistencia')
-          )
-        );
+        this.asistencias.set(datos.asistencias ?? []);
         this.tarifas.set(datos.tarifas);
         this.publicKey.set(datos.publicKey);
 
