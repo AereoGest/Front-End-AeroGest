@@ -692,3 +692,54 @@
 .search-bar-form--debajo {
   margin: 1rem 0 1.5rem;
 }
+
+
+.asientos-config {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.asientos-config__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.asientos-config__titulo {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.asientos-config__contador {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.asientos-config__contador--exceso {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.form-row.form-row--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.asientos-config__error {
+  margin-top: -6px;
+}
+
+@media (max-width: 600px) {
+  .form-row.form-row--3 {
+    grid-template-columns: 1fr;
+  }
+}

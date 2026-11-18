@@ -16,6 +16,9 @@ export interface Vuelo {
   estado: EstadoVuelo;
   precioVuelo: number;
   escala: boolean;
+  asientosPrimera?: number | null;
+  asientosEjecutiva?: number | null;
+  asientosEconomica?: number | null;
 }
 
 /** Respuesta de GET /api/vuelos/{id}/impacto-cancelacion: qué pasa con los clientes si se cancela el vuelo. */
@@ -43,4 +46,7 @@ export interface VueloRequest {
   estado?: EstadoVuelo;  // en el alta, si no se envía queda PROGRAMADO
   precioVuelo: number;
   escala: boolean;
+  asientosPrimera: number;
+  asientosEjecutiva: number;
+  asientosEconomica: number;
 }

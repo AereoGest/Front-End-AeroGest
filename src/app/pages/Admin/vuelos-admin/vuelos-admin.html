@@ -147,6 +147,9 @@
         <div><dt>{{ 'flights.type' | translate }}</dt><dd>{{ (v.escala ? 'flights.layover' : 'flights.direct') | translate }}</dd></div>
         <div><dt>{{ 'flights.status' | translate }}</dt><dd>{{ v.estado }}</dd></div>
         <div><dt>{{ 'adminFlights.price' | translate }}</dt><dd>${{ v.precioVuelo }}</dd></div>
+        @if (tieneAsientosConfigurados(v)) {
+          <div><dt>{{ 'adminFlights.seatsDetail' | translate }}</dt><dd>{{ etiquetaAsientosVuelo(v) }}</dd></div>
+        }
       </dl>
 
       @if (!esGestionable(v)) {
@@ -222,6 +225,43 @@
           <label class="field-label" for="f-avion">{{ 'adminFlights.fieldAircraft' | translate }}</label>
           @if (errores().avion; as e) {
             <p class="field-error">{{ e | translate }}</p>
+          }
+        </div>
+
+        <div class="asientos-config">
+          <div class="asientos-config__header">
+            <span class="asientos-config__titulo">{{ 'adminFlights.seatsSection' | translate }}</span>
+            <span class="asientos-config__contador" [class.asientos-config__contador--exceso]="errores().asientos === 'adminFlights.errorSeatsExceedsCapacity'">
+              @if (capacidadAvionSeleccionado(); as cap) {
+                {{ 'adminFlights.seatsCapacityHint' | translate:{ assigned: totalAsientosConfigurados(), capacity: cap } }}
+              } @else {
+                {{ 'adminFlights.seatsAssignedHint' | translate:{ assigned: totalAsientosConfigurados() } }}
+              }
+            </span>
+          </div>
+
+          <div class="form-row form-row--3">
+            <div class="field">
+              <input id="f-asientos-primera" class="field-input" type="number" name="asientosPrimera" min="0" step="1" placeholder=" "
+                [attr.aria-invalid]="!!errores().asientos"
+                [ngModel]="fAsientosPrimera()" (ngModelChange)="fAsientosPrimera.set($event)" />
+              <label class="field-label" for="f-asientos-primera">{{ 'adminFlights.seatsFirst' | translate }}</label>
+            </div>
+            <div class="field">
+              <input id="f-asientos-ejecutiva" class="field-input" type="number" name="asientosEjecutiva" min="0" step="1" placeholder=" "
+                [attr.aria-invalid]="!!errores().asientos"
+                [ngModel]="fAsientosEjecutiva()" (ngModelChange)="fAsientosEjecutiva.set($event)" />
+              <label class="field-label" for="f-asientos-ejecutiva">{{ 'adminFlights.seatsBusiness' | translate }}</label>
+            </div>
+            <div class="field">
+              <input id="f-asientos-economica" class="field-input" type="number" name="asientosEconomica" min="0" step="1" placeholder=" "
+                [attr.aria-invalid]="!!errores().asientos"
+                [ngModel]="fAsientosEconomica()" (ngModelChange)="fAsientosEconomica.set($event)" />
+              <label class="field-label" for="f-asientos-economica">{{ 'adminFlights.seatsEconomy' | translate }}</label>
+            </div>
+          </div>
+          @if (errores().asientos; as e) {
+            <p class="field-error asientos-config__error">{{ e | translate }}</p>
           }
         </div>
 

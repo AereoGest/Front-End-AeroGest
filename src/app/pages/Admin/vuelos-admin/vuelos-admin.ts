@@ -15,7 +15,7 @@ import type { TranslationKey } from '../../../i18n/es';
 
 type FiltroEstado = 'TODOS' | 'ACTIVOS' | 'INACTIVOS';
 type ModoFormulario = 'ALTA' | 'EDICION';
-type CampoVuelo = 'origen' | 'destino' | 'avion' | 'salida' | 'llegada' | 'precio';
+type CampoVuelo = 'origen' | 'destino' | 'avion' | 'asientos' | 'salida' | 'llegada' | 'precio';
 type Toast = { texto: string; tipo: 'exito' | 'info' | 'error' };
 
 // Mismas reglas que valida el backend (VueloService)
@@ -81,6 +81,9 @@ export class VuelosAdmin implements OnInit {
   protected readonly origenTextoInvalido = signal(false);
   protected readonly destinoTextoInvalido = signal(false);
   protected readonly fAvionId = signal<number | null>(null);
+  protected readonly fAsientosPrimera = signal<number | null>(null);
+  protected readonly fAsientosEjecutiva = signal<number | null>(null);
+  protected readonly fAsientosEconomica = signal<number | null>(null);
   protected readonly fFechaSalida = signal('');
   protected readonly fSalidaHora = signal('');
   protected readonly fSalidaMin = signal('');
@@ -183,6 +186,32 @@ export class VuelosAdmin implements OnInit {
       e.precio = 'adminFlights.errorPrice';
     }
 
+    const asientosIngresados = [
+      this.fAsientosPrimera(),
+      this.fAsientosEjecutiva(),
+      this.fAsientosEconomica(),
+    ];
+    const algunoPresente = asientosIngresados.some((v) => this.esNumeroPresente(v));
+    const algunoInvalido = asientosIngresados.some(
+      (v) => this.esNumeroPresente(v) && !this.esEnteroNoNegativo(v)
+    );
+    const todosPresentes = asientosIngresados.every((v) => this.esNumeroPresente(v));
+
+    if (algunoInvalido) {
+      e.asientos = 'adminFlights.errorSeatsInvalid';
+    } else if (algunoPresente) {
+      const totalParcial = asientosIngresados.reduce<number>(
+        (suma, v) => suma + (this.esNumeroPresente(v) ? Number(v) : 0),
+        0
+      );
+      const cap = this.capacidadAvionSeleccionado();
+      if (cap !== null && totalParcial > cap) {
+        e.asientos = 'adminFlights.errorSeatsExceedsCapacity';
+      } else if (todosPresentes && totalParcial < 1) {
+        e.asientos = 'adminFlights.errorSeatsMin';
+      }
+    }
+
     // Con solo las fechas ya se pueden detectar algunos errores, sin esperar a la hora
     const fechaSalida = this.fFechaSalida();
     const fechaLlegada = this.fFechaLlegada();
@@ -214,6 +243,7 @@ export class VuelosAdmin implements OnInit {
       if (!this.fOrigenId()) e.origen ??= 'adminFlights.errorFieldRequired';
       if (!this.fDestinoId()) e.destino ??= 'adminFlights.errorFieldRequired';
       if (!this.fAvionId()) e.avion ??= 'adminFlights.errorFieldRequired';
+      if (!todosPresentes) e.asientos ??= 'adminFlights.errorFieldRequired';
       if (!this.fFechaSalida() || !this.horaSalida()) e.salida ??= 'adminFlights.errorFieldRequired';
       if (!this.fFechaLlegada() || !this.horaLlegada()) e.llegada ??= 'adminFlights.errorFieldRequired';
       if (precio === null || precio === undefined || String(precio) === '') e.precio ??= 'adminFlights.errorFieldRequired';
@@ -223,11 +253,38 @@ export class VuelosAdmin implements OnInit {
 
   protected readonly hayErroresLocales = computed(() => Object.keys(this.errores()).length > 0);
 
+  protected readonly avionSeleccionado = computed<Avion | null>(() => {
+    const id = this.fAvionId();
+    if (id === null || id === undefined) return null;
+    const enLista = this.aviones().find((a) => a.id === Number(id));
+    if (enLista) return enLista;
+    const editado = this.vueloEditado()?.avion;
+    return editado && editado.id === Number(id) ? editado : null;
+  });
+
+  protected readonly capacidadAvionSeleccionado = computed<number | null>(
+    () => this.avionSeleccionado()?.capacidadPasajeros ?? null
+  );
+
+  protected readonly totalAsientosConfigurados = computed(() => {
+    const valores = [this.fAsientosPrimera(), this.fAsientosEjecutiva(), this.fAsientosEconomica()];
+    return valores.reduce<number>(
+      (suma, v) => suma + (this.esEnteroNoNegativo(v) ? Number(v) : 0),
+      0
+    );
+  });
+
   /** Payload completo, o null mientras falte algún dato. */
   private readonly payloadCompleto = computed<VueloRequest | null>(() => {
     const precio = this.fPrecio();
+    const primera = this.fAsientosPrimera();
+    const ejecutiva = this.fAsientosEjecutiva();
+    const economica = this.fAsientosEconomica();
     if (
       !this.fOrigenId() || !this.fDestinoId() || !this.fAvionId() ||
+      !this.esEnteroNoNegativo(primera) ||
+      !this.esEnteroNoNegativo(ejecutiva) ||
+      !this.esEnteroNoNegativo(economica) ||
       !this.fFechaSalida() || !this.horaSalida() ||
       !this.fFechaLlegada() || !this.horaLlegada() ||
       precio === null || precio === undefined || String(precio) === ''
@@ -244,6 +301,9 @@ export class VuelosAdmin implements OnInit {
       horaLlegada: this.horaLlegada(),
       precioVuelo: Number(precio),
       escala: this.fEscala(),
+      asientosPrimera: Number(primera),
+      asientosEjecutiva: Number(ejecutiva),
+      asientosEconomica: Number(economica),
     };
     if (this.modoFormulario() === 'EDICION') payload.estado = this.fEstado();
     return payload;
@@ -443,6 +503,19 @@ export class VuelosAdmin implements OnInit {
     this.fOrigenId.set(vuelo?.aeropuertoOrigen?.id ?? null);
     this.fDestinoId.set(vuelo?.aeropuertoDestino?.id ?? null);
     this.fAvionId.set(vuelo?.avion?.id ?? null);
+    if (vuelo && this.tieneAsientosConfigurados(vuelo)) {
+      this.fAsientosPrimera.set(vuelo.asientosPrimera ?? 0);
+      this.fAsientosEjecutiva.set(vuelo.asientosEjecutiva ?? 0);
+      this.fAsientosEconomica.set(vuelo.asientosEconomica ?? 0);
+    } else if (vuelo) {
+      this.fAsientosPrimera.set(0);
+      this.fAsientosEjecutiva.set(0);
+      this.fAsientosEconomica.set(vuelo.avion?.capacidadPasajeros ?? null);
+    } else {
+      this.fAsientosPrimera.set(null);
+      this.fAsientosEjecutiva.set(null);
+      this.fAsientosEconomica.set(null);
+    }
     this.fFechaSalida.set(vuelo?.fechaSalida ?? '');
     this.fSalidaHora.set(sh);
     this.fSalidaMin.set(sm);
@@ -634,6 +707,32 @@ export class VuelosAdmin implements OnInit {
 
   protected etiquetaAvion(a: Avion): string {
     return `${a.identificador} · ${a.modelo} · ${a.capacidadPasajeros} pax`;
+  }
+
+  protected tieneAsientosConfigurados(v: Vuelo): boolean {
+    return (
+      v.asientosPrimera != null ||
+      v.asientosEjecutiva != null ||
+      v.asientosEconomica != null
+    );
+  }
+
+  protected etiquetaAsientosVuelo(v: Vuelo): string {
+    return (
+      `${this.i18n.t('adminFlights.seatsFirstShort')}: ${v.asientosPrimera ?? 0} · ` +
+      `${this.i18n.t('adminFlights.seatsBusinessShort')}: ${v.asientosEjecutiva ?? 0} · ` +
+      `${this.i18n.t('adminFlights.seatsEconomyShort')}: ${v.asientosEconomica ?? 0}`
+    );
+  }
+
+  private esNumeroPresente(valor: number | null | undefined): boolean {
+    return valor !== null && valor !== undefined && String(valor).trim() !== '';
+  }
+
+  private esEnteroNoNegativo(valor: number | null | undefined): boolean {
+    if (!this.esNumeroPresente(valor)) return false;
+    const n = Number(valor);
+    return Number.isInteger(n) && n >= 0;
   }
 
   @HostListener('document:keydown.escape')
