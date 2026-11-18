@@ -52,6 +52,8 @@ export const routes: Routes = [
     { path: "checkoutReserva", component: Reserva, canActivate: [authGuard] },
     {path: "checkoutReserva/pago", component: Pago, canActivate: [checkoutPagoGuard, authGuard] },
     { path: "reservas", component: Reservas, canActivate: [authGuard] },
+    { path: "mis-reservas", redirectTo: "reservas" },
+    { path: "misReservas", redirectTo: "reservas" },
     { path: "carrito", component: MiCarrito, canActivate: [authGuard] },
     {path: "favoritos", component: Favoritos, canActivate: [authGuard]},
     {path: "forgot-password", component: ForgotPassword},

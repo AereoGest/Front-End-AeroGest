@@ -26,6 +26,14 @@
                     {{ 'nav.destinations' | translate }}
                 </a>
             </li>
+
+            @if (auth.usuarioAutenticado()) {
+                <li>
+                    <a id="nav-reservas" routerLink="/reservas" routerLinkActive="active">
+                        {{ 'myBookings.title' | translate }}
+                    </a>
+                </li>
+            }
         </ul>
     </nav>
 
@@ -290,7 +298,7 @@
                                         <path d="M16 10a4 4 0 0 1-8 0"></path>
                                     </svg>
 
-                                    <span>{{ 'nav.purchases' | translate }}</span>
+                                    <span>{{ 'myBookings.title' | translate }}</span>
                                 </a>
                             </li>
 
