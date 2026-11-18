@@ -19,9 +19,6 @@ export interface SeccionCabina {
   claseTexto: string;
   zona: 'first-class' | 'biz' | 'eco';
   filas: FilaAsientos[];
-  disponibles: number;
-  total: number;
-  precioDesde: number;
 }
 
 interface ConfigCategoria {
@@ -161,18 +158,12 @@ export class Asientos implements OnInit {
         continue;
       }
 
-      const disponibles = grupo.filter((a) => !a.ocupado).length;
-      const precios = grupo.map((a) => Number(a.precioExtra ?? 0));
-
       secciones.push({
         categoria: cfg.categoria,
         tituloKey: cfg.tituloKey,
         claseTexto: cfg.claseTexto,
         zona: cfg.zona,
         filas: this.construirFilasCategoria(grupo, cfg),
-        disponibles,
-        total: grupo.length,
-        precioDesde: precios.length ? Math.min(...precios) : 0,
       });
     }
 

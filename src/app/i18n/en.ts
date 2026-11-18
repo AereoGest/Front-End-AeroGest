@@ -309,7 +309,7 @@ export const en: Record<TranslationKey, string> = {
   'seats.goToFlights': 'Search flights',
   'seats.goToCart': 'Go to cart',
   'seats.noSeats': 'This flight does not have seats configured yet.',
-  'seats.availableCount': '{available} of {total} available',
+  'seats.randomHint': 'If you skip seat selection, a random Economy seat is assigned at no extra charge.',
   'seats.freeBadge': 'No extra charge',
 
   // Booking / checkout

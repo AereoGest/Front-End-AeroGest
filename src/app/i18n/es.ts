@@ -307,7 +307,7 @@ export const es = {
   'seats.goToFlights': 'Buscar vuelos',
   'seats.goToCart': 'Ir al carrito',
   'seats.noSeats': 'Este vuelo no tiene asientos configurados todavía.',
-  'seats.availableCount': '{available} de {total} disponibles',
+  'seats.randomHint': 'Si no elegís asiento, se asignará uno aleatorio en clase turista sin costo extra.',
   'seats.freeBadge': 'Sin cargo extra',
 
   // Reserva / checkout

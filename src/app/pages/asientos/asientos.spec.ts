@@ -62,29 +62,32 @@ describe('Asientos', () => {
     httpMock.expectOne(`${environment.apiUrl}/asientos/vuelo/10`).flush([
       { id: 101, codigo: '1A', precioExtra: 18500, avionId: 1, vueloId: 10, categoria: 'BUSINESS', ocupado: false },
       { id: 102, codigo: '1B', precioExtra: 18500, avionId: 1, vueloId: 10, categoria: 'BUSINESS', ocupado: true },
-      { id: 103, codigo: '2A', precioExtra: 0, avionId: 1, vueloId: 10, categoria: 'ECONOMICA', ocupado: false },
-      { id: 104, codigo: '2B', precioExtra: 0, avionId: 1, vueloId: 10, categoria: 'ECONOMICA', ocupado: false },
-      { id: 105, codigo: '2C', precioExtra: 0, avionId: 1, vueloId: 10, categoria: 'ECONOMICA', ocupado: true },
+      { id: 103, codigo: '2A', precioExtra: 5000, avionId: 1, vueloId: 10, categoria: 'ECONOMICA', ocupado: false },
+      { id: 104, codigo: '2B', precioExtra: 5000, avionId: 1, vueloId: 10, categoria: 'ECONOMICA', ocupado: false },
+      { id: 105, codigo: '2C', precioExtra: 5000, avionId: 1, vueloId: 10, categoria: 'ECONOMICA', ocupado: true },
     ]);
 
     fixture.detectChanges();
 
     const el = fixture.nativeElement as HTMLElement;
-    const labels = Array.from(el.querySelectorAll('.cabin-section-label')).map((n) => n.textContent);
+    const labels = Array.from(el.querySelectorAll('.cabin-section-label')).map((n) => n.textContent?.trim());
 
-    expect(labels.some((t) => t?.includes('Primera clase'))).toBe(false);
-    expect(labels.some((t) => t?.includes('Clase ejecutiva'))).toBe(true);
-    expect(labels.some((t) => t?.includes('Clase turista'))).toBe(true);
+    expect(labels).toEqual(['Clase ejecutiva', 'Clase turista']);
+    expect(el.textContent).toContain('Si no elegís asiento, se asignará uno aleatorio en clase turista sin costo extra.');
+    expect(component.totalExtra).toBe(0);
+    expect(el.textContent).toContain('Sin costo');
 
     const botones = Array.from(el.querySelectorAll('button.seat')) as HTMLButtonElement[];
     expect(botones.length).toBe(5);
     expect(botones.filter((b) => b.disabled).length).toBe(2);
 
     const asiento1A = botones.find((b) => b.textContent?.trim() === '1A')!;
+    const asiento2A = botones.find((b) => b.textContent?.trim() === '2A')!;
     asiento1A.click();
+    asiento2A.click();
     fixture.detectChanges();
 
-    expect(component.selectedSeats.length).toBe(1);
+    expect(component.selectedSeats.length).toBe(2);
     expect(component.selectedSeats[0]).toEqual({
       id: '1A',
       backendId: 101,
@@ -92,10 +95,17 @@ describe('Asientos', () => {
       categoria: 'BUSINESS',
       precio: 18500,
     });
-    expect(component.totalExtra).toBe(18500);
-    expect(component.total).toBe(80000 * 2 + 18500);
+    expect(component.selectedSeats[1]).toEqual({
+      id: '2A',
+      backendId: 103,
+      clase: 'Económica',
+      categoria: 'ECONOMICA',
+      precio: 5000,
+    });
+    expect(component.totalExtra).toBe(23500);
+    expect(component.total).toBe(80000 * 2 + 23500);
     expect(sessionStorage.getItem('asientos_vuelo_id')).toBe('10');
-    expect(JSON.parse(sessionStorage.getItem('asientos_seleccionados') ?? '[]')).toHaveLength(1);
+    expect(JSON.parse(sessionStorage.getItem('asientos_seleccionados') ?? '[]')).toHaveLength(2);
   });
 
   it('filtra asientos ya ocupados y actualiza precios reales al restaurar selección previa', () => {

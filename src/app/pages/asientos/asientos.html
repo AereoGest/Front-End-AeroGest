@@ -81,17 +81,7 @@
           <div class="cabin-plane-nose">✈</div>
 
           @for (seccion of seccionesCabina; track seccion.categoria) {
-            <div class="cabin-section-label cabin-section-header">
-              <span>{{ seccion.tituloKey | translate }}</span>
-              <span class="cabin-section-meta">
-                {{ 'seats.availableCount' | translate:{ available: seccion.disponibles, total: seccion.total } }}
-                @if (seccion.precioDesde > 0) {
-                  · +$ {{ formatearPrecio(seccion.precioDesde) }}
-                } @else {
-                  · {{ 'seats.noCost' | translate }}
-                }
-              </span>
-            </div>
+            <div class="cabin-section-label">{{ seccion.tituloKey | translate }}</div>
 
             @for (fila of seccion.filas; track fila.numero) {
               <div class="seat-row">
@@ -131,6 +121,9 @@
             <div class="asientos-seleccionados">
               {{ selectedSeats.length ? asientosTexto : ('seats.noneYet' | translate) }}
             </div>
+            @if (selectedSeats.length < seatsNeeded) {
+              <p class="seat-random-hint">{{ 'seats.randomHint' | translate }}</p>
+            }
           </div>
 
           <div class="seat-legend">

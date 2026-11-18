@@ -341,7 +341,9 @@ export class CheckoutService {
       vueloId: item.vueloId,
       cantidadPasajes: this.pasajeros().length,
       pasajes: this.pasajeros().map((pasajero) => ({
-        clasesVuelo: pasajero.categoriaAsiento ?? item.claseVuelo,
+        clasesVuelo: pasajero.asientoBackendId
+          ? (pasajero.categoriaAsiento ?? item.claseVuelo)
+          : 'ECONOMICA',
         asientoId: pasajero.asientoBackendId ?? undefined,
         equipajeIds: pasajero.equipajeIds,
         asistenciaId: pasajero.asistenciaId ? Number(pasajero.asistenciaId) : null,
