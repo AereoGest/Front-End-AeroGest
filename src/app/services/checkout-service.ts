@@ -1,6 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { Observable, catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
-import { CarritoItem } from '../Models/Carrito';
+import { CarritoItem, ClaseVuelo } from '../Models/Carrito';
 import { Vuelo } from '../Models/Vuelo';
 import { Equipaje, TipoEquipaje } from '../Models/Equipaje';
 import { Asistencia } from '../Models/Asistencia';
@@ -14,12 +14,14 @@ import { AsistenciaService } from './asistenciaService';
 import { ConfigService, Tarifas } from './config';
 import { MercadoPagoService } from './mercadoPagoService';
 import { ReservaService } from './reservaService';
-import { AsientoService as AsientoDataService } from './asiento';
+import { Asiento, AsientoService as AsientoDataService } from './asiento';
 
 // Lo que guarda la página de asientos en sessionStorage.
 interface AsientoSeleccionado {
   id: string;
+  backendId?: number;
   clase: string;
+  categoria?: ClaseVuelo;
   precio: number;
 }
 
@@ -28,6 +30,7 @@ interface AsientoSeleccionado {
 export interface PasajeroFormulario {
   asiento: string;
   claseAsiento: string;
+  categoriaAsiento?: ClaseVuelo;
   precioAsiento: number;
   asientoBackendId?: number | null;
   nombre: string;
@@ -197,26 +200,18 @@ export class CheckoutService {
         return this.vueloService.obtenerPorId(item.vueloId).pipe(
           switchMap((vuelo) => {
             this.vuelo.set(vuelo);
-            const avionId = vuelo?.avion?.id;
-            if (avionId) {
-              return this.asientoDataService.obtenerPorAvion(avionId).pipe(
-                catchError(() => of([])),
-                tap((asientosAvion) => {
-                  if (!mismoCarrito) {
-                    this.pasajeros.set(this.crearPasajeros(item.cantidad, asientosAvion));
-                    this.reservaPendiente = null;
-                  } else {
-                    this.actualizarAsientosBackend(asientosAvion);
-                  }
-                }),
-                map(() => null)
-              );
-            }
-            if (!mismoCarrito) {
-              this.pasajeros.set(this.crearPasajeros(item.cantidad));
-              this.reservaPendiente = null;
-            }
-            return of(null);
+            return this.asientoDataService.obtenerPorVuelo(item.vueloId).pipe(
+              catchError(() => of([] as Asiento[])),
+              tap((asientosVuelo) => {
+                if (!mismoCarrito) {
+                  this.pasajeros.set(this.crearPasajeros(item.cantidad, item.vueloId, asientosVuelo));
+                  this.reservaPendiente = null;
+                } else {
+                  this.actualizarAsientosBackend(item.vueloId, asientosVuelo);
+                }
+              }),
+              map(() => null)
+            );
           })
         );
       })
@@ -230,6 +225,7 @@ export class CheckoutService {
       tap((respuesta) => {
         if (respuesta.status === 'approved') {
           sessionStorage.removeItem(CLAVE_ASIENTOS);
+          sessionStorage.removeItem('asientos_vuelo_id');
           this.reservaPendiente = null;
           this.pasajerosListos.set(false);
         } else if (respuesta.status === 'rejected') {
@@ -256,19 +252,20 @@ export class CheckoutService {
     );
   }
 
-  private crearPasajeros(cantidad: number, asientosAvion: any[] = []): PasajeroFormulario[] {
-    const asientos = this.leerAsientosSeleccionados();
+  private crearPasajeros(cantidad: number, vueloId: number, asientosVuelo: Asiento[] = []): PasajeroFormulario[] {
+    const asientos = this.leerAsientosSeleccionados(vueloId);
 
     return Array.from({ length: cantidad }, (_, indice) => {
       const seleccionado = asientos[indice];
-      const codigo = seleccionado?.id ?? '';
-      const asientoBackend = asientosAvion.find((a: any) => a.codigo === codigo);
+      const backend = this.buscarAsientoBackend(seleccionado, asientosVuelo);
+      const codigo = backend?.codigo ?? seleccionado?.id ?? '';
 
       return {
         asiento: codigo,
         claseAsiento: seleccionado?.clase ?? '',
-        precioAsiento: seleccionado?.precio ?? (asientoBackend?.precioExtra ?? 0),
-        asientoBackendId: asientoBackend?.id ?? null,
+        categoriaAsiento: backend?.categoria ?? seleccionado?.categoria,
+        precioAsiento: backend ? Number(backend.precioExtra ?? 0) : (seleccionado?.precio ?? 0),
+        asientoBackendId: backend?.id ?? seleccionado?.backendId ?? null,
         nombre: '',
         apellido: '',
         tipoDocumento: 'DNI',
@@ -281,16 +278,30 @@ export class CheckoutService {
     });
   }
 
-  private actualizarAsientosBackend(asientosAvion: any[]): void {
+  private actualizarAsientosBackend(vueloId: number, asientosVuelo: Asiento[]): void {
+    const seleccionados = this.leerAsientosSeleccionados(vueloId);
     const actuales = this.pasajeros();
-    const actualizados = actuales.map((p) => {
+    const actualizados = actuales.map((p, indice) => {
+      const sel = seleccionados[indice];
+      if (sel) {
+        const backend = this.buscarAsientoBackend(sel, asientosVuelo);
+        return {
+          ...p,
+          asiento: backend?.codigo ?? sel.id ?? p.asiento,
+          claseAsiento: sel.clase || p.claseAsiento,
+          categoriaAsiento: backend?.categoria ?? sel.categoria ?? p.categoriaAsiento,
+          precioAsiento: backend ? Number(backend.precioExtra ?? 0) : (sel.precio ?? 0),
+          asientoBackendId: backend?.id ?? sel.backendId ?? p.asientoBackendId ?? null,
+        };
+      }
       if (!p.asientoBackendId && p.asiento) {
-        const backend = asientosAvion.find((a: any) => a.codigo === p.asiento);
+        const backend = asientosVuelo.find((a) => a.codigo === p.asiento);
         if (backend) {
           return {
             ...p,
             asientoBackendId: backend.id,
-            precioAsiento: p.precioAsiento || (backend.precioExtra ?? 0),
+            categoriaAsiento: backend.categoria ?? p.categoriaAsiento,
+            precioAsiento: Number(backend.precioExtra ?? 0),
           };
         }
       }
@@ -299,8 +310,24 @@ export class CheckoutService {
     this.pasajeros.set(actualizados);
   }
 
-  private leerAsientosSeleccionados(): AsientoSeleccionado[] {
+  private buscarAsientoBackend(
+    seleccionado: AsientoSeleccionado | undefined,
+    asientosVuelo: Asiento[]
+  ): Asiento | undefined {
+    if (!seleccionado) return undefined;
+    if (seleccionado.backendId != null) {
+      const porId = asientosVuelo.find((a) => a.id === seleccionado.backendId);
+      if (porId) return porId;
+    }
+    return asientosVuelo.find((a) => a.codigo === seleccionado.id);
+  }
+
+  private leerAsientosSeleccionados(vueloId?: number): AsientoSeleccionado[] {
     try {
+      const vueloGuardado = sessionStorage.getItem('asientos_vuelo_id');
+      if (vueloId != null && vueloGuardado && Number(vueloGuardado) !== vueloId) {
+        return [];
+      }
       return JSON.parse(sessionStorage.getItem(CLAVE_ASIENTOS) ?? '[]');
     } catch {
       return [];
@@ -314,7 +341,7 @@ export class CheckoutService {
       vueloId: item.vueloId,
       cantidadPasajes: this.pasajeros().length,
       pasajes: this.pasajeros().map((pasajero) => ({
-        clasesVuelo: item.claseVuelo,
+        clasesVuelo: pasajero.categoriaAsiento ?? item.claseVuelo,
         asientoId: pasajero.asientoBackendId ?? undefined,
         equipajeIds: pasajero.equipajeIds,
         asistenciaId: pasajero.asistenciaId ? Number(pasajero.asistenciaId) : null,

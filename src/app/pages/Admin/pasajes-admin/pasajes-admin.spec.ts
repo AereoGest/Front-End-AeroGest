@@ -108,9 +108,9 @@ describe('PasajesAdmin', () => {
     const pasaje = reserva.pasajes![0];
 
     component['abrirModalEdicion'](reserva, pasaje);
-    httpMock.expectOne(`${environment.apiUrl}/asientos/avion/1`).flush([
-      { id: 20, codigo: '12A', precioExtra: 0, avionId: 1, ocupado: true },
-      { id: 21, codigo: '12B', precioExtra: 5000, avionId: 1, ocupado: false },
+    httpMock.expectOne(`${environment.apiUrl}/asientos/vuelo/5`).flush([
+      { id: 20, codigo: '12A', precioExtra: 0, avionId: 1, vueloId: 5, categoria: 'ECONOMICA', ocupado: true },
+      { id: 21, codigo: '12B', precioExtra: 5000, avionId: 1, vueloId: 5, categoria: 'ECONOMICA', ocupado: false },
     ]);
 
     component['editNombre'].set('Juan Ignacio');

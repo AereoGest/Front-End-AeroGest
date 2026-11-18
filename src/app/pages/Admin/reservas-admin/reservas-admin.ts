@@ -362,14 +362,10 @@ export class ReservasAdmin implements OnInit {
     this.altaPasajeros.update((lista) => lista.map((p) => ({ ...p, asientoId: null })));
 
     if (!id) return;
-    const vuelo = this.vuelosDisponibles().find((v) => Number(v.id) === id);
-    const avionId = vuelo?.avion?.id;
-    if (avionId) {
-      this.asientoService.obtenerPorAvion(avionId).subscribe({
-        next: (asientos) => this.asientosAvion.set(asientos ?? []),
-        error: () => this.asientosAvion.set([]),
-      });
-    }
+    this.asientoService.obtenerPorVuelo(id).subscribe({
+      next: (asientos) => this.asientosAvion.set(asientos ?? []),
+      error: () => this.asientosAvion.set([]),
+    });
   }
 
   protected agregarPasajeroAlta(): void {

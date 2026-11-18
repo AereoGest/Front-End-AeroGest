@@ -2,12 +2,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { ClaseVuelo } from '../Models/Carrito';
 
 export interface Asiento {
   id: number;
   codigo: string;
   precioExtra: number;
   avionId: number;
+  vueloId?: number | null;
+  categoria?: ClaseVuelo;
   ocupado: boolean;
 }
 
@@ -21,6 +24,10 @@ export class AsientoService {
 
   obtenerPorAvion(avionId: number): Observable<Asiento[]> {
     return this.http.get<Asiento[]>(`${this.baseUrl}/avion/${avionId}`);
+  }
+
+  obtenerPorVuelo(vueloId: number): Observable<Asiento[]> {
+    return this.http.get<Asiento[]>(`${this.baseUrl}/vuelo/${vueloId}`);
   }
 
   verificarDisponibilidad(ids: number[]): Observable<Record<number, boolean>> {

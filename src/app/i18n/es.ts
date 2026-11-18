@@ -299,6 +299,16 @@ export const es = {
   'seats.noCost': 'Sin costo',
   'seats.total': 'Total',
   'seats.continue': 'Continuar con la reserva →',
+  'seats.loading': 'Cargando mapa de asientos...',
+  'seats.loadError': 'No pudimos cargar los asientos del vuelo. Intentá nuevamente.',
+  'seats.retry': 'Reintentar',
+  'seats.cartEmpty': 'Tu carrito está vacío. Elegí un vuelo para seleccionar asientos.',
+  'seats.singleFlightOnly': 'Solo podés elegir asientos cuando tenés un único vuelo en el carrito.',
+  'seats.goToFlights': 'Buscar vuelos',
+  'seats.goToCart': 'Ir al carrito',
+  'seats.noSeats': 'Este vuelo no tiene asientos configurados todavía.',
+  'seats.availableCount': '{available} de {total} disponibles',
+  'seats.freeBadge': 'Sin cargo extra',
 
   // Reserva / checkout
   'booking.title': 'Finalizá tu reserva',

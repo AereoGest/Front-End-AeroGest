@@ -301,6 +301,16 @@ export const en: Record<TranslationKey, string> = {
   'seats.noCost': 'No charge',
   'seats.total': 'Total',
   'seats.continue': 'Continue booking →',
+  'seats.loading': 'Loading seat map...',
+  'seats.loadError': 'We could not load the seats for this flight. Please try again.',
+  'seats.retry': 'Retry',
+  'seats.cartEmpty': 'Your cart is empty. Choose a flight to select seats.',
+  'seats.singleFlightOnly': 'You can only choose seats when you have a single flight in your cart.',
+  'seats.goToFlights': 'Search flights',
+  'seats.goToCart': 'Go to cart',
+  'seats.noSeats': 'This flight does not have seats configured yet.',
+  'seats.availableCount': '{available} of {total} available',
+  'seats.freeBadge': 'No extra charge',
 
   // Booking / checkout
   'booking.title': 'Complete your booking',

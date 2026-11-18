@@ -244,8 +244,14 @@ export class PasajesAdmin implements OnInit {
     this.editEquipajeIds.set((pasaje.equipajes ?? []).map((e) => e.id));
 
     this.asientosAvion.set([]);
+    const vueloId = pasaje.vuelo?.id;
     const avionId = pasaje.vuelo?.avion?.id;
-    if (avionId) {
+    if (vueloId) {
+      this.asientoService.obtenerPorVuelo(Number(vueloId)).subscribe({
+        next: (asientos) => this.asientosAvion.set(asientos ?? []),
+        error: () => this.asientosAvion.set([]),
+      });
+    } else if (avionId) {
       this.asientoService.obtenerPorAvion(avionId).subscribe({
         next: (asientos) => this.asientosAvion.set(asientos ?? []),
         error: () => this.asientosAvion.set([]),
