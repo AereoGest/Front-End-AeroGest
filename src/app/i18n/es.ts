@@ -1045,6 +1045,14 @@ export const es = {
 
    // Común y utilidades:
     'common.dateLocale': 'es-AR',
+
+  //VALIDACIONES
+    'profile.accountNav': 'Navegación de cuenta',
+  'profile.firstNameError': 'Ingresá tu nombre, solo con letras y espacios.',
+  'profile.lastNameError': 'Ingresá tu apellido, solo con letras y espacios.',
+  'profile.phoneError': 'Ingresá un teléfono de hasta 15 dígitos.',
+  'profile.genderError': 'Seleccioná un género.',
+  'profile.birthDateError': 'Ingresá una fecha de nacimiento anterior a hoy.',
 };
 
 export type TranslationKey = keyof typeof es;

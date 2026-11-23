@@ -1047,4 +1047,12 @@ export const en: Record<TranslationKey, string> = {
   // Común y utilidades:
   'common.dateLocale': 'en-US',
 
+  //VALIDACIONES
+    'profile.accountNav': 'Account navigation',
+  'profile.firstNameError': 'Enter your first name using only letters and spaces.',
+  'profile.lastNameError': 'Enter your last name using only letters and spaces.',
+  'profile.phoneError': 'Enter a phone number with up to 15 digits.',
+  'profile.genderError': 'Select a gender.',
+  'profile.birthDateError': 'Enter a date of birth before today.',
+
 };

@@ -12,7 +12,7 @@
         <h1 class="auth-title" id="perfil-titulo">{{ 'profile.title' | translate }} <em>{{ 'profile.titleEm' | translate }}</em></h1>
         <p class="auth-subtitle">{{ 'profile.subtitle' | translate }}</p>
 
-        <nav class="settings-nav-tabs" aria-label="Navegación de cuenta">
+        <nav class="settings-nav-tabs" [attr.aria-label]="'profile.accountNav' | translate">
           <span class="settings-nav-tab is-active" aria-current="page">
             <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 21a8 8 0 0 0-16 0"></path>
@@ -68,7 +68,7 @@
             aria-describedby="p-nombre-error" />
           <label class="field-label" for="p-nombre">{{ 'profile.firstName' | translate }}</label>
           @if (errorVisible(perfilForm.nombre)) {
-            <p class="field-error" id="p-nombre-error">Ingresá tu nombre, solo con letras y espacios.</p>
+            <p class="field-error" id="p-nombre-error">{{ 'profile.firstNameError' | translate }}</p>
           }
         </div>
 
@@ -78,7 +78,7 @@
             aria-describedby="p-apellido-error" />
           <label class="field-label" for="p-apellido">{{ 'profile.lastName' | translate }}</label>
           @if (errorVisible(perfilForm.apellido)) {
-            <p class="field-error" id="p-apellido-error">Ingresá tu apellido, solo con letras y espacios.</p>
+            <p class="field-error" id="p-apellido-error">{{ 'profile.lastNameError' | translate }}</p>
           }
         </div>
 
@@ -95,7 +95,7 @@
             aria-describedby="p-telefono-error" />
           <label class="field-label" for="p-telefono">{{ 'profile.phone' | translate }}</label>
           @if (errorVisible(perfilForm.telefono)) {
-            <p class="field-error" id="p-telefono-error">Ingresá un teléfono de hasta 15 dígitos.</p>
+            <p class="field-error" id="p-telefono-error">{{ 'profile.phoneError' | translate }}</p>
           }
         </div>
 
@@ -109,15 +109,15 @@
         </div>
 
         <div class="field">
-                    <input id="p-dni" type="text" class="field-input" placeholder=" "
+          <input id="p-dni" type="text" class="field-input" placeholder=" "
             [attr.inputmode]="esPasaporte() ? 'text' : 'numeric'"
             (input)="limpiarDocumento($event)"
             [formField]="perfilForm.numeroIdentificador"
             [attr.aria-invalid]="errorVisible(perfilForm.numeroIdentificador)" aria-describedby="p-dni-error" />
           <label class="field-label" for="p-dni">{{ 'profile.docNumber' | translate }}</label>
           @if (errorVisible(perfilForm.numeroIdentificador)) {
-                        <p class="field-error" id="p-dni-error">
-              {{ esPasaporte() ? 'El pasaporte debe tener entre 6 y 20 letras o números.' : 'El DNI debe tener entre 7 y 8 dígitos.' }}
+            <p class="field-error" id="p-dni-error">
+              {{ (esPasaporte() ? 'booking.passportPattern' : 'booking.dniPattern') | translate }}
             </p>
           }
         </div>
@@ -132,7 +132,7 @@
           </select>
           <label class="field-label" for="p-sexo">{{ 'profile.gender' | translate }}</label>
           @if (errorVisible(perfilForm.sexo)) {
-            <p class="field-error" id="p-sexo-error">Seleccioná un género.</p>
+            <p class="field-error" id="p-sexo-error">{{ 'profile.genderError' | translate }}</p>
           }
         </div>
 
@@ -142,7 +142,7 @@
             [attr.aria-invalid]="errorVisible(perfilForm.fechaNacimiento)" aria-describedby="p-nacimiento-error" />
           <label class="field-label" for="p-nacimiento">{{ 'profile.birthDate' | translate }}</label>
           @if (errorVisible(perfilForm.fechaNacimiento)) {
-            <p class="field-error" id="p-nacimiento-error">Ingresá una fecha de nacimiento anterior a hoy.</p>
+            <p class="field-error" id="p-nacimiento-error">{{ 'profile.birthDateError' | translate }}</p>
           }
         </div>
 
