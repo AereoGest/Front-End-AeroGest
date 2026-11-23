@@ -66,7 +66,7 @@ export class Vuelos implements OnInit {
     };
 
     this.vueloService.buscarDisponibles(filtros).subscribe({
-      next: (vuelos) => this.vuelos.set(vuelos ?? []),
+    next: (vuelos) => this.vuelos.set((vuelos ?? []).filter((v) => !this.yaSalio(v))),
       error: (error: HttpErrorResponse) => {
         this.vuelos.set([]);
         this.error.set(
@@ -128,6 +128,12 @@ export class Vuelos implements OnInit {
     const horas = Math.floor(minutos / 60);
     const resto = minutos % 60;
     return `${horas}h ${resto.toString().padStart(2, '0')}m`;
+  }
+  
+  // true si el vuelo ya despegó (fecha + hora de salida anteriores a ahora).
+  private yaSalio(vuelo: Vuelo): boolean {
+    const salida = new Date(`${vuelo.fechaSalida}T${vuelo.horaSalida}`);
+    return salida.getTime() <= Date.now();
   }
 
   // Los mensajes se muestran como toast y se ocultan solos a los 4 segundos.
