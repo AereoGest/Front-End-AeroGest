@@ -19,6 +19,9 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 
 const SOLO_LETRAS = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/;
 const SOLO_DIGITOS = /^\d+$/;
+const DNI_VALIDO = /^\d{7,8}$/;
+const PASAPORTE_VALIDO = /^[a-zA-Z0-9]{6,20}$/;
+const TIPO_PASAPORTE = 'PASAPORTE'; // ⚠️ ajustalo al `valor` real que tenga en TIPOS_DOCUMENTO
 
 const DATOS_VACIOS: DatosPerfil = {
   nombre: '',
@@ -53,6 +56,10 @@ export class VerPerfil {
 
   private readonly datos = signal<DatosPerfil>({ ...DATOS_VACIOS });
 
+  protected readonly esPasaporte = computed(
+    () => this.datos().identificador?.toUpperCase() === TIPO_PASAPORTE,
+  );
+
   protected readonly perfilForm = form(this.datos, (campo) => {
     required(campo.nombre);
     pattern(campo.nombre, SOLO_LETRAS);
@@ -62,16 +69,25 @@ export class VerPerfil {
     pattern(campo.telefono, SOLO_DIGITOS);
     maxLength(campo.telefono, 15);
     required(campo.identificador);
+        required(campo.identificador);
     required(campo.numeroIdentificador);
-    pattern(campo.numeroIdentificador, SOLO_DIGITOS);
-    minLength(campo.numeroIdentificador, 7);
-    maxLength(campo.numeroIdentificador, 8);
+    validate(campo.numeroIdentificador, ({ value, valueOf }) => {
+      const numero = value();
+      if (!numero) return null; // de eso ya se encarga required
+      const tipo = valueOf(campo.identificador)?.toUpperCase();
+      if (tipo === TIPO_PASAPORTE) {
+        return PASAPORTE_VALIDO.test(numero) ? null : { kind: 'pasaporteInvalido' };
+      }
+      return DNI_VALIDO.test(numero) ? null : { kind: 'dniInvalido' };
+    });
     required(campo.sexo);
     required(campo.fechaNacimiento);
     validate(campo.fechaNacimiento, ({ value }) =>
       value() && value() >= this.fechaMaxima ? { kind: 'fechaFutura' } : null,
     );
   });
+
+  
 
   constructor(private auth: Auth) {
     this.cargarPerfil();
@@ -82,11 +98,23 @@ export class VerPerfil {
     return estado.touched() && estado.invalid();
   }
 
-  protected soloDigitos(campo: 'telefono' | 'numeroIdentificador', evento: Event): void {
+ 
+
+    protected soloDigitos(campo: 'telefono', evento: Event): void {
     const input = evento.target as HTMLInputElement;
     const limpio = input.value.replace(/\D/g, '');
     if (limpio !== input.value) {
       this.datos.update((datos) => ({ ...datos, [campo]: limpio }));
+    }
+  }
+
+  protected limpiarDocumento(evento: Event): void {
+    const input = evento.target as HTMLInputElement;
+    const limpio = this.esPasaporte()
+      ? input.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
+      : input.value.replace(/\D/g, '');
+    if (limpio !== input.value) {
+      this.datos.update((datos) => ({ ...datos, numeroIdentificador: limpio }));
     }
   }
 

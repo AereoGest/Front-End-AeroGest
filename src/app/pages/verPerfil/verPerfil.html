@@ -109,13 +109,16 @@
         </div>
 
         <div class="field">
-          <input id="p-dni" type="text" class="field-input" placeholder=" " inputmode="numeric"
-            (input)="soloDigitos('numeroIdentificador', $event)"
+                    <input id="p-dni" type="text" class="field-input" placeholder=" "
+            [attr.inputmode]="esPasaporte() ? 'text' : 'numeric'"
+            (input)="limpiarDocumento($event)"
             [formField]="perfilForm.numeroIdentificador"
             [attr.aria-invalid]="errorVisible(perfilForm.numeroIdentificador)" aria-describedby="p-dni-error" />
           <label class="field-label" for="p-dni">{{ 'profile.docNumber' | translate }}</label>
           @if (errorVisible(perfilForm.numeroIdentificador)) {
-            <p class="field-error" id="p-dni-error">Ingresá un documento de 7 u 8 dígitos.</p>
+                        <p class="field-error" id="p-dni-error">
+              {{ esPasaporte() ? 'El pasaporte debe tener entre 6 y 20 letras o números.' : 'El DNI debe tener entre 7 y 8 dígitos.' }}
+            </p>
           }
         </div>
 
