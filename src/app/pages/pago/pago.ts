@@ -60,6 +60,78 @@ function soloDigitosCuil(cuil: string): string {
   return cuil.replace(/[-\s]/g, '');
 }
 
+// ---------- Validaciones de la tarjeta ----------
+// Estos inputs los maneja el SDK de Mercado Pago, por eso no usan formField.
+
+interface DatosTarjeta {
+  numero: string;
+  titular: string;
+  vencimiento: string;
+  cvv: string;
+  tipoDoc: string;
+  numeroDoc: string;
+}
+
+type CampoTarjeta = 'numero' | 'titular' | 'vencimiento' | 'cvv' | 'numeroDoc';
+
+const SOLO_LETRAS = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]+$/;
+const NUMERO_TARJETA_REGEX = /^\d{13,16}$/;
+const VENCIMIENTO_REGEX = /^(0[1-9]|1[0-2])\/(\d{2})$/;
+const CVV_REGEX = /^\d{3,4}$/;
+const DNI_REGEX = /^\d{7,8}$/;
+const DOC_OTRO_REGEX = /^[a-zA-Z0-9]{5,20}$/;
+
+// Algoritmo de Luhn: detecta números de tarjeta mal tipeados.
+function pasaLuhn(numero: string): boolean {
+  let suma = 0;
+  let duplicar = false;
+  for (let i = numero.length - 1; i >= 0; i--) {
+    let digito = Number(numero[i]);
+    if (duplicar) {
+      digito *= 2;
+      if (digito > 9) digito -= 9;
+    }
+    suma += digito;
+    duplicar = !duplicar;
+  }
+  return suma % 10 === 0;
+}
+
+function errorNumeroTarjeta(numero: string): string | null {
+  if (!numero) return 'required';
+  if (!NUMERO_TARJETA_REGEX.test(numero) || !pasaLuhn(numero)) return 'invalido';
+  return null;
+}
+
+function errorTitular(titular: string): string | null {
+  const valor = titular.trim();
+  if (!valor) return 'required';
+  if (valor.length < 3 || !SOLO_LETRAS.test(valor)) return 'invalido';
+  return null;
+}
+
+function errorVencimiento(vencimiento: string): string | null {
+  if (!vencimiento) return 'required';
+  const partes = VENCIMIENTO_REGEX.exec(vencimiento);
+  if (!partes) return 'invalido';
+  const mes = Number(partes[1]);
+  const anio = 2000 + Number(partes[2]);
+  const hoy = new Date();
+  // Vence el último día del mes indicado.
+  if (anio * 12 + mes - 1 < hoy.getFullYear() * 12 + hoy.getMonth()) return 'vencida';
+  return null;
+}
+
+function errorCvv(cvv: string): string | null {
+  if (!cvv) return 'required';
+  return CVV_REGEX.test(cvv) ? null : 'invalido';
+}
+
+function errorDocumento(tipo: string, numero: string): string | null {
+  if (!numero) return 'required';
+  if (tipo.toUpperCase() === 'DNI') return DNI_REGEX.test(numero) ? null : 'dni';
+  return DOC_OTRO_REGEX.test(numero) ? null : 'otro';
+}
 // Paso 4 del checkout (/checkoutReserva/pago): facturación, tarjeta y pago.
 // Los pasajeros, el vuelo y el total vienen de CheckoutService (los cargó la página de pasajeros).
 // El guard checkoutPagoGuard no deja entrar si los pasajeros no se completaron.
@@ -134,6 +206,35 @@ export class Pago implements OnDestroy {
 
   protected readonly ocupado = computed(() => this.generandoToken() || this.procesando());
 
+  
+  // Datos y errores de la tarjeta.
+  protected readonly tarjeta = signal<DatosTarjeta>({
+    numero: '',
+    titular: '',
+    vencimiento: '',
+    cvv: '',
+    tipoDoc: 'DNI',
+    numeroDoc: '',
+  });
+  private readonly camposTocados = signal<Set<CampoTarjeta>>(new Set());
+
+  protected readonly esDni = computed(() => this.tarjeta().tipoDoc.toUpperCase() === 'DNI');
+
+  protected readonly erroresTarjeta = computed(() => {
+    const t = this.tarjeta();
+    return {
+      numero: errorNumeroTarjeta(t.numero),
+      titular: errorTitular(t.titular),
+      vencimiento: errorVencimiento(t.vencimiento),
+      cvv: errorCvv(t.cvv),
+      numeroDoc: errorDocumento(t.tipoDoc, t.numeroDoc),
+    };
+  });
+
+  protected readonly tarjetaValida = computed(() =>
+    Object.values(this.erroresTarjeta()).every((error) => error === null),
+  );
+
   private formularioTarjeta: any = null;
   private tarjetaMontada = false;
   private montoTarjeta = 0;
@@ -167,15 +268,69 @@ export class Pago implements OnDestroy {
     });
   }
 
+  
+  protected mostrarErrorTarjeta(campo: CampoTarjeta): boolean {
+    const tocado = this.camposTocados().has(campo) || this.intentoPagar();
+    return tocado && this.erroresTarjeta()[campo] !== null;
+  }
+
+  protected marcarTocado(campo: CampoTarjeta): void {
+    this.camposTocados.update((tocados) => new Set(tocados).add(campo));
+  }
+
+  // Limpia lo que escribe el usuario y guarda el valor para validarlo.
+  protected alEscribirTarjeta(campo: CampoTarjeta, evento: Event): void {
+    const input = evento.target as HTMLInputElement;
+    let valor = input.value;
+
+    switch (campo) {
+      case 'numero':
+      case 'cvv':
+        valor = valor.replace(/\D/g, '');
+        break;
+      case 'vencimiento': {
+        // Pone la barra sola: "1228" -> "12/28"
+        const digitos = valor.replace(/\D/g, '').slice(0, 4);
+        valor = digitos.length > 2 ? `${digitos.slice(0, 2)}/${digitos.slice(2)}` : digitos;
+        break;
+      }
+      case 'numeroDoc':
+        valor = this.esDni() ? valor.replace(/\D/g, '') : valor.replace(/[^a-zA-Z0-9]/g, '');
+        break;
+    }
+
+    if (valor !== input.value) {
+      input.value = valor;
+    }
+    this.tarjeta.update((t) => ({ ...t, [campo]: valor }));
+  }
+
+  protected alCambiarTipoDoc(evento: Event): void {
+    const tipo = (evento.target as HTMLSelectElement).value;
+    this.tarjeta.update((t) => ({ ...t, tipoDoc: tipo }));
+  }
+
+  // El SDK carga las opciones del tipo de documento solo, así que lo leemos antes de validar.
+  private sincronizarTipoDoc(): void {
+    const select = document.getElementById('docType') as HTMLSelectElement | null;
+    if (select?.value) {
+      this.tarjeta.update((t) => ({ ...t, tipoDoc: select.value }));
+    }
+  }
+
   private enviar(): void {
     if (this.ocupado()) {
       return;
     }
     this.intentoPagar.set(true);
     this.errorTarjeta.set(null);
-    this.estadoPago.set(null);
+        this.estadoPago.set(null);
+    this.sincronizarTipoDoc();
 
     submit(this.facturacion, async () => {
+      if (!this.tarjetaValida()) {
+        return undefined;
+      }
       if (!this.tarjetaMontada || !this.formularioTarjeta) {
         this.errorTarjeta.set('tarjetaCargando');
         return undefined;

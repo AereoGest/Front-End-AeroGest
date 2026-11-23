@@ -97,6 +97,7 @@
       </section>
 
       <!-- Tarjeta: estos inputs los maneja el SDK de Mercado Pago -->
+            <!-- Tarjeta: estos inputs los maneja el SDK de Mercado Pago -->
       <section class="checkout-section" aria-labelledby="titulo-tarjeta">
         <h2 id="titulo-tarjeta" class="checkout-section-title">
           <span class="checkout-step-num">3</span> {{ 'payment.cardInfo' | translate }}
@@ -105,39 +106,94 @@
         <fieldset class="form-card">
           <label class="form-group">
             <span>{{ 'payment.cardNumber' | translate }}</span>
-            <input type="text" class="form-control" id="cardNumber" placeholder="Ej. 4509 9535 6623 3704"
-              inputmode="numeric" maxlength="16" required />
+            <input type="text" class="form-control" id="cardNumber" placeholder="Ej. 4509953566233704"
+              inputmode="numeric" maxlength="16" autocomplete="cc-number" required
+              (input)="alEscribirTarjeta('numero', $event)" (blur)="marcarTocado('numero')"
+              [attr.aria-invalid]="mostrarErrorTarjeta('numero')" />
+            @if (mostrarErrorTarjeta('numero')) {
+              <small class="form-error" role="alert">
+                @switch (erroresTarjeta().numero) {
+                  @case ('required') { {{ 'payment.fieldRequired' | translate }} }
+                  @default { {{ 'payment.cardNumberInvalid' | translate }} }
+                }
+              </small>
+            }
           </label>
 
           <label class="form-group">
             <span>{{ 'payment.cardholderName' | translate }}</span>
-            <input type="text" class="form-control" id="cardholderName" [placeholder]="'payment.cardholderPlaceholder' | translate" required />
+            <input type="text" class="form-control" id="cardholderName" autocomplete="cc-name" required
+              [placeholder]="'payment.cardholderPlaceholder' | translate"
+              (input)="alEscribirTarjeta('titular', $event)" (blur)="marcarTocado('titular')"
+              [attr.aria-invalid]="mostrarErrorTarjeta('titular')" />
+            @if (mostrarErrorTarjeta('titular')) {
+              <small class="form-error" role="alert">
+                @switch (erroresTarjeta().titular) {
+                  @case ('required') { {{ 'payment.fieldRequired' | translate }} }
+                  @default { {{ 'payment.cardholderInvalid' | translate }} }
+                }
+              </small>
+            }
           </label>
 
           <div class="form-row">
             <label class="form-group">
               <span>{{ 'payment.expiration' | translate }}</span>
-              <input type="text" class="form-control" id="expirationDate" placeholder="MM / AA"
-                inputmode="numeric" maxlength="5" required />
+              <input type="text" class="form-control" id="expirationDate" autocomplete="cc-exp"
+                [placeholder]="'payment.expirationPlaceholder' | translate"
+                inputmode="numeric" maxlength="5" required
+                (input)="alEscribirTarjeta('vencimiento', $event)" (blur)="marcarTocado('vencimiento')"
+                [attr.aria-invalid]="mostrarErrorTarjeta('vencimiento')" />
+              @if (mostrarErrorTarjeta('vencimiento')) {
+                <small class="form-error" role="alert">
+                  @switch (erroresTarjeta().vencimiento) {
+                    @case ('required') { {{ 'payment.fieldRequired' | translate }} }
+                    @case ('vencida') { {{ 'payment.expirationPast' | translate }} }
+                    @default { {{ 'payment.expirationInvalid' | translate }} }
+                  }
+                </small>
+              }
             </label>
 
             <label class="form-group">
               <span>{{ 'payment.cvv' | translate }}</span>
               <input type="text" class="form-control" id="securityCode" placeholder="123"
-                inputmode="numeric" maxlength="4" required />
+                inputmode="numeric" maxlength="4" autocomplete="cc-csc" required
+                (input)="alEscribirTarjeta('cvv', $event)" (blur)="marcarTocado('cvv')"
+                [attr.aria-invalid]="mostrarErrorTarjeta('cvv')" />
+              @if (mostrarErrorTarjeta('cvv')) {
+                <small class="form-error" role="alert">
+                  @switch (erroresTarjeta().cvv) {
+                    @case ('required') { {{ 'payment.fieldRequired' | translate }} }
+                    @default { {{ 'payment.cvvInvalid' | translate }} }
+                  }
+                </small>
+              }
             </label>
           </div>
 
           <div class="form-row">
             <label class="form-group">
               <span>{{ 'booking.docType' | translate }}</span>
-              <select class="form-control" id="docType"></select>
+              <select class="form-control" id="docType" (change)="alCambiarTipoDoc($event)"></select>
             </label>
 
             <label class="form-group">
               <span>{{ 'booking.docNumber' | translate }}</span>
               <input type="text" class="form-control" id="docNumber" placeholder="Ej. 35123456"
-                inputmode="numeric" maxlength="8" required />
+                [attr.inputmode]="esDni() ? 'numeric' : 'text'"
+                [attr.maxlength]="esDni() ? 8 : 20" required
+                (input)="alEscribirTarjeta('numeroDoc', $event)" (blur)="marcarTocado('numeroDoc')"
+                [attr.aria-invalid]="mostrarErrorTarjeta('numeroDoc')" />
+              @if (mostrarErrorTarjeta('numeroDoc')) {
+                <small class="form-error" role="alert">
+                  @switch (erroresTarjeta().numeroDoc) {
+                    @case ('required') { {{ 'payment.fieldRequired' | translate }} }
+                    @case ('dni') { {{ 'booking.dniPattern' | translate }} }
+                    @default { {{ 'payment.docInvalid' | translate }} }
+                  }
+                </small>
+              }
             </label>
           </div>
 
@@ -153,10 +209,14 @@
         </fieldset>
       </section>
 
-      @if (intentoPagar() && facturacion().invalid()) {
+      
+       @if (intentoPagar() && facturacion().invalid()) {
         <p class="form-error" role="alert">{{ 'payment.checkBillingData' | translate }}</p>
       }
 
+      @if (intentoPagar() && !tarjetaValida()) {
+        <p class="form-error" role="alert">{{ 'payment.checkCardData' | translate }}</p>
+      }
       @switch (errorTarjeta()) {
         @case ('sdkNoCargo') {
           <p class="form-error" role="alert">{{ 'payment.sdkLoadError' | translate }}</p>

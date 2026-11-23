@@ -1055,4 +1055,15 @@ export const en: Record<TranslationKey, string> = {
   'profile.genderError': 'Select a gender.',
   'profile.birthDateError': 'Enter a date of birth before today.',
 
+  //PAGO
+    'payment.fieldRequired': 'This field is required.',
+  'payment.cardNumberInvalid': 'Enter a valid card number.',
+  'payment.cardholderInvalid': 'Enter the name as printed on the card, using letters only.',
+  'payment.expirationPlaceholder': 'MM/YY',
+  'payment.expirationInvalid': 'Use the MM/YY format.',
+  'payment.expirationPast': 'The card has expired.',
+  'payment.cvvInvalid': 'CVV must have 3 or 4 digits.',
+  'payment.docInvalid': 'ID must have 5 to 20 letters or numbers.',
+  'payment.checkCardData': 'Please check the marked card details.',
+
 };

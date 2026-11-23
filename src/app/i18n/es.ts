@@ -1053,6 +1053,17 @@ export const es = {
   'profile.phoneError': 'Ingresá un teléfono de hasta 15 dígitos.',
   'profile.genderError': 'Seleccioná un género.',
   'profile.birthDateError': 'Ingresá una fecha de nacimiento anterior a hoy.',
+
+  //PAGO
+    'payment.fieldRequired': 'Este campo es obligatorio.',
+  'payment.cardNumberInvalid': 'Ingresá un número de tarjeta válido.',
+  'payment.cardholderInvalid': 'Ingresá el nombre como figura en la tarjeta, solo con letras.',
+  'payment.expirationPlaceholder': 'MM/AA',
+  'payment.expirationInvalid': 'Usá el formato MM/AA.',
+  'payment.expirationPast': 'La tarjeta está vencida.',
+  'payment.cvvInvalid': 'El CVV debe tener 3 o 4 dígitos.',
+  'payment.docInvalid': 'El documento debe tener entre 5 y 20 letras o números.',
+  'payment.checkCardData': 'Revisá los datos de la tarjeta marcados.',
 };
 
 export type TranslationKey = keyof typeof es;
