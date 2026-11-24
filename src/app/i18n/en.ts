@@ -1084,5 +1084,6 @@ export const en: Record<TranslationKey, string> = {
 'myBookings.cancelConfirm': 'Yes, cancel',
 'myBookings.cancelDone': 'Booking cancelled.',
 'myBookings.statusFinished': 'Completed',
+'myBookings.seatReleased': 'Released on cancellation',
 
 };

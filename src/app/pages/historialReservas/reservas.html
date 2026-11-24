@@ -229,6 +229,8 @@
                       @if (asientosAutomaticos().includes(pasaje.id)) {
                         <small class="pasaje-auto">{{ 'myBookings.autoAssigned' | translate }}</small>
                       }
+                      } @else if (reserva.estadoReserva === 'CANCELADA') {
+                      <span class="pasaje-pendiente">{{ 'myBookings.seatReleased' | translate }}</span>
                     } @else {
                       <span class="pasaje-pendiente">{{ 'myBookings.seatPending' | translate }}</span>
                     }
@@ -291,7 +293,9 @@
           <p class="cancelacion-error" role="alert">{{ errorReembolso() }}</p>
         }
 
-        <p class="cancelacion-ayuda">{{ 'myBookings.cancelPolicyInfo' | translate }}</p>
+        @if (reembolsoPrevio()?.porcentaje !== 100 || (reembolsoPrevio()?.diasRestantes ?? 0) >= 30) {
+          <p class="cancelacion-ayuda">{{ 'myBookings.cancelPolicyInfo' | translate }}</p>
+        }
 
         <div class="detalle-acciones">
           <button type="button" class="btn" [disabled]="cancelando()" (click)="volverDeCancelacion()">

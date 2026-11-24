@@ -1084,6 +1084,7 @@ export const es = {
 'myBookings.cancelConfirm': 'Sí, cancelar',
 'myBookings.cancelDone': 'Reserva cancelada.',
 'myBookings.statusFinished': 'Finalizado',
+'myBookings.seatReleased': 'Liberado al cancelar',
 };
 
 export type TranslationKey = keyof typeof es;
