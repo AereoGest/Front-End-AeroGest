@@ -91,6 +91,17 @@ export interface CheckInResponse {
   }[];
 }
 
+/** Respuesta de GET /api/reservas/mis-reservas/{id}/reembolso. */
+export interface Reembolso {
+  reservaId: number;
+  valorPagado: number;
+  porcentaje: number;          // 100 | 50 | 15 | 0
+  montoReembolso: number;
+  diasRestantes: number | null;
+  pagada: boolean;
+  cancelada: boolean;
+}
+
 /** Datos de un pasajero para POST /api/reservas o POST /api/reservas/mis-reservas. */
 export interface PasajeRequest {
   clasesVuelo: ClaseVuelo;

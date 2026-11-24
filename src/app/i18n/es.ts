@@ -420,8 +420,8 @@ export const es = {
   'myBookings.reasonFlightCancelled': 'Vuelo cancelado por la aerolínea',
   'myBookings.reasonCustomer': 'Cancelada por vos',
   'myBookings.reasonAirline': 'Cancelada por la aerolínea',
-  'myBookings.refundAmount': 'Reembolso del 100%: {amount}',
-  'myBookings.refundNone': 'Sin cobro: la reserva no estaba pagada',
+  'myBookings.refundAmount': 'Reembolso del {percent}%: {amount}',
+  'myBookings.refundNone': 'Sin reembolso',
   'myBookings.filterAll': 'Todos',
   'myBookings.filterFrom': 'Desde',
   'myBookings.filterTo': 'Hasta',
@@ -1064,6 +1064,26 @@ export const es = {
   'payment.cvvInvalid': 'El CVV debe tener 3 o 4 dígitos.',
   'payment.docInvalid': 'El documento debe tener entre 5 y 20 letras o números.',
   'payment.checkCardData': 'Revisá los datos de la tarjeta marcados.',
+
+
+  //REEMBOLSO
+  'myBookings.cancelPreviewTitle': '¿Cancelar esta reserva?',
+'myBookings.cancelPreviewLoading': 'Calculando cuánto te devolvemos...',
+'myBookings.cancelPreviewError': 'No pudimos calcular la devolución. Intentá de nuevo.',
+'myBookings.cancelPreviewPaid': 'Pagaste',
+'myBookings.cancelPreviewDays': 'Días para el vuelo',
+'myBookings.cancelPreviewPercent': 'Se devuelve',
+'myBookings.cancelPreviewRefund': 'Te devolvemos',
+'myBookings.cancelPolicyFull': 'Faltan 30 días o más para tu vuelo: te devolvemos el total.',
+'myBookings.cancelPolicyPartial': 'Te devolvemos una parte de lo que pagaste según los días que faltan.',
+'myBookings.cancelPolicyNone': 'Faltan 10 días o menos para tu vuelo: no corresponde devolución.',
+'myBookings.cancelPolicyAdmin': 'Cancelación de la aerolínea: se devuelve el total de lo pagado.',
+'myBookings.cancelPolicyNotPaid': 'Esta reserva no se pagó, así que no hay nada para devolver.',
+'myBookings.cancelPolicyInfo': 'Política: 30 días o más antes del vuelo, 100%; de 20 a 29 días, 50%; de 11 a 19 días, 15%; 10 días o menos, sin devolución.',
+'myBookings.cancelKeep': 'Mantener reserva',
+'myBookings.cancelConfirm': 'Sí, cancelar',
+'myBookings.cancelDone': 'Reserva cancelada.',
+'myBookings.statusFinished': 'Finalizado',
 };
 
 export type TranslationKey = keyof typeof es;

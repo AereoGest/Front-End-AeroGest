@@ -11,6 +11,7 @@ import {
   ReservaAdminRequest,
   ReservaRequest,
   ReservaUpdateDTO,
+  Reembolso
 } from '../Models/Reserva';
 import { PagoRequest, PagoResponse } from '../Models/Pago';
 
@@ -38,6 +39,10 @@ export class ReservaService {
 
   cancelar(id: number): Observable<string> {
     return this.http.patch(`${this.baseUrl}/cancelar/${id}`, {}, { responseType: 'text' });
+  }
+
+    simularReembolso(id: number): Observable<Reembolso> {
+    return this.http.get<Reembolso>(`${this.baseUrl}/mis-reservas/${id}/reembolso`);
   }
 
   checkIn(id: number): Observable<CheckInResponse> {
@@ -84,4 +89,7 @@ export class ReservaService {
     const params = new HttpParams().set('reservaId', String(reservaId));
     return this.http.delete<void>(`${this.pasajesUrl}/${id}`, { params });
   }
+
+  
 }
+

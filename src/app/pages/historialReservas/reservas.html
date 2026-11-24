@@ -15,9 +15,8 @@
       </div>
       <div class="stat animate delay-1">
         <dt>{{ 'myBookings.completedFlights' | translate }}</dt>
-        <dd></dd>
+        <dd>{{ vuelosCompletados() }}</dd>
       </div>
-  
     </dl>
 
     <nav class="search-card-header" aria-label="Tipo de reservas">
@@ -105,36 +104,35 @@
     } @else {
       <ul class="booking-list">
         @for (reserva of reservasVisibles(); track reserva.id) {
-          <li class="booking-card" [attr.data-estado]="reserva.estadoReserva">
+          <li class="booking-card" [attr.data-estado]="estadoVisual(reserva)">
             <div class="booking-info">
               <h2 class="booking-route">{{ 'myBookings.bookingItem' | translate:{ id: reserva.id } }}</h2>
               <p class="booking-details">{{ 'myBookings.ticketsCount' | translate:{ count: reserva.cantidadPasajes } }} · {{ formatearPrecio(reserva.valor) }}</p>
-              <span class="estado-badge" [attr.data-estado]="reserva.estadoReserva">{{ etiquetaEstado(reserva.estadoReserva) }}</span>
+              <span class="estado-badge" [attr.data-estado]="estadoVisual(reserva)">{{ etiquetaReserva(reserva) }}</span>
               @if (reserva.estadoReserva === 'CANCELADA' && reserva.motivoCancelacion) {
                 <p class="booking-cancelacion">
                   <strong>{{ textoMotivo(reserva.motivoCancelacion) }}</strong>
                   @if (reserva.montoReembolso != null) {
-                    <span>{{ textoReembolso(reserva.montoReembolso) }}</span>
+                    <span>{{ textoReembolso(reserva.montoReembolso, reserva.valor) }}</span>
                   }
                 </p>
               }
             </div>
-            <time class="booking-date" [attr.datetime]="reserva.fechaReserva">
-              <span class="booking-date-day">{{ formatearDia(reserva.fechaReserva) }}</span>
-              <span class="booking-date-month">{{ formatearMesAnio(reserva.fechaReserva) }}</span>
+                        <time class="booking-date" [attr.datetime]="fechaTarjeta(reserva)">
+              <span class="booking-date-day">{{ formatearDia(fechaTarjeta(reserva)) }}</span>
+              <span class="booking-date-month">{{ formatearMesAnio(fechaTarjeta(reserva)) }}</span>
             </time>
-            @if (reserva.estadoReserva !== 'CANCELADA') {
-              <div class="booking-actions">
-                @if (reserva.estadoReserva === 'CONFIRMADO') {
-                  <button type="button" class="btn btn-dark"
-                    [disabled]="!!reserva.fechaCheckIn || checkInEnCurso() === reserva.id"
-                    (click)="abrirCheckIn(reserva)">
-                    {{ (reserva.fechaCheckIn ? 'myBookings.checkinDone' : 'myBookings.checkin') | translate }}
-                  </button>
-                }
-                <button type="button" class="btn btn-dark" (click)="abrirDetalle(reserva)">{{ 'myBookings.view' | translate }}</button>
-              </div>
-            }
+
+                        <div class="booking-actions">
+              @if (reserva.estadoReserva === 'CONFIRMADO' && !vueloFinalizado(reserva)) {
+                <button type="button" class="btn btn-dark"
+                  [disabled]="!!reserva.fechaCheckIn || checkInEnCurso() === reserva.id"
+                  (click)="abrirCheckIn(reserva)">
+                  {{ (reserva.fechaCheckIn ? 'myBookings.checkinDone' : 'myBookings.checkin') | translate }}
+                </button>
+              }
+              <button type="button" class="btn btn-dark" (click)="abrirDetalle(reserva)">{{ 'myBookings.view' | translate }}</button>
+            </div>
           </li>
         }
       </ul>
@@ -149,7 +147,7 @@
       <button type="button" class="detalle-cerrar no-print" [attr.aria-label]="'flights.close' | translate" (click)="cerrarDetalle()">×</button>
     </header>
 
-      @if (reserva.fechaCheckIn)  {
+        @if (reserva.fechaCheckIn && reserva.estadoReserva !== 'CANCELADA') {
       <div class="detalle-exito no-print" role="status">
         <span class="detalle-exito-icono" aria-hidden="true">✓</span>
         <div>
@@ -183,7 +181,7 @@
       </div>
       <div class="completo">
         <dt>{{ 'myBookings.status' | translate }}</dt>
-        <dd><span class="estado-badge" [attr.data-estado]="reserva.estadoReserva">{{ etiquetaEstado(reserva.estadoReserva) }}</span></dd>
+        <dd><span class="estado-badge" [attr.data-estado]="estadoVisual(reserva)">{{ etiquetaReserva(reserva) }}</span></dd>
       </div>
       @if (reserva.estadoReserva === 'CANCELADA' && reserva.motivoCancelacion) {
         <div class="completo">
@@ -193,7 +191,7 @@
         @if (reserva.montoReembolso != null) {
           <div class="completo">
             <dt>{{ 'myBookings.refund' | translate }}</dt>
-            <dd>{{ textoReembolso(reserva.montoReembolso) }}</dd>
+            <dd>{{ textoReembolso(reserva.montoReembolso, reserva.valor) }}</dd>
           </div>
         }
       }
@@ -261,16 +259,63 @@
       </section>
     }
 
-    <div class="detalle-acciones no-print">
-       @if (reserva.fechaCheckIn) {
-        <button type="button" class="btn btn-primary" (click)="imprimirPasajes()">
-          {{ 'myBookings.print' | translate }}
-        </button>
-      }
-      @if (reserva.estadoReserva !== 'CANCELADA') {
-        <button type="button" class="btn btn-dark" (click)="cancelarReserva(reserva)">{{ 'myBookings.cancelBooking' | translate }}</button>
-      }
-    </div>
+    @if (confirmandoCancelacion()) {
+      <section class="cancelacion-previa no-print" aria-live="polite">
+        <h3>{{ 'myBookings.cancelPreviewTitle' | translate }}</h3>
+
+        @if (cargandoReembolso()) {
+          <p class="cancelacion-ayuda">{{ 'myBookings.cancelPreviewLoading' | translate }}</p>
+        } @else if (reembolsoPrevio(); as r) {
+          <dl class="cancelacion-montos">
+            <div>
+              <dt>{{ 'myBookings.cancelPreviewPaid' | translate }}</dt>
+              <dd>{{ formatearPrecio(r.valorPagado) }}</dd>
+            </div>
+            @if (r.diasRestantes !== null) {
+              <div>
+                <dt>{{ 'myBookings.cancelPreviewDays' | translate }}</dt>
+                <dd>{{ r.diasRestantes }}</dd>
+              </div>
+            }
+            <div>
+              <dt>{{ 'myBookings.cancelPreviewPercent' | translate }}</dt>
+              <dd>{{ r.porcentaje }}%</dd>
+            </div>
+            <div class="destacado">
+              <dt>{{ 'myBookings.cancelPreviewRefund' | translate }}</dt>
+              <dd>{{ formatearPrecio(r.montoReembolso) }}</dd>
+            </div>
+          </dl>
+          <p class="cancelacion-politica">{{ textoPolitica(r) }}</p>
+        } @else if (errorReembolso()) {
+          <p class="cancelacion-error" role="alert">{{ errorReembolso() }}</p>
+        }
+
+        <p class="cancelacion-ayuda">{{ 'myBookings.cancelPolicyInfo' | translate }}</p>
+
+        <div class="detalle-acciones">
+          <button type="button" class="btn" [disabled]="cancelando()" (click)="volverDeCancelacion()">
+            {{ 'myBookings.cancelKeep' | translate }}
+          </button>
+          <button type="button" class="btn btn-dark"
+            [disabled]="cargandoReembolso() || cancelando() || !!errorReembolso()"
+            (click)="cancelarReserva(reserva)">
+            {{ 'myBookings.cancelConfirm' | translate }}
+          </button>
+        </div>
+      </section>
+    } @else {
+      <div class="detalle-acciones no-print">
+               @if (reserva.fechaCheckIn && reserva.estadoReserva !== 'CANCELADA') {
+          <button type="button" class="btn btn-primary" (click)="imprimirPasajes()">
+            {{ 'myBookings.print' | translate }}
+          </button>
+        }
+        @if (reserva.estadoReserva !== 'CANCELADA' && !vueloFinalizado(reserva)) {
+          <button type="button" class="btn btn-dark" (click)="pedirCancelacion(reserva)">{{ 'myBookings.cancelBooking' | translate }}</button>
+        }
+      </div>
+    }
   }
 </dialog>
 

@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { CheckInResponse, EstadoReserva, PasajeReserva, Reserva } from '../../Models/Reserva';
+import { CheckInResponse, EstadoReserva, PasajeReserva, Reserva, Reembolso } from '../../Models/Reserva';
 import { ReservaService } from '../../services/reservaService';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { I18nService } from '../../services/i18n';
@@ -63,11 +63,42 @@ export class Reservas implements OnInit {
   protected readonly errorCheckin = signal('');
   // Pasajes a los que el sistema les asignó asiento al azar en el último check-in
   protected readonly asientosAutomaticos = signal<number[]>([]);
+    // ── Cancelación ──
+  // true mientras se muestra la confirmación con el reembolso dentro del detalle
+  protected readonly confirmandoCancelacion = signal(false);
+  protected readonly reembolsoPrevio = signal<Reembolso | null>(null);
+  protected readonly cargandoReembolso = signal(false);
+  protected readonly errorReembolso = signal('');
+  protected readonly cancelando = signal(false);
 
-  protected readonly cantidadActivas = computed(
-    () => this.reservas().filter((reserva) => ESTADOS_ACTIVOS.includes(reserva.estadoReserva)).length
+   protected readonly cantidadActivas = computed(
+    () => this.reservas().filter((reserva) =>
+      ESTADOS_ACTIVOS.includes(reserva.estadoReserva) && !this.vueloFinalizado(reserva)
+    ).length
   );
 
+  protected readonly vuelosCompletados = computed(
+    () => this.reservas().filter((reserva) =>
+      reserva.estadoReserva === 'CONFIRMADO' && this.vueloFinalizado(reserva)
+    ).length
+  );
+
+
+    /** Estado para el badge y el color de la tarjeta: "FINALIZADO" si el vuelo ya salió. */
+  protected estadoVisual(reserva: Reserva): string {
+    return this.vueloFinalizado(reserva) ? 'FINALIZADO' : reserva.estadoReserva;
+  }
+
+  protected etiquetaReserva(reserva: Reserva): string {
+    return this.vueloFinalizado(reserva)
+      ? this.i18n.t('myBookings.statusFinished')
+      : this.etiquetaEstado(reserva.estadoReserva);
+  }
+   /** Fecha de la tarjeta: la salida del vuelo; si la reserva no tiene pasajes, la fecha de reserva. */
+  protected fechaTarjeta(reserva: Reserva): string {
+    const salida = this.salidaVuelo(reserva);
+    return salida ? salida.toISOString() : reserva.fechaReserva;
+  }
   // true si hay algún filtro aplicado además de la pestaña (para mostrar "Limpiar filtros")
   protected readonly hayFiltros = computed(
     () =>
@@ -87,7 +118,7 @@ export class Reservas implements OnInit {
 
     const filtradas = this.reservas()
       // Pestaña: activas / historial (canceladas)
-      .filter((reserva) => (reserva.estadoReserva === 'CANCELADA') === verHistorial)
+        .filter((reserva) => this.enHistorial(reserva) === verHistorial)
       // Búsqueda: código o número de reserva, estado del backend o etiqueta traducida
       .filter((reserva) =>
         !texto ||
@@ -164,35 +195,62 @@ export class Reservas implements OnInit {
   }
 
   // Se llama cuando el <dialog> del detalle se cierra, por cualquier motivo
-  protected alCerrarDetalle(): void {
+    protected alCerrarDetalle(): void {
     this.seleccionada.set(null);
     this.asientosAutomaticos.set([]);
+    this.volverDeCancelacion();
   }
-
   // Imprime solo el detalle de la reserva (ver estilos de impresión en styles.css)
   protected imprimirPasajes(): void {
     window.print();
   }
 
-  protected cancelarReserva(reserva: Reserva): void {
-    if (!confirm(this.i18n.isSpanish() ? '¿Confirmar la cancelación de esta reserva?' : 'Confirm cancellation of this booking?')) {
-      return;
-    }
-
+   /** Botón "Cancelar reserva": pide al back cuánto le devolverían y muestra la confirmación. */
+  protected pedirCancelacion(reserva: Reserva): void {
+    if (this.vueloFinalizado(reserva)) return;
     this.limpiarMensajes();
+    this.confirmandoCancelacion.set(true);
+    this.reembolsoPrevio.set(null);
+    this.errorReembolso.set('');
+    this.cargandoReembolso.set(true);
+
+    this.reservaService.simularReembolso(reserva.id).subscribe({
+      next: (r) => this.reembolsoPrevio.set(r),
+      error: (error: HttpErrorResponse) =>
+        this.errorReembolso.set(error.error?.message || this.i18n.t('myBookings.cancelPreviewError')),
+    }).add(() => this.cargandoReembolso.set(false));
+  }
+
+  protected volverDeCancelacion(): void {
+    this.confirmandoCancelacion.set(false);
+    this.reembolsoPrevio.set(null);
+    this.errorReembolso.set('');
+  }
+
+  /** "Sí, cancelar": cancela y avisa cuánto se le devuelve. */
+    protected cancelarReserva(reserva: Reserva): void {
+    if (this.cancelando()) return;
+    const monto = this.reembolsoPrevio()?.montoReembolso ?? 0;
+    this.cancelando.set(true);
 
     this.reservaService.cancelar(reserva.id).subscribe({
       next: () => {
         this.cerrarDetalle();
-        this.mostrarMensaje(this.mensajeExito, this.i18n.t('common.success'));
+        this.mostrarMensaje(
+          this.mensajeExito,
+          `${this.i18n.t('myBookings.cancelDone')} ${this.textoReembolso(monto, reserva.valor)}`
+        );
         this.cargarReservas();
       },
       error: (error: HttpErrorResponse) => {
-        this.mostrarMensaje(this.mensajeError, error.error?.message || this.i18n.t('common.error'));
+        let mensaje = error.error?.message;
+        if (!mensaje && typeof error.error === 'string') {
+          try { mensaje = JSON.parse(error.error).message; } catch { mensaje = error.error; }
+        }
+        this.mostrarMensaje(this.mensajeError, mensaje || this.i18n.t('common.error'));
       }
-    });
+    }).add(() => this.cancelando.set(false));
   }
-
   // ===================== Check-in online =====================
 
   protected abrirCheckIn(reserva: Reserva): void {
@@ -268,10 +326,23 @@ export class Reservas implements OnInit {
     return clave ? this.i18n.t(clave) : motivo;
   }
 
-  protected textoReembolso(monto: number): string {
-    return monto > 0
-      ? this.i18n.t('myBookings.refundAmount', { amount: this.formatearPrecio(monto) })
-      : this.i18n.t('myBookings.refundNone');
+  /** "Reembolso del 50%: $100.000" (el porcentaje se calcula con lo que se pagó). */
+  protected textoReembolso(monto: number, valor: number): string {
+    if (monto <= 0) return this.i18n.t('myBookings.refundNone');
+    const porcentaje = valor > 0 ? Math.round((monto * 100) / valor) : 0;
+    return this.i18n.t('myBookings.refundAmount', {
+      amount: this.formatearPrecio(monto),
+      percent: String(porcentaje),
+    });
+  }
+
+    /** Explicación según el porcentaje que devolvió el back. */
+    protected textoPolitica(r: Reembolso): string {
+    if (!r.pagada) return this.i18n.t('myBookings.cancelPolicyNotPaid');
+    if (r.porcentaje === 100 && (r.diasRestantes ?? 0) < 30) return this.i18n.t('myBookings.cancelPolicyAdmin');
+    if (r.porcentaje === 100) return this.i18n.t('myBookings.cancelPolicyFull');
+    if (r.porcentaje > 0) return this.i18n.t('myBookings.cancelPolicyPartial');
+    return this.i18n.t('myBookings.cancelPolicyNone');
   }
 
   protected formatearPrecio(valor: number): string {
@@ -324,6 +395,32 @@ export class Reservas implements OnInit {
   // ===================== Auxiliares =====================
 
   // Fecha local en formato yyyy-mm-dd, para comparar con los <input type="date">
+
+    // Fecha y hora de salida del vuelo de la reserva (la más temprana de sus pasajes)
+  private salidaVuelo(reserva: Reserva): Date | null {
+    const salidas = (reserva.pasajes ?? [])
+      .map((p) => p.vuelo)
+      .filter((v) => !!v?.fechaSalida)
+      .map((v) => {
+        const [anio, mes, dia] = v.fechaSalida.split('-').map(Number);
+        const [hora, min] = (v.horaSalida ?? '00:00').split(':').map(Number);
+        return new Date(anio, mes - 1, dia, hora, min).getTime();
+      });
+    return salidas.length ? new Date(Math.min(...salidas)) : null;
+  }
+
+  /** El vuelo ya salió y la reserva no estaba cancelada. */
+  protected vueloFinalizado(reserva: Reserva): boolean {
+    if (reserva.estadoReserva === 'CANCELADA') return false;
+    const salida = this.salidaVuelo(reserva);
+    return !!salida && salida.getTime() < Date.now();
+  }
+
+  /** Va al historial si está cancelada o si el vuelo ya pasó. */
+  protected enHistorial(reserva: Reserva): boolean {
+    return reserva.estadoReserva === 'CANCELADA' || this.vueloFinalizado(reserva);
+  }
+  
   private diaReserva(fecha: string): string {
     const d = new Date(fecha);
     const mes = String(d.getMonth() + 1).padStart(2, '0');
@@ -344,4 +441,8 @@ export class Reservas implements OnInit {
     this.mensajeExito.set('');
     this.mensajeError.set('');
   }
+
+  
+
+  
 }

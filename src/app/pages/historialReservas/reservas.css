@@ -147,6 +147,11 @@
   --estado-texto: var(--danger-contrast);
 }
 
+[data-estado='FINALIZADO'] {
+  --estado-color: var(--text-muted);
+  --estado-texto: var(--bg-elevated);
+}
+
 .booking-list {
   display: grid;
   gap: 16px;
@@ -468,3 +473,56 @@
   color: var(--danger);
   font-weight: 600;
 }
+
+/* Confirmación de cancelación con el reembolso */
+.cancelacion-previa {
+  padding: 16px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  animation: fadeInUp 0.25s ease both;
+}
+.cancelacion-previa h3 {
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+}
+.cancelacion-montos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.cancelacion-montos dt {
+  font-size: 11px;
+  color: var(--texto-suave);
+}
+.cancelacion-montos dd {
+  font-weight: 600;
+  color: var(--text);
+}
+.cancelacion-montos .destacado {
+  grid-column: 1 / -1;
+}
+.cancelacion-montos .destacado dd {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+}
+.cancelacion-politica {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--text);
+}
+.cancelacion-ayuda {
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: var(--texto-suave);
+}
+.cancelacion-error {
+  margin-bottom: 12px;
+  color: var(--danger);
+}
+
