@@ -1007,6 +1007,7 @@ export const es = {
   'adminUsers.noEmployees': 'No hay empleados que coincidan con los filtros aplicados.',
   'adminUsers.filterActiveIndicator': 'Filtro de empleados activo',
   'adminUsers.employeesBadge': 'Personal / Empleados',
+  'adminUsers.phoneInvalid': 'Ingresá un teléfono de 10 dígitos, sin espacios ni símbolos.',
 
   // Admin - Ventas (VentasAdmin)
   'adminSales.eyebrow': 'Panel de administración',

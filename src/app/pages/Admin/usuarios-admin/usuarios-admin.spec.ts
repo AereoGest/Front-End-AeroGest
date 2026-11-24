@@ -134,7 +134,7 @@ describe('UsuariosAdmin', () => {
     component.altaSexo.set('MASCULINO');
     component.altaEmail.set('mariano@example.com');
     component.altaTelefono.set('1133445566');
-    component.altaPassword.set('clave123');
+    component.altaPassword.set('Clave#123');
     component.altaRole.set('ROLE_USUARIO');
 
     component.crearUsuario();
@@ -152,6 +152,56 @@ describe('UsuariosAdmin', () => {
     expect(component.guardando()).toBe(false);
     expect(component.modalAltaAbierto()).toBe(false);
     expect(component.mensajeExito()).toBe('adminUsers.successCreated');
+  });
+
+  it('aplica en el alta las mismas reglas que el registro del usuario', () => {
+    expectInitialLoad();
+    component.abrirModalAlta();
+
+    component.altaNombre.set('<script>alert(1)</script>');
+    component.altaApellido.set('López');
+    component.altaIdentificador.set('DNI');
+    component.altaNumeroIdentificador.set('40.123.456');
+    component.altaFechaNacimiento.set('1998-02-14');
+    component.altaSexo.set('MASCULINO');
+    component.altaEmail.set('mariano@example.com');
+    component.altaTelefono.set('+541133445566');
+    component.altaPassword.set('clave123');
+    component.altaRole.set('ROLE_USUARIO');
+
+    component.crearUsuario();
+
+    const errores = component.erroresAlta();
+    expect(errores.nombre).toBe('booking.namePattern');
+    expect(errores.telefono).toBe('adminUsers.phoneInvalid');
+    expect(errores.password).toBe('auth.passwordPattern');
+    // El DNI con puntos es válido: se normaliza antes de validar y de enviar
+    expect(errores.documento).toBeUndefined();
+    expect(component.guardando()).toBe(false);
+    httpMock.expectNone(`${environment.apiUrl}/admin/users`);
+  });
+
+  it('envía el documento sin puntos ni espacios', () => {
+    expectInitialLoad();
+    component.abrirModalAlta();
+
+    component.altaNombre.set('Mariano');
+    component.altaApellido.set('López');
+    component.altaIdentificador.set('DNI');
+    component.altaNumeroIdentificador.set('40.123.456');
+    component.altaFechaNacimiento.set('1998-02-14');
+    component.altaSexo.set('MASCULINO');
+    component.altaEmail.set('mariano@example.com');
+    component.altaTelefono.set('1133445566');
+    component.altaPassword.set('Clave#123');
+    component.altaRole.set('ROLE_USUARIO');
+
+    component.crearUsuario();
+
+    const reqPost = httpMock.expectOne(`${environment.apiUrl}/admin/users`);
+    expect(reqPost.request.body.numeroIdentificador).toBe('40123456');
+    reqPost.flush({ ...mockUsuarios[0], id: 4 });
+    httpMock.expectOne(`${environment.apiUrl}/auth/usuarios`).flush(mockUsuarios);
   });
 
   it('opens modal edicion with populated user data and saves update', () => {
