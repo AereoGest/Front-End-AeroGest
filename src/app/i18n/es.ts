@@ -640,6 +640,7 @@ export const es = {
   'adminFlights.seatsSection': 'Asientos por categoría',
   'adminFlights.seatsCapacityHint': 'Configurados: {assigned} / {capacity} máx.',
   'adminFlights.seatsAssignedHint': 'Configurados: {assigned}',
+  'adminFlights.seatsSelectAircraftFirst': 'Elegí un avión para configurar los asientos',
   'adminFlights.seatsFirst': 'Primera clase',
   'adminFlights.seatsBusiness': 'Ejecutiva',
   'adminFlights.seatsEconomy': 'Económica',
