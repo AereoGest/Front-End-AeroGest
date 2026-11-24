@@ -7,6 +7,8 @@ export interface CarritoItem {
   vueloId: number;
   cantidad: number;
   claseVuelo: ClaseVuelo;
+  /** Asientos libres que quedan en el vuelo (tope de pasajes). */
+  asientosDisponibles?: number;
 }
 
 /** Carrito tal como lo devuelve GET /api/carrito. */

@@ -76,6 +76,15 @@
   font-size: 13px;
   color: var(--texto-suave);
 }
+.item-aviso {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-text);
+}
+.item-aviso--error {
+  color: var(--danger);
+}
 
 .item-cantidad {
   display: flex;
