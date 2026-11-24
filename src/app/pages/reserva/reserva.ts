@@ -21,6 +21,7 @@ import {
 } from '../../services/checkout-service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { I18nService } from '../../services/i18n';
+import { DatePickerDirective } from '../../components/date-picker/date-picker';
 
 // Qué salió mal al cargar la página. El texto de cada caso está en el html.
 type ErrorCarga = ErrorCarrito | 'servidor';
@@ -47,7 +48,7 @@ function hoyLocal(): string {
 @Component({
   selector: 'app-reserva',
   standalone: true,
-  imports: [RouterLink, FormField, TranslatePipe],
+  imports: [RouterLink, FormField, TranslatePipe, DatePickerDirective],
   templateUrl: './reserva.html',
   styleUrl: './reserva.css',
 })
@@ -58,6 +59,8 @@ export class Reserva implements OnInit {
 
   protected readonly tiposDocumento = TIPOS_DOCUMENTO;
   protected readonly etiquetaEquipaje = etiquetaEquipaje;
+  protected readonly fechaMinimaNacimiento = '1900-01-01';
+  protected readonly fechaMaximaNacimiento = hoyLocal();
 
   protected readonly vuelo = this.checkout.vuelo;
   protected readonly equipajes = this.checkout.equipajes;

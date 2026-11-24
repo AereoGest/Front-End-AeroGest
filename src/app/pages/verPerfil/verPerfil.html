@@ -137,7 +137,8 @@
         </div>
 
         <div class="field">
-          <input id="p-nacimiento" type="date" class="field-input" autocomplete="bday" [attr.max]="fechaMaxima"
+          <input id="p-nacimiento" type="date" class="field-input" autocomplete="bday"
+            [attr.min]="fechaMinima" [attr.max]="fechaMaxima"
             [formField]="perfilForm.fechaNacimiento"
             [attr.aria-invalid]="errorVisible(perfilForm.fechaNacimiento)" aria-describedby="p-nacimiento-error" />
           <label class="field-label" for="p-nacimiento">{{ 'profile.birthDate' | translate }}</label>

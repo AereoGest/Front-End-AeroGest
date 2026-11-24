@@ -122,8 +122,9 @@
 
             <label class="form-group">
               <span>{{ 'booking.birthDate' | translate }}</span>
-              <input type="date" class="form-control" [formField]="campos.fechaNacimiento"
-                (click)="$any($event.target).showPicker?.()" />
+              <input type="date" class="form-control"
+                [attr.min]="fechaMinimaNacimiento" [attr.max]="fechaMaximaNacimiento"
+                [formField]="campos.fechaNacimiento" />
               @if (campos.fechaNacimiento().touched() && campos.fechaNacimiento().invalid()) {
                 <small class="form-error" role="alert">
                   @switch (campos.fechaNacimiento().errors()[0].kind) {

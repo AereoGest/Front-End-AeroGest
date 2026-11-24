@@ -280,4 +280,14 @@ describe('UsuariosAdmin', () => {
     expect(component.orden()).toBe('NOMBRE_ASC');
     expect(component.hayFiltros()).toBe(false);
   });
+
+  it('valida que la fecha de nacimiento no sea anterior al 01/01/1900', () => {
+    expectInitialLoad();
+    component.abrirModalAlta();
+    component.altaFechaNacimiento.set('1899-12-31');
+    expect(component.erroresAlta().fechaNacimiento).toBe('booking.birthDateMin');
+
+    component.altaFechaNacimiento.set('1900-01-01');
+    expect(component.erroresAlta().fechaNacimiento).toBeUndefined();
+  });
 });

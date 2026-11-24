@@ -71,7 +71,8 @@ describe('DatePickerDirective & DatePickerPopover', () => {
   });
 
   it('deshabilita fechas fuera del rango min/max y permite limpiar la fecha', () => {
-    host.fecha.set('1900-01-10');
+    host.min.set('1995-05-10');
+    host.max.set('1995-05-18');
     fixture.detectChanges();
 
     const input = fixture.nativeElement.querySelector('#test-date') as HTMLInputElement;
@@ -79,8 +80,13 @@ describe('DatePickerDirective & DatePickerPopover', () => {
     fixture.detectChanges();
 
     const popover = document.querySelector('.ag-datepicker') as HTMLElement;
-    const diaAnterior1900 = popover.querySelector('button[data-date="1899-12-31"]') as HTMLButtonElement;
-    expect(diaAnterior1900?.disabled).toBe(true);
+    const diaAntesMin = popover.querySelector('button[data-date="1995-05-09"]') as HTMLButtonElement;
+    const diaEnRango = popover.querySelector('button[data-date="1995-05-15"]') as HTMLButtonElement;
+    const diaDespuesMax = popover.querySelector('button[data-date="1995-05-19"]') as HTMLButtonElement;
+
+    expect(diaAntesMin.disabled).toBe(true);
+    expect(diaEnRango.disabled).toBe(false);
+    expect(diaDespuesMax.disabled).toBe(true);
 
     const btnLimpiar = popover.querySelector('.ag-datepicker__action') as HTMLButtonElement;
     btnLimpiar.click();

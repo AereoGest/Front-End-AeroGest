@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { DatePickerDirective } from '../../../components/date-picker/date-picker';
 import type { TranslationKey } from '../../../i18n/es';
 import { VentaService } from '../../../services/venta-service';
 import { MetodoPago, Transaccion, VentaDiaria } from '../../../Models/Venta';
@@ -11,7 +12,7 @@ type RangoRapido = 7 | 30 | 90 | null;
 @Component({
   selector: 'app-ventas-admin',
   standalone: true,
-  imports: [DatePipe, TranslatePipe],
+  imports: [DatePipe, TranslatePipe, DatePickerDirective],
   templateUrl: './ventas-admin.html',
   styleUrl: './ventas-admin.css',
 })

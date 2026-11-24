@@ -323,6 +323,8 @@
                   [id]="'p-nac-' + idx"
                   type="date"
                   class="form-control"
+                  [attr.min]="fechaMinimaNacimiento"
+                  [attr.max]="fechaMaximaNacimiento"
                   [attr.aria-invalid]="!!err.fechaNacimiento"
                   [ngModel]="pasajero.fechaNacimiento"
                   (ngModelChange)="actualizarPasajero(idx, 'fechaNacimiento', $event)"

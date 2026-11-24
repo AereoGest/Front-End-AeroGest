@@ -7,6 +7,7 @@ import { VueloService } from '../../../services/vuelo';
 import { Asignacion, EmpleadoAsignacion, RolEmpleado } from '../../../Models/Asignacion';
 import { Vuelo } from '../../../Models/Vuelo';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { DatePickerDirective } from '../../../components/date-picker/date-picker';
 import { I18nService } from '../../../services/i18n';
 import type { TranslationKey } from '../../../i18n/es';
 
@@ -24,7 +25,7 @@ interface EmpleadoOpcion {
 @Component({
   selector: 'app-asignaciones-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe, TranslatePipe],
+  imports: [CommonModule, FormsModule, DatePipe, TranslatePipe, DatePickerDirective],
   templateUrl: './asignaciones-admin.html',
   styleUrl: './asignaciones-admin.css',
 })

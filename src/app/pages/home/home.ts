@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { I18nService } from '../../services/i18n';
+import { DatePickerDirective, formatearFechaIsoLocal } from '../../components/date-picker/date-picker';
 
 interface Destino {
   ciudad: string;
@@ -16,7 +17,7 @@ interface Destino {
 }
 
 @Component({
-  imports: [FormsModule, RouterLink, TranslatePipe],
+  imports: [FormsModule, RouterLink, TranslatePipe, DatePickerDirective],
   selector: 'app-home',
   styleUrl: './home.css',
   templateUrl: './home.html',
@@ -24,6 +25,7 @@ interface Destino {
 export class Home {
   private readonly router = inject(Router);
   protected readonly i18n = inject(I18nService);
+  protected readonly hoy = formatearFechaIsoLocal(new Date());
 
   // Buscador
   origen = 'Buenos Aires (EZE)';

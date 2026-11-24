@@ -55,7 +55,7 @@
           <div class="search-row search-row-1" id="fechas-row">
             <div class="form-group">
               <label for="fecha-ida">{{ 'home.departureDate' | translate }}</label>
-              <input type="date" id="fecha-ida" name="fechaIda" class="form-control" [(ngModel)]="fechaIda" />
+              <input type="date" id="fecha-ida" name="fechaIda" class="form-control" [attr.min]="hoy" [(ngModel)]="fechaIda" />
             </div>
           </div>
 

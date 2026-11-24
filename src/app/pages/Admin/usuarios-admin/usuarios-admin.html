@@ -222,6 +222,8 @@
           <div class="form-row">
             <div class="field">
               <input id="alta-fecha-nac" class="field-input" type="date"
+                     [attr.min]="fechaMinimaNacimiento"
+                     [attr.max]="fechaMaximaNacimiento"
                      [attr.aria-invalid]="!!errA.fechaNacimiento"
                      [ngModel]="altaFechaNacimiento()" (ngModelChange)="altaFechaNacimiento.set($event)"
                      name="altaFechaNacimiento" />
@@ -359,6 +361,8 @@
           <div class="form-row">
             <div class="field">
               <input id="edit-fecha-nac" class="field-input" type="date"
+                     [attr.min]="fechaMinimaNacimiento"
+                     [attr.max]="fechaMaximaNacimiento"
                      [attr.aria-invalid]="!!errE.fechaNacimiento"
                      [ngModel]="editFechaNacimiento()" (ngModelChange)="editFechaNacimiento.set($event)"
                      name="editFechaNacimiento" />

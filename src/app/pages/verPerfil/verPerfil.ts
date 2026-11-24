@@ -16,6 +16,7 @@ import { DatosPerfil, GENEROS, Perfil, TIPOS_DOCUMENTO } from '../../Models/Perf
 import { Auth } from '../../services/auth';
 
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { DatePickerDirective } from '../../components/date-picker/date-picker';
 
 const SOLO_LETRAS = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/;
 const SOLO_DIGITOS = /^\d+$/;
@@ -35,7 +36,7 @@ const DATOS_VACIOS: DatosPerfil = {
 
 @Component({
   selector: 'app-ver-perfil',
-  imports: [FormField, RouterLink, TranslatePipe],
+  imports: [FormField, RouterLink, TranslatePipe, DatePickerDirective],
   templateUrl: './verPerfil.html',
   styleUrl: './verPerfil.css',
 })

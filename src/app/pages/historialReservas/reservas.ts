@@ -7,6 +7,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { I18nService } from '../../services/i18n';
 import type { TranslationKey } from '../../i18n/es';
 import { Checkinonline } from '../check-in-online/check-in-online';
+import { DatePickerDirective } from '../../components/date-picker/date-picker';
 
 const ESTADOS_ACTIVOS: EstadoReserva[] = ['CONFIRMADO', 'PROCESANDO', 'ACTIVO'];
 
@@ -32,7 +33,7 @@ const MOTIVOS_CANCELACION: Record<string, TranslationKey> = {
 @Component({
   selector: 'app-reservas',
   standalone: true,
-  imports: [RouterLink, TranslatePipe, Checkinonline],
+  imports: [RouterLink, TranslatePipe, Checkinonline, DatePickerDirective],
   templateUrl: './reservas.html',
   styleUrl: './reservas.css',
 })

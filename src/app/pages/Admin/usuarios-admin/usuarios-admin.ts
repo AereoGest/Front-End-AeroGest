@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { DatePickerDirective } from '../../../components/date-picker/date-picker';
 import type { TranslationKey } from '../../../i18n/es';
 import { UsuarioService } from '../../../services/usuario-service';
 import { I18nService } from '../../../services/i18n';
@@ -52,7 +53,7 @@ function hoyLocal(): string {
 @Component({
   selector: 'app-usuarios-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, DatePickerDirective],
   templateUrl: './usuarios-admin.html',
   styleUrl: './usuarios-admin.css',
 })

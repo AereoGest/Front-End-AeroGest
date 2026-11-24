@@ -226,6 +226,8 @@
             id="p-fecha-nac"
             type="date"
             class="form-control"
+            [attr.min]="fechaMinimaNacimiento"
+            [attr.max]="fechaMaximaNacimiento"
             [attr.aria-invalid]="!!err.fechaNacimiento"
             [ngModel]="editFechaNacimiento()"
             (ngModelChange)="editFechaNacimiento.set($event)"

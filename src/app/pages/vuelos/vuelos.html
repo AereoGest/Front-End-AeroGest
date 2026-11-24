@@ -15,6 +15,7 @@
 
       <fieldset class="field">
         <input id="v-fecha" type="date" class="field-input" placeholder=" "
+          [attr.min]="hoy"
           [value]="fechaIda()" (input)="fechaIda.set($any($event.target).value)" />
         <label class="field-label" for="v-fecha">{{ 'flights.departureDate' | translate }}</label>
       </fieldset>

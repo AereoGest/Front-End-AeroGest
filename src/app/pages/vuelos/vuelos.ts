@@ -8,13 +8,14 @@ import { CarritoService } from '../../services/carritoService';
 import { Auth } from '../../services/auth';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { I18nService } from '../../services/i18n';
+import { DatePickerDirective, formatearFechaIsoLocal } from '../../components/date-picker/date-picker';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-vuelos',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [CommonModule, TranslatePipe, DatePickerDirective],
   templateUrl: './vuelos.html',
   styleUrl: './vuelos.css',
 })
@@ -25,6 +26,7 @@ export class Vuelos implements OnInit {
   private readonly carritoService = inject(CarritoService);
   private readonly auth = inject(Auth);
   protected readonly i18n = inject(I18nService);
+  protected readonly hoy = formatearFechaIsoLocal(new Date());
 
   protected readonly vuelos = signal<Vuelo[]>([]);
   protected readonly vueloDetalle = signal<Vuelo | null>(null);

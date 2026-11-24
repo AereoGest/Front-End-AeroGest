@@ -1,6 +1,7 @@
 import { Component, HostListener, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DatePickerDirective } from '../../../components/date-picker/date-picker';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ReservaService } from '../../../services/reservaService';
 import { Asiento, AsientoService } from '../../../services/asiento';
@@ -52,7 +53,7 @@ function hoyLocal(): string {
 @Component({
   selector: 'app-pasajes-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, DatePickerDirective],
   templateUrl: './pasajes-admin.html',
   styleUrl: './pasajes-admin.css',
 })
@@ -62,6 +63,8 @@ export class PasajesAdmin implements OnInit {
   private readonly equipajeService = inject(EquipajeService);
   private readonly asistenciaService = inject(AsistenciaService);
   protected readonly i18n = inject(I18nService);
+  protected readonly fechaMinimaNacimiento = '1900-01-01';
+  protected readonly fechaMaximaNacimiento = hoyLocal();
 
   protected readonly tiposDocumento = TIPOS_DOCUMENTO;
   protected readonly clasesVuelo: readonly ClaseVuelo[] = ['ECONOMICA', 'TURISTA', 'BUSINESS', 'PRIMERA'];

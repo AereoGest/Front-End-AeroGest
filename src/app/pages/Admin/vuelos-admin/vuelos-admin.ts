@@ -10,6 +10,7 @@ import { Aeropuerto } from '../../../Models/Aeropuerto';
 import { Avion } from '../../../Models/Avion';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { AeropuertoAutocompletar } from '../../../components/aeropuerto-autocompletar/aeropuerto-autocompletar';
+import { DatePickerDirective } from '../../../components/date-picker/date-picker';
 import { I18nService } from '../../../services/i18n';
 import type { TranslationKey } from '../../../i18n/es';
 
@@ -34,7 +35,7 @@ const MINUTOS = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '
 @Component({
   selector: 'app-vuelos-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, AeropuertoAutocompletar],
+  imports: [CommonModule, FormsModule, TranslatePipe, AeropuertoAutocompletar, DatePickerDirective],
   templateUrl: './vuelos-admin.html',
   styleUrl: './vuelos-admin.css',
 })
