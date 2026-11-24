@@ -1,0 +1,207 @@
+.ag-datepicker {
+  position: fixed;
+  z-index: 3000;
+  width: 304px;
+  padding: 14px;
+  background: var(--bg-elevated);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-body);
+  user-select: none;
+  animation: ag-datepicker-in 0.16s ease-out;
+}
+
+@keyframes ag-datepicker-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.ag-datepicker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.ag-datepicker__nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-subtle);
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.ag-datepicker__nav:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.ag-datepicker__nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.ag-datepicker__selects {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ag-datepicker__select {
+  height: 30px;
+  padding: 0 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-subtle);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.ag-datepicker__select--mes {
+  flex: 1;
+  min-width: 0;
+}
+
+.ag-datepicker__select--anio {
+  width: 78px;
+}
+
+.ag-datepicker__select:hover,
+.ag-datepicker__select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--focus);
+}
+
+.ag-datepicker__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.ag-datepicker__weekday {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+
+.ag-datepicker__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.ag-datepicker__day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.ag-datepicker__day:hover:not(:disabled):not(.is-selected) {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+
+.ag-datepicker__day.is-outside {
+  color: var(--text-subtle);
+  opacity: 0.55;
+}
+
+.ag-datepicker__day.is-today:not(.is-selected) {
+  border-color: var(--accent);
+  color: var(--accent-text);
+  font-weight: 700;
+}
+
+.ag-datepicker__day.is-selected {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 700;
+}
+
+.ag-datepicker__day:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.ag-datepicker__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.ag-datepicker__action {
+  padding: 5px 10px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+
+.ag-datepicker__action:hover:not(:disabled) {
+  background: var(--bg-inset);
+  color: var(--text);
+}
+
+.ag-datepicker__action--today {
+  color: var(--accent-text);
+}
+
+.ag-datepicker__action--today:hover:not(:disabled) {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+.ag-datepicker__action:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

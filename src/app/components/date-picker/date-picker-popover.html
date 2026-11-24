@@ -1,0 +1,90 @@
+<div
+  class="ag-datepicker"
+  role="dialog"
+  aria-modal="false"
+  [style.top.px]="top()"
+  [style.left.px]="left()"
+  (mousedown)="$event.stopPropagation()">
+
+  <header class="ag-datepicker__header">
+    <button
+      type="button"
+      class="ag-datepicker__nav"
+      [disabled]="!puedeMesAnterior()"
+      [attr.aria-label]="'datePicker.prevMonth' | translate"
+      (click)="cambiarMes(-1)">
+      ‹
+    </button>
+
+    <div class="ag-datepicker__selects">
+      <select
+        class="ag-datepicker__select ag-datepicker__select--mes"
+        [attr.aria-label]="'datePicker.month' | translate"
+        [ngModel]="mesVista()"
+        (ngModelChange)="onMesChange($event)">
+        @for (m of mesesDisponibles(); track m.indice) {
+          <option [ngValue]="m.indice">{{ m.etiqueta }}</option>
+        }
+      </select>
+
+      <select
+        class="ag-datepicker__select ag-datepicker__select--anio"
+        [attr.aria-label]="'datePicker.year' | translate"
+        [ngModel]="anioVista()"
+        (ngModelChange)="onAnioChange($event)">
+        @for (a of aniosDisponibles(); track a) {
+          <option [ngValue]="a">{{ a }}</option>
+        }
+      </select>
+    </div>
+
+    <button
+      type="button"
+      class="ag-datepicker__nav"
+      [disabled]="!puedeMesSiguiente()"
+      [attr.aria-label]="'datePicker.nextMonth' | translate"
+      (click)="cambiarMes(1)">
+      ›
+    </button>
+  </header>
+
+  <div class="ag-datepicker__weekdays">
+    @for (d of diasSemana(); track d) {
+      <span class="ag-datepicker__weekday">{{ d }}</span>
+    }
+  </div>
+
+  <div class="ag-datepicker__grid" role="grid">
+    @for (celda of celdasDias(); track celda.fechaIso) {
+      <button
+        type="button"
+        class="ag-datepicker__day"
+        [class.is-outside]="!celda.delMesActual"
+        [class.is-today]="celda.esHoy"
+        [class.is-selected]="celda.seleccionado"
+        [disabled]="celda.deshabilitado"
+        [attr.aria-selected]="celda.seleccionado"
+        [attr.data-date]="celda.fechaIso"
+        (click)="seleccionarDia(celda)">
+        {{ celda.numero }}
+      </button>
+    }
+  </div>
+
+  <footer class="ag-datepicker__footer">
+    <button
+      type="button"
+      class="ag-datepicker__action"
+      (click)="limpiar()">
+      {{ 'datePicker.clear' | translate }}
+    </button>
+
+    <button
+      type="button"
+      class="ag-datepicker__action ag-datepicker__action--today"
+      [disabled]="!hoyHabilitado()"
+      (click)="seleccionarHoy()">
+      {{ 'datePicker.today' | translate }}
+    </button>
+  </footer>
+</div>
