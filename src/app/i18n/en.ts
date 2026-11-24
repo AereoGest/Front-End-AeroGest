@@ -813,7 +813,7 @@ export const en: Record<TranslationKey, string> = {
   'adminTickets.noExtras': 'No extras',
   'adminTickets.editTicket': 'Edit',
   'adminTickets.cancelTicket': 'Deactivate',
-  'adminTickets.bookingCanceledNotice': 'Booking canceled (read-only)',
+  'adminTickets.bookingCanceledNotice': 'Booking canceled',
   'adminTickets.editModalTitle': 'Edit associated ticket',
   'adminTickets.editModalSubtitle': 'Update passenger details, class, available seat, baggage, or assistance. The booking total will be automatically recalculated.',
   'adminTickets.saving': 'Saving changes...',

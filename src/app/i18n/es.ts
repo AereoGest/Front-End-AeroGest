@@ -811,7 +811,7 @@ export const es = {
   'adminTickets.noExtras': 'Sin extras',
   'adminTickets.editTicket': 'Modificar',
   'adminTickets.cancelTicket': 'Dar de baja',
-  'adminTickets.bookingCanceledNotice': 'Reserva cancelada (solo lectura)',
+  'adminTickets.bookingCanceledNotice': 'Reserva cancelada',
   'adminTickets.editModalTitle': 'Modificar pasaje asociado',
   'adminTickets.editModalSubtitle': 'Actualizá los datos del pasajero, clase, asiento libre, equipajes o asistencia. El importe total de la reserva se recalculará automáticamente.',
   'adminTickets.saving': 'Guardando cambios...',
