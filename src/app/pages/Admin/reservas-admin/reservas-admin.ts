@@ -1,7 +1,6 @@
 import { Component, HostListener, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DatePickerDirective } from '../../../components/date-picker/date-picker';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ReservaService } from '../../../services/reservaService';
 import { VueloService } from '../../../services/vuelo';
@@ -25,7 +24,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { I18nService } from '../../../services/i18n';
 import type { TranslationKey } from '../../../i18n/es';
 
-type FiltroTab = 'TODAS' | 'ACTIVAS' | 'CONFIRMADAS' | 'PROCESANDO' | 'CANCELADAS';
+type FiltroTab = 'TODAS' | 'CONFIRMADAS' | 'PROCESANDO' | 'FINALIZADAS' | 'CANCELADAS';
 type Toast = { texto: string; tipo: 'exito' | 'info' | 'error' };
 
 // Debe coincidir con la duración de las animaciones overlay-out / modal-out del CSS (igual que vuelos-admin)
@@ -77,7 +76,7 @@ function hoyLocal(): string {
 @Component({
   selector: 'app-reservas-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, DatePickerDirective],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './reservas-admin.html',
   styleUrl: './reservas-admin.css',
 })
@@ -88,8 +87,6 @@ export class ReservasAdmin implements OnInit {
   private readonly equipajeService = inject(EquipajeService);
   private readonly asistenciaService = inject(AsistenciaService);
   protected readonly i18n = inject(I18nService);
-  protected readonly fechaMinimaNacimiento = '1900-01-01';
-  protected readonly fechaMaximaNacimiento = hoyLocal();
 
   protected readonly tiposDocumento = TIPOS_DOCUMENTO;
   protected readonly clasesVuelo: readonly ClaseVuelo[] = ['ECONOMICA', 'TURISTA', 'BUSINESS', 'PRIMERA'];
@@ -169,14 +166,14 @@ export class ReservasAdmin implements OnInit {
   });
 
   protected readonly totalTodas = computed(() => this.reservasBuscadas().length);
-  protected readonly totalActivas = computed(
-    () => this.reservasBuscadas().filter((r) => r.estadoReserva !== 'CANCELADA').length
-  );
   protected readonly totalConfirmadas = computed(
-    () => this.reservasBuscadas().filter((r) => r.estadoReserva === 'CONFIRMADO' || r.estadoReserva === 'ACTIVO').length
+    () => this.reservasBuscadas().filter((r) => this.coincideTab(r, 'CONFIRMADAS')).length
   );
   protected readonly totalProcesando = computed(
-    () => this.reservasBuscadas().filter((r) => r.estadoReserva === 'PROCESANDO').length
+    () => this.reservasBuscadas().filter((r) => this.coincideTab(r, 'PROCESANDO')).length
+  );
+  protected readonly totalFinalizadas = computed(
+    () => this.reservasBuscadas().filter((r) => this.coincideTab(r, 'FINALIZADAS')).length
   );
   protected readonly totalCanceladas = computed(
     () => this.reservasBuscadas().filter((r) => r.estadoReserva === 'CANCELADA').length
@@ -185,20 +182,7 @@ export class ReservasAdmin implements OnInit {
   protected readonly reservasFiltradas = computed(() => {
     const tab = this.tabActiva();
     const base = this.reservasBuscadas();
-    const filtradas = base.filter((r) => {
-      switch (tab) {
-        case 'ACTIVAS':
-          return r.estadoReserva !== 'CANCELADA';
-        case 'CONFIRMADAS':
-          return r.estadoReserva === 'CONFIRMADO' || r.estadoReserva === 'ACTIVO';
-        case 'PROCESANDO':
-          return r.estadoReserva === 'PROCESANDO';
-        case 'CANCELADAS':
-          return r.estadoReserva === 'CANCELADA';
-        default:
-          return true;
-      }
-    });
+    const filtradas = base.filter((r) => this.coincideTab(r, tab));
 
     return [...filtradas].sort(
       (a, b) => (new Date(b.fechaReserva).getTime() || 0) - (new Date(a.fechaReserva).getTime() || 0)
@@ -228,9 +212,8 @@ export class ReservasAdmin implements OnInit {
       if (apellido && !SOLO_LETRAS.test(apellido)) e.apellido = 'booking.lastNamePattern';
       else if (!apellido && intento) e.apellido = 'booking.lastNameRequired';
 
-      // Fecha de nacimiento: desde 01/01/1900 y anterior a hoy
-      if (p.fechaNacimiento && p.fechaNacimiento < '1900-01-01') e.fechaNacimiento = 'booking.birthDateMin';
-      else if (p.fechaNacimiento && p.fechaNacimiento >= hoy) e.fechaNacimiento = 'booking.birthDateFuture';
+      // Fecha de nacimiento: tiene que ser anterior a hoy
+      if (p.fechaNacimiento && p.fechaNacimiento >= hoy) e.fechaNacimiento = 'booking.birthDateFuture';
       else if (!p.fechaNacimiento && intento) e.fechaNacimiento = 'booking.birthDateRequired';
 
       // Documento: formato según el tipo y que no se repita entre pasajeros
@@ -466,7 +449,7 @@ export class ReservasAdmin implements OnInit {
 
   protected abrirModalEdicion(reserva: Reserva, event?: Event): void {
     event?.stopPropagation();
-    if (reserva.estadoReserva === 'CANCELADA') return;
+    if (reserva.estadoReserva === 'CANCELADA' || this.estaFinalizada(reserva)) return;
 
     this.limpiarMensajes();
     this.errorFormularioEdicion.set('');
@@ -520,7 +503,7 @@ export class ReservasAdmin implements OnInit {
 
   protected abrirModalBaja(reserva: Reserva, event?: Event): void {
     event?.stopPropagation();
-    if (reserva.estadoReserva === 'CANCELADA') return;
+    if (reserva.estadoReserva === 'CANCELADA' || this.estaFinalizada(reserva)) return;
 
     this.limpiarMensajes();
     this.cerrandoBaja.set(false);
@@ -617,6 +600,51 @@ export class ReservasAdmin implements OnInit {
 
   protected estadoKey(estado: EstadoReserva): TranslationKey {
     return `adminBookings.status.${estado}` as TranslationKey;
+  }
+
+  // ===================== Reservas finalizadas =====================
+
+  /** Si la reserva entra en la pestaña. Las finalizadas solo aparecen en "Finalizadas" (y en "Todas"). */
+  private coincideTab(r: Reserva, tab: FiltroTab): boolean {
+    const finalizada = this.estaFinalizada(r);
+    switch (tab) {
+      case 'CONFIRMADAS':
+        return !finalizada && (r.estadoReserva === 'CONFIRMADO' || r.estadoReserva === 'ACTIVO');
+      case 'PROCESANDO':
+        return !finalizada && r.estadoReserva === 'PROCESANDO';
+      case 'FINALIZADAS':
+        return finalizada;
+      case 'CANCELADAS':
+        return r.estadoReserva === 'CANCELADA';
+      default:
+        return true;
+    }
+  }
+
+  /** El vuelo ya salió y la reserva no está cancelada. */
+  protected estaFinalizada(r: Reserva): boolean {
+    if (r.estadoReserva === 'CANCELADA') return false;
+    const salida = this.salidaVuelo(r);
+    return !!salida && salida.getTime() < Date.now();
+  }
+
+  /** Texto del badge: "Finalizada" si el vuelo ya salió; si no, el estado del back. */
+  protected estadoReservaKey(r: Reserva): TranslationKey {
+    return this.estaFinalizada(r) ? 'adminBookings.status.FINALIZADA' : this.estadoKey(r.estadoReserva);
+  }
+
+  /** Fecha y hora de salida del vuelo (la más temprana de sus pasajes). */
+  private salidaVuelo(r: Reserva): Date | null {
+    const salidas = (r.pasajes ?? [])
+      .map((p) => p.vuelo)
+      .filter((v) => !!v?.fechaSalida)
+      .map((v) => {
+        // Se arma a mano: new Date('2026-11-20') la toma como UTC y en Argentina daría el día anterior
+        const [anio, mes, dia] = v.fechaSalida.split('-').map(Number);
+        const [hora, min] = (v.horaSalida ?? '00:00').split(':').map(Number);
+        return new Date(anio, mes - 1, dia, hora, min).getTime();
+      });
+    return salidas.length ? new Date(Math.min(...salidas)) : null;
   }
 
   protected formatearPrecio(valor: number): string {
