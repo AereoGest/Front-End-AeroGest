@@ -28,6 +28,7 @@ const SOLO_LETRAS = /^\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+(\s+[a-zA-Záéíóú�
 const DNI_REGEX = /^\d{7,8}$/;
 const PASAPORTE_REGEX = /^[A-Z0-9]{6,20}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const FECHA_NACIMIENTO_MIN = '1900-01-01';
 
 type CampoUsuario = 'nombre' | 'apellido' | 'documento' | 'fechaNacimiento' | 'email' | 'telefono' | 'password';
 type ErroresUsuario = Partial<Record<CampoUsuario, TranslationKey>>;
@@ -63,6 +64,8 @@ export class UsuariosAdmin implements OnInit {
   readonly rolesAsignables: RolUsuario[] = ['ROLE_USUARIO', 'ROLE_EMPLEADO', 'ROLE_ADMIN'];
   readonly tiposIdentificador: TipoIdentificador[] = ['DNI', 'PASAPORTE'];
   readonly sexos: Sexo[] = ['MASCULINO', 'FEMENINO', 'OTRO'];
+  readonly fechaMinimaNacimiento = FECHA_NACIMIENTO_MIN;
+  readonly fechaMaximaNacimiento = hoyLocal();
 
   readonly ordenes: { valor: Orden; key: TranslationKey }[] = [
     { valor: 'NOMBRE_ASC', key: 'adminUsers.sortNameAsc' },
@@ -219,7 +222,8 @@ export class UsuariosAdmin implements OnInit {
       e.documento = 'booking.docRequired';
     }
 
-    if (d.fechaNacimiento && d.fechaNacimiento >= hoyLocal()) e.fechaNacimiento = 'booking.birthDateFuture';
+    if (d.fechaNacimiento && d.fechaNacimiento < FECHA_NACIMIENTO_MIN) e.fechaNacimiento = 'booking.birthDateMin';
+    else if (d.fechaNacimiento && d.fechaNacimiento >= hoyLocal()) e.fechaNacimiento = 'booking.birthDateFuture';
     else if (!d.fechaNacimiento && intento) e.fechaNacimiento = 'booking.birthDateRequired';
 
     const email = d.email.trim();

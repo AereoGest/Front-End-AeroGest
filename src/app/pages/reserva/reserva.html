@@ -128,6 +128,7 @@
                 <small class="form-error" role="alert">
                   @switch (campos.fechaNacimiento().errors()[0].kind) {
                     @case ('required') { {{ 'booking.birthDateRequired' | translate }} }
+                    @case ('fechaMinima') { {{ 'booking.birthDateMin' | translate }} }
                     @case ('fechaFutura') { {{ 'booking.birthDateFuture' | translate }} }
                   }
                 </small>

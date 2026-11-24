@@ -10,7 +10,8 @@ import type { TranslationKey } from '../../../i18n/es';
 
 // Mismas reglas que valida el backend en AeropuertoDTO
 const CODIGO_IATA = /^[A-Za-z]{3}$/;
-const SOLO_LETRAS = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/;
+const SOLO_LETRAS = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ ]+$/;
+const NOMBRE_AEROPUERTO = /^(?=(?:.*[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]){4,})[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ ]+$/;
 
 type Toast = { texto: string; tipo: 'exito' | 'info' | 'error' };
 type CampoAeropuerto = 'nombre' | 'iata' | 'ciudad' | 'pais';
@@ -97,6 +98,7 @@ export class AeropuertosAdmin implements OnInit {
 
     const nombre = this.formNombre().trim();
     if (!nombre && intento) e.nombre = 'adminAirports.errNameRequired';
+    else if (nombre && !NOMBRE_AEROPUERTO.test(nombre)) e.nombre = 'adminAirports.errNameInvalid';
 
     // IATA: si tiene algo que no es letra se avisa enseguida; si le faltan letras, al guardar
     const iata = this.formCodigoIata().trim();

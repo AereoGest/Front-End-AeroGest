@@ -347,6 +347,7 @@ export const es = {
   'booking.passportPattern': 'El pasaporte debe tener entre 6 y 20 letras o números.',
   'booking.birthDateRequired': 'La fecha de nacimiento es obligatoria.',
   'booking.birthDateFuture': 'Ingresá una fecha de nacimiento válida.',
+  'booking.birthDateMin': 'La fecha de nacimiento debe ser posterior al 01/01/1900.',
   'booking.emailInvalid': 'El email no es válido.',
 
   // Pago
@@ -915,6 +916,7 @@ export const es = {
   'adminAirports.successDeleted': 'Aeropuerto dado de baja correctamente.',
   'adminAirports.toastDeleteCancelled': 'Se canceló la baja del aeropuerto {code}. No se realizaron cambios.',
   'adminAirports.errNameRequired': 'El nombre es obligatorio.',
+  'adminAirports.errNameInvalid': 'El nombre solo puede contener letras y espacios, con al menos 4 letras.',
   'adminAirports.errIataInvalid': 'El código IATA debe tener exactamente 3 letras.',
   'adminAirports.errCityInvalid': 'La ciudad es obligatoria y solo puede contener letras y espacios.',
   'adminAirports.errCountryInvalid': 'El país es obligatorio y solo puede contener letras y espacios.',
@@ -1052,7 +1054,17 @@ export const es = {
   'profile.lastNameError': 'Ingresá tu apellido, solo con letras y espacios.',
   'profile.phoneError': 'Ingresá un teléfono de hasta 15 dígitos.',
   'profile.genderError': 'Seleccioná un género.',
-  'profile.birthDateError': 'Ingresá una fecha de nacimiento anterior a hoy.',
+  'profile.birthDateError': 'Ingresá una fecha de nacimiento válida (desde 01/01/1900 y anterior a hoy).',
+
+  // Selector de fechas
+  'datePicker.placeholder': 'dd/mm/aaaa',
+  'datePicker.open': 'Abrir calendario',
+  'datePicker.prevMonth': 'Mes anterior',
+  'datePicker.nextMonth': 'Mes siguiente',
+  'datePicker.month': 'Mes',
+  'datePicker.year': 'Año',
+  'datePicker.today': 'Hoy',
+  'datePicker.clear': 'Limpiar',
 
   //PAGO
     'payment.fieldRequired': 'Este campo es obligatorio.',

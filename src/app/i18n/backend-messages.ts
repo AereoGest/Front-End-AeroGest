@@ -51,6 +51,9 @@ export const BACKEND_MESSAGES_TO_EN: Record<string, string> = {
   'El titular de la reserva es obligatorio': 'Reservation holder is required',
   'El valor de la reserva debe ser mayor o igual a cero': 'Reservation value must be greater than or equal to zero',
   'El estado de la reserva es obligatorio': 'Reservation status is required',
+  'El nombre solo puede contener letras y espacios, con al menos 4 letras.': 'Name may only contain letters and spaces, with at least 4 letters.',
+  'La fecha de nacimiento no puede ser anterior al 01/01/1900.': 'Date of birth cannot be earlier than 01/01/1900.',
+  'La fecha de nacimiento no puede ser anterior al 01/01/1900': 'Date of birth cannot be earlier than 01/01/1900',
 };
 
 export const BACKEND_MESSAGES_TO_ES: Record<string, string> = Object.entries(

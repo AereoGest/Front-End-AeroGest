@@ -63,15 +63,22 @@ describe('AeropuertosAdmin', () => {
     expect(component.filtrados().length).toBe(3);
   });
 
-  it('debe validar el formulario antes de enviar el alta', () => {
+  it('debe validar el formulario antes de enviar el alta (incluyendo mínimo 4 letras y sin caracteres especiales en nombre)', () => {
     component.abrirModalAlta();
     component.guardar();
-    expect(component.formularioError()).toBeTruthy();
+    expect(component.errores().nombre).toBe('adminAirports.errNameRequired');
+
+    for (const nombreInvalido of ['1234', 'Abc', 'A B C', 'Ezeiza (EZE)', 'Aero-1']) {
+      component.formNombre.set(nombreInvalido);
+      expect(component.errores().nombre).toBe('adminAirports.errNameInvalid');
+    }
 
     component.formNombre.set('Aeroparque');
+    expect(component.errores().nombre).toBeUndefined();
+
     component.formCodigoIata.set('AE');
     component.guardar();
-    expect(component.formularioError()).toBeTruthy();
+    expect(component.errores().iata).toBe('adminAirports.errIataInvalid');
   });
 
   it('debe crear un aeropuerto y recargar el listado', () => {

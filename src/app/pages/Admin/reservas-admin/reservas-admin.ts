@@ -225,8 +225,9 @@ export class ReservasAdmin implements OnInit {
       if (apellido && !SOLO_LETRAS.test(apellido)) e.apellido = 'booking.lastNamePattern';
       else if (!apellido && intento) e.apellido = 'booking.lastNameRequired';
 
-      // Fecha de nacimiento: tiene que ser anterior a hoy
-      if (p.fechaNacimiento && p.fechaNacimiento >= hoy) e.fechaNacimiento = 'booking.birthDateFuture';
+      // Fecha de nacimiento: desde 01/01/1900 y anterior a hoy
+      if (p.fechaNacimiento && p.fechaNacimiento < '1900-01-01') e.fechaNacimiento = 'booking.birthDateMin';
+      else if (p.fechaNacimiento && p.fechaNacimiento >= hoy) e.fechaNacimiento = 'booking.birthDateFuture';
       else if (!p.fechaNacimiento && intento) e.fechaNacimiento = 'booking.birthDateRequired';
 
       // Documento: formato según el tipo y que no se repita entre pasajeros

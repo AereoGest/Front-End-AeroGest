@@ -42,6 +42,7 @@ const DATOS_VACIOS: DatosPerfil = {
 export class VerPerfil {
   protected readonly tiposDocumento = TIPOS_DOCUMENTO;
   protected readonly generos = GENEROS;
+  protected readonly fechaMinima = '1900-01-01';
   protected readonly fechaMaxima = new Date().toISOString().split('T')[0];
 
   protected readonly perfil = signal<Perfil | null>(null);
@@ -82,9 +83,13 @@ export class VerPerfil {
     });
     required(campo.sexo);
     required(campo.fechaNacimiento);
-    validate(campo.fechaNacimiento, ({ value }) =>
-      value() && value() >= this.fechaMaxima ? { kind: 'fechaFutura' } : null,
-    );
+    validate(campo.fechaNacimiento, ({ value }) => {
+      const v = value();
+      if (!v) return null;
+      if (v < this.fechaMinima) return { kind: 'fechaMinima' };
+      if (v >= this.fechaMaxima) return { kind: 'fechaFutura' };
+      return null;
+    });
   });
 
   

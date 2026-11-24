@@ -104,9 +104,13 @@ export class Reserva implements OnInit {
       });
 
       required(pasajero.fechaNacimiento);
-      validate(pasajero.fechaNacimiento, ({ value }) =>
-        value() && value() >= hoyLocal() ? { kind: 'fechaFutura' } : undefined
-      );
+      validate(pasajero.fechaNacimiento, ({ value }) => {
+        const v = value();
+        if (!v) return undefined;
+        if (v < '1900-01-01') return { kind: 'fechaMinima' };
+        if (v >= hoyLocal()) return { kind: 'fechaFutura' };
+        return undefined;
+      });
 
       email(pasajero.email);
     });

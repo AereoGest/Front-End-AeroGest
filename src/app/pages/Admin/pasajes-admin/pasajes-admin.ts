@@ -161,9 +161,10 @@ export class PasajesAdmin implements OnInit {
     if (apellido && !SOLO_LETRAS.test(apellido)) e.apellido = 'booking.lastNamePattern';
     else if (!apellido && intento) e.apellido = 'booking.lastNameRequired';
 
-    // Fecha de nacimiento: opcional, pero si está tiene que ser anterior a hoy
+    // Fecha de nacimiento: opcional, pero si está tiene que ser desde 01/01/1900 y anterior a hoy
     const fechaNac = this.editFechaNacimiento();
-    if (fechaNac && fechaNac >= hoyLocal()) e.fechaNacimiento = 'booking.birthDateFuture';
+    if (fechaNac && fechaNac < '1900-01-01') e.fechaNacimiento = 'booking.birthDateMin';
+    else if (fechaNac && fechaNac >= hoyLocal()) e.fechaNacimiento = 'booking.birthDateFuture';
 
     // Documento: formato según el tipo, obligatorio al guardar
     const doc = normalizarDocumento(this.editDocumento());

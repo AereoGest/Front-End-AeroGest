@@ -349,6 +349,7 @@ export const en: Record<TranslationKey, string> = {
   'booking.passportPattern': 'Passport must have 6 to 20 letters or numbers.',
   'booking.birthDateRequired': 'Date of birth is required.',
   'booking.birthDateFuture': 'Enter a valid date of birth.',
+  'booking.birthDateMin': 'Date of birth must be on or after 01/01/1900.',
   'booking.emailInvalid': 'Email is not valid.',
 
   // Payment
@@ -917,6 +918,7 @@ export const en: Record<TranslationKey, string> = {
   'adminAirports.successDeleted': 'Airport deactivated successfully.',
   'adminAirports.toastDeleteCancelled': 'Deactivation of airport {code} was cancelled. No changes were made.',
   'adminAirports.errNameRequired': 'Name is required.',
+  'adminAirports.errNameInvalid': 'Name may only contain letters and spaces, with at least 4 letters.',
   'adminAirports.errIataInvalid': 'The IATA code must be exactly 3 letters.',
   'adminAirports.errCityInvalid': 'City is required and may only contain letters and spaces.',
   'adminAirports.errCountryInvalid': 'Country is required and may only contain letters and spaces.',
@@ -1053,7 +1055,17 @@ export const en: Record<TranslationKey, string> = {
   'profile.lastNameError': 'Enter your last name using only letters and spaces.',
   'profile.phoneError': 'Enter a phone number with up to 15 digits.',
   'profile.genderError': 'Select a gender.',
-  'profile.birthDateError': 'Enter a date of birth before today.',
+  'profile.birthDateError': 'Enter a valid date of birth (from 01/01/1900 and before today).',
+
+  // Date picker
+  'datePicker.placeholder': 'mm/dd/yyyy',
+  'datePicker.open': 'Open calendar',
+  'datePicker.prevMonth': 'Previous month',
+  'datePicker.nextMonth': 'Next month',
+  'datePicker.month': 'Month',
+  'datePicker.year': 'Year',
+  'datePicker.today': 'Today',
+  'datePicker.clear': 'Clear',
 
   //PAGO
     'payment.fieldRequired': 'This field is required.',
