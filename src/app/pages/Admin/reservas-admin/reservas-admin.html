@@ -55,17 +55,6 @@
         type="button"
         role="tab"
         class="tab"
-        [class.activa]="tabActiva() === 'ACTIVAS'"
-        [attr.aria-selected]="tabActiva() === 'ACTIVAS'"
-        (click)="tabActiva.set('ACTIVAS')"
-      >
-        {{ 'adminBookings.tabActive' | translate }}
-        <span class="tab-contador">{{ totalActivas() }}</span>
-      </button>
-      <button
-        type="button"
-        role="tab"
-        class="tab"
         [class.activa]="tabActiva() === 'CONFIRMADAS'"
         [attr.aria-selected]="tabActiva() === 'CONFIRMADAS'"
         (click)="tabActiva.set('CONFIRMADAS')"
@@ -83,6 +72,17 @@
       >
         {{ 'adminBookings.tabProcessing' | translate }}
         <span class="tab-contador">{{ totalProcesando() }}</span>
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="tab"
+        [class.activa]="tabActiva() === 'FINALIZADAS'"
+        [attr.aria-selected]="tabActiva() === 'FINALIZADAS'"
+        (click)="tabActiva.set('FINALIZADAS')"
+      >
+        {{ 'adminBookings.tabFinished' | translate }}
+        <span class="tab-contador">{{ totalFinalizadas() }}</span>
       </button>
       <button
         type="button"
@@ -126,11 +126,12 @@
               <span class="reserva-codigo">{{ codigoReserva(reserva) }}</span>
               <span
                 class="badge-estado"
-                [class.badge-confirmado]="reserva.estadoReserva === 'CONFIRMADO' || reserva.estadoReserva === 'ACTIVO'"
-                [class.badge-procesando]="reserva.estadoReserva === 'PROCESANDO'"
+                [class.badge-confirmado]="!estaFinalizada(reserva) && (reserva.estadoReserva === 'CONFIRMADO' || reserva.estadoReserva === 'ACTIVO')"
+                [class.badge-procesando]="!estaFinalizada(reserva) && reserva.estadoReserva === 'PROCESANDO'"
+                [class.badge-finalizada]="estaFinalizada(reserva)"
                 [class.badge-cancelada]="reserva.estadoReserva === 'CANCELADA'"
               >
-                {{ estadoKey(reserva.estadoReserva) | translate }}
+                {{ estadoReservaKey(reserva) | translate }}
               </span>
             </div>
 
@@ -173,7 +174,7 @@
               <button
                 type="button"
                 class="btn-accion btn-editar"
-                [disabled]="reserva.estadoReserva === 'CANCELADA'"
+                [disabled]="reserva.estadoReserva === 'CANCELADA' || estaFinalizada(reserva)"
                 (click)="abrirModalEdicion(reserva, $event)"
               >
                 {{ 'adminBookings.edit' | translate }}
@@ -182,7 +183,7 @@
               <button
                 type="button"
                 class="btn-accion btn-accion--peligro"
-                [disabled]="reserva.estadoReserva === 'CANCELADA'"
+                [disabled]="reserva.estadoReserva === 'CANCELADA' || estaFinalizada(reserva)"
                 (click)="abrirModalBaja(reserva, $event)"
               >
                 {{
@@ -323,8 +324,6 @@
                   [id]="'p-nac-' + idx"
                   type="date"
                   class="form-control"
-                  [attr.min]="fechaMinimaNacimiento"
-                  [attr.max]="fechaMaximaNacimiento"
                   [attr.aria-invalid]="!!err.fechaNacimiento"
                   [ngModel]="pasajero.fechaNacimiento"
                   (ngModelChange)="actualizarPasajero(idx, 'fechaNacimiento', $event)"
@@ -639,7 +638,7 @@
         </div>
         <div>
           <span class="detalle-label">{{ 'flights.status' | translate }}</span>
-          <strong>{{ estadoKey(rDet.estadoReserva) | translate }}</strong>
+          <strong>{{ estadoReservaKey(rDet) | translate }}</strong>
         </div>
         <div>
           <span class="detalle-label">{{ 'adminBookings.createdAt' | translate }}</span>
