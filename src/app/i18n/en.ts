@@ -278,6 +278,9 @@ export const en: Record<TranslationKey, string> = {
   'cart.subtotal': 'Subtotal',
   'cart.total': 'Total',
   'cart.checkout': 'Book now',
+  'cart.maxSeatsReached': 'No more free seats on this flight (max {count} tickets).',
+  'cart.notEnoughSeats': 'Not enough seats (free: {count}). Lower the quantity to book.',
+  'cart.noSeatsLeft': 'This flight has no free seats left.',
 
   // Seat selection
   'seats.progressFlight': 'Flight',

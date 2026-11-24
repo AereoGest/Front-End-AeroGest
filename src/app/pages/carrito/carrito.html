@@ -32,6 +32,17 @@
                   </h2>
                   <p class="item-detalle">{{ 'cart.class' | translate }}: {{ etiquetaClase(item.claseVuelo) }}</p>
                   <p class="item-detalle">{{ 'cart.flightNumber' | translate:{ id: item.vueloId } }}</p>
+                  @if (item.asientosDisponibles === 0) {
+                    <p class="item-aviso item-aviso--error" role="alert">{{ 'cart.noSeatsLeft' | translate }}</p>
+                  } @else if (excedeAsientos(item)) {
+                    <p class="item-aviso item-aviso--error" role="alert">
+                      {{ 'cart.notEnoughSeats' | translate:{ count: item.asientosDisponibles } }}
+                    </p>
+                  } @else if (!puedeSumarPasaje(item)) {
+                    <p class="item-aviso" role="status">
+                      {{ 'cart.maxSeatsReached' | translate:{ count: item.asientosDisponibles } }}
+                    </p>
+                  }
                 </div>
 
                 <div class="item-cantidad">
@@ -39,7 +50,7 @@
                     [disabled]="item.cantidad <= 1" (click)="cambiarCantidad(item, -1)">−</button>
                   <span aria-live="polite">{{ item.cantidad }}</span>
                   <button type="button" class="btn btn-dark" aria-label="Agregar un pasaje"
-                    (click)="cambiarCantidad(item, 1)">+</button>
+                    [disabled]="!puedeSumarPasaje(item)" (click)="cambiarCantidad(item, 1)">+</button>
                 </div>
 
                 <p class="item-precio">{{ formatearPrecio(subtotalItem(item)) }}</p>
@@ -51,7 +62,7 @@
                 <button
                   type="button"
                   class="btn btn-dark btn-reservar"
-                  [disabled]="cargando()"
+                  [disabled]="cargando() || excedeAsientos(item) || item.asientosDisponibles === 0"
                   [routerLink]="['/asientos']">
                   {{ 'cart.checkout' | translate }}
                 </button>

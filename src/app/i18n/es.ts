@@ -276,6 +276,9 @@ export const es = {
   'cart.subtotal': 'Subtotal',
   'cart.total': 'Total',
   'cart.checkout': 'Reservar',
+  'cart.maxSeatsReached': 'No quedan más asientos libres en este vuelo (máximo {count} pasajes).',
+  'cart.notEnoughSeats': 'No hay asientos suficientes (libres: {count}). Reducí la cantidad para reservar.',
+  'cart.noSeatsLeft': 'Este vuelo ya no tiene asientos libres.',
 
   // Selección de asientos
   'seats.progressFlight': 'Vuelo',

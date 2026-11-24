@@ -66,9 +66,23 @@ export class MiCarrito implements OnInit {
     }).add(() => this.cargando.set(false));
   }
 
+  /** Máximo de pasajes que se pueden pedir: los asientos libres del vuelo. */
+  protected maxPasajes(item: ItemConVuelo): number {
+    return item.asientosDisponibles ?? Number.POSITIVE_INFINITY;
+  }
+
+  protected puedeSumarPasaje(item: ItemConVuelo): boolean {
+    return item.cantidad < this.maxPasajes(item);
+  }
+
+  /** Se pidieron más pasajes de los que quedan (por ejemplo, porque otro cliente reservó mientras tanto). */
+  protected excedeAsientos(item: ItemConVuelo): boolean {
+    return item.cantidad > this.maxPasajes(item);
+  }
+
   protected cambiarCantidad(item: ItemConVuelo, cambio: number): void {
     const nuevaCantidad = item.cantidad + cambio;
-    if (nuevaCantidad < 1) {
+    if (nuevaCantidad < 1 || (cambio > 0 && nuevaCantidad > this.maxPasajes(item))) {
       return;
     }
 
