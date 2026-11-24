@@ -724,6 +724,11 @@ input[type='date'].form-control {
   background: var(--bg-inset);
   cursor: default;
 }
+.field-input:disabled {
+  opacity: 0.55;
+  background: var(--bg-inset);
+  cursor: not-allowed;
+}
 
 .field-label {
   position: absolute;

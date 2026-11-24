@@ -11,6 +11,7 @@ import { Avion } from '../../../Models/Avion';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { AeropuertoAutocompletar } from '../../../components/aeropuerto-autocompletar/aeropuerto-autocompletar';
 import { DatePickerDirective } from '../../../components/date-picker/date-picker';
+import { FiltroEntradaDirective } from '../../../directives/filtro-entrada';
 import { I18nService } from '../../../services/i18n';
 import type { TranslationKey } from '../../../i18n/es';
 
@@ -18,6 +19,10 @@ type FiltroEstado = 'TODOS' | 'ACTIVOS' | 'INACTIVOS';
 type ModoFormulario = 'ALTA' | 'EDICION';
 type CampoVuelo = 'origen' | 'destino' | 'avion' | 'asientos' | 'salida' | 'llegada' | 'precio';
 type Toast = { texto: string; tipo: 'exito' | 'info' | 'error' };
+
+// Límites de los campos numéricos del formulario
+const MAX_DIGITOS_ASIENTOS = 3;
+const MAX_DIGITOS_PRECIO = 9;
 
 // Mismas reglas que valida el backend (VueloService)
 const MAX_HORAS_DIRECTO = 18;
@@ -35,7 +40,7 @@ const MINUTOS = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '
 @Component({
   selector: 'app-vuelos-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, AeropuertoAutocompletar, DatePickerDirective],
+  imports: [CommonModule, FormsModule, TranslatePipe, AeropuertoAutocompletar, DatePickerDirective, FiltroEntradaDirective],
   templateUrl: './vuelos-admin.html',
   styleUrl: './vuelos-admin.css',
 })
@@ -93,6 +98,8 @@ export class VuelosAdmin implements OnInit {
   protected readonly fLlegadaMin = signal('');
   protected readonly fPrecio = signal<number | null>(null);
   protected readonly fEscala = signal(false);
+  protected readonly maxDigitosAsientos = MAX_DIGITOS_ASIENTOS;
+  protected readonly maxDigitosPrecio = MAX_DIGITOS_PRECIO;
   protected readonly fEstado = signal<EstadoVuelo>('PROGRAMADO');
 
   /** Al modificar, se pasó a CANCELADO un vuelo que no lo estaba: se van a cancelar sus reservas. */

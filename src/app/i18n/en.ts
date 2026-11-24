@@ -642,6 +642,7 @@ export const en: Record<TranslationKey, string> = {
   'adminFlights.seatsSection': 'Seats by category',
   'adminFlights.seatsCapacityHint': 'Configured: {assigned} / {capacity} max',
   'adminFlights.seatsAssignedHint': 'Configured: {assigned}',
+  'adminFlights.seatsSelectAircraftFirst': 'Choose an aircraft to configure the seats',
   'adminFlights.seatsFirst': 'First class',
   'adminFlights.seatsBusiness': 'Business',
   'adminFlights.seatsEconomy': 'Economy',

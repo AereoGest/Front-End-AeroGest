@@ -4,6 +4,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { Aeropuerto } from '../../Models/Aeropuerto';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { FiltroEntradaDirective } from '../../directives/filtro-entrada';
 
 // Espera desde la última tecla antes de recalcular las sugerencias
 const DEBOUNCE_BUSQUEDA_MS = 300;
@@ -22,7 +23,7 @@ const MAX_SUGERENCIAS = 8;
 @Component({
   selector: 'app-aeropuerto-autocompletar',
   standalone: true,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, FiltroEntradaDirective],
   templateUrl: './aeropuerto-autocompletar.html',
   styleUrl: './aeropuerto-autocompletar.css',
 })

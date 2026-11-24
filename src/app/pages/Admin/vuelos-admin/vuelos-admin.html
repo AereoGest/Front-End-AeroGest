@@ -14,13 +14,13 @@
     <!-- Buscador, debajo del título -->
     <form class="search-bar-form search-bar-form--debajo" (submit)="onBuscar($event)">
       <fieldset class="field">
-        <input id="a-origen" type="text" class="field-input" [placeholder]="'flights.originPlaceholder' | translate"
+        <input id="a-origen" type="text" class="field-input" appFiltroEntrada="letras" [placeholder]="'flights.originPlaceholder' | translate"
           [value]="origen()" (input)="origen.set($any($event.target).value)" />
         <label class="field-label" for="a-origen">{{ 'flights.origin' | translate }}</label>
       </fieldset>
 
       <fieldset class="field">
-        <input id="a-destino" type="text" class="field-input" [placeholder]="'flights.destinationPlaceholder' | translate"
+        <input id="a-destino" type="text" class="field-input" appFiltroEntrada="letras" [placeholder]="'flights.destinationPlaceholder' | translate"
           [value]="destino()" (input)="destino.set($any($event.target).value)" />
         <label class="field-label" for="a-destino">{{ 'flights.destination' | translate }}</label>
       </fieldset>
@@ -235,26 +235,35 @@
               @if (capacidadAvionSeleccionado(); as cap) {
                 {{ 'adminFlights.seatsCapacityHint' | translate:{ assigned: totalAsientosConfigurados(), capacity: cap } }}
               } @else {
-                {{ 'adminFlights.seatsAssignedHint' | translate:{ assigned: totalAsientosConfigurados() } }}
+                {{ 'adminFlights.seatsSelectAircraftFirst' | translate }}
               }
             </span>
           </div>
 
           <div class="form-row form-row--3">
             <div class="field">
-              <input id="f-asientos-primera" class="field-input" type="number" name="asientosPrimera" min="0" step="1" placeholder=" "
+              <input id="f-asientos-primera" class="field-input" type="number" inputmode="numeric"
+                appFiltroEntrada="entero" [maxDigitos]="maxDigitosAsientos" [valorMaximo]="capacidadAvionSeleccionado()"
+                [disabled]="!capacidadAvionSeleccionado()" [attr.max]="capacidadAvionSeleccionado()"
+                name="asientosPrimera" min="0" step="1" placeholder=" "
                 [attr.aria-invalid]="!!errores().asientos"
                 [ngModel]="fAsientosPrimera()" (ngModelChange)="fAsientosPrimera.set($event)" />
               <label class="field-label" for="f-asientos-primera">{{ 'adminFlights.seatsFirst' | translate }}</label>
             </div>
             <div class="field">
-              <input id="f-asientos-ejecutiva" class="field-input" type="number" name="asientosEjecutiva" min="0" step="1" placeholder=" "
+              <input id="f-asientos-ejecutiva" class="field-input" type="number" inputmode="numeric"
+                appFiltroEntrada="entero" [maxDigitos]="maxDigitosAsientos" [valorMaximo]="capacidadAvionSeleccionado()"
+                [disabled]="!capacidadAvionSeleccionado()" [attr.max]="capacidadAvionSeleccionado()"
+                name="asientosEjecutiva" min="0" step="1" placeholder=" "
                 [attr.aria-invalid]="!!errores().asientos"
                 [ngModel]="fAsientosEjecutiva()" (ngModelChange)="fAsientosEjecutiva.set($event)" />
               <label class="field-label" for="f-asientos-ejecutiva">{{ 'adminFlights.seatsBusiness' | translate }}</label>
             </div>
             <div class="field">
-              <input id="f-asientos-economica" class="field-input" type="number" name="asientosEconomica" min="0" step="1" placeholder=" "
+              <input id="f-asientos-economica" class="field-input" type="number" inputmode="numeric"
+                appFiltroEntrada="entero" [maxDigitos]="maxDigitosAsientos" [valorMaximo]="capacidadAvionSeleccionado()"
+                [disabled]="!capacidadAvionSeleccionado()" [attr.max]="capacidadAvionSeleccionado()"
+                name="asientosEconomica" min="0" step="1" placeholder=" "
                 [attr.aria-invalid]="!!errores().asientos"
                 [ngModel]="fAsientosEconomica()" (ngModelChange)="fAsientosEconomica.set($event)" />
               <label class="field-label" for="f-asientos-economica">{{ 'adminFlights.seatsEconomy' | translate }}</label>
@@ -339,7 +348,9 @@
 
         <div class="form-row">
           <div class="field">
-            <input id="f-precio" class="field-input" type="number" name="precio" min="1" step="0.01" placeholder=" "
+            <input id="f-precio" class="field-input" type="number" inputmode="decimal"
+              appFiltroEntrada="decimal" [maxDigitos]="maxDigitosPrecio" [maxDecimales]="2"
+              name="precio" min="1" step="0.01" placeholder=" "
               [attr.aria-invalid]="!!errores().precio"
               [ngModel]="fPrecio()" (ngModelChange)="fPrecio.set($event)" />
             <label class="field-label" for="f-precio">{{ 'adminFlights.price' | translate }}</label>
