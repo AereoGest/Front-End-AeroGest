@@ -29,6 +29,9 @@ const SOLO_LETRAS = /^\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+(\s+[a-zA-Záéíóú�
 const DNI_REGEX = /^\d{7,8}$/;
 const PASAPORTE_REGEX = /^[A-Z0-9]{6,20}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Mismas reglas que el registro y el perfil del usuario (y que valida el backend)
+const TELEFONO_REGEX = /^\d{10}$/;
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/;
 const FECHA_NACIMIENTO_MIN = '1900-01-01';
 
 type CampoUsuario = 'nombre' | 'apellido' | 'documento' | 'fechaNacimiento' | 'email' | 'telefono' | 'password';
@@ -203,6 +206,11 @@ export class UsuariosAdmin implements OnInit {
    * Mismas reglas para alta y edición. Los errores de formato se muestran en vivo;
    * los obligatorios vacíos, recién al intentar guardar (igual que vuelos-admin).
    */
+  /** Quita espacios, puntos y guiones (30.111.222 → 30111222) y pasa a mayúsculas, igual que la validación. */
+  private normalizarDocumento(valor: string): string {
+    return valor.replace(/[\s.\-]/g, '').toUpperCase();
+  }
+
   private validar(d: DatosUsuario, intento: boolean, passwordObligatoria: boolean): ErroresUsuario {
     const e: ErroresUsuario = {};
 
@@ -231,12 +239,13 @@ export class UsuariosAdmin implements OnInit {
     if (email && !EMAIL_REGEX.test(email)) e.email = 'booking.emailInvalid';
     else if (!email && intento) e.email = 'auth.emailRequired';
 
-    const digitos = d.telefono.replace(/\D/g, '');
-    if (d.telefono.trim() && (digitos.length < 10 || digitos.length > 11)) e.telefono = 'payment.phoneInvalid';
+    const telefono = d.telefono.trim();
+    if (telefono && !TELEFONO_REGEX.test(telefono)) e.telefono = 'adminUsers.phoneInvalid';
     else if (!d.telefono.trim() && intento) e.telefono = 'adminFlights.errorFieldRequired';
 
     const password = d.password.trim();
-   if (password && password.length < 8) e.password = 'auth.passwordMinLength';
+    if (password && password.length < 8) e.password = 'auth.passwordMinLength';
+    else if (password && !PASSWORD_REGEX.test(password)) e.password = 'auth.passwordPattern';
     else if (!password && intento && passwordObligatoria) e.password = 'auth.passwordRequired';
 
     return e;
@@ -324,7 +333,7 @@ export class UsuariosAdmin implements OnInit {
       nombre: this.altaNombre().trim(),
       apellido: this.altaApellido().trim(),
       identificador: this.altaIdentificador(),
-      numeroIdentificador: this.altaNumeroIdentificador().trim(),
+      numeroIdentificador: this.normalizarDocumento(this.altaNumeroIdentificador()),
       fechaNacimiento: this.altaFechaNacimiento(),
       sexo: this.altaSexo(),
       email: this.altaEmail().trim().toLowerCase(),
@@ -390,7 +399,7 @@ export class UsuariosAdmin implements OnInit {
       nombre: this.editNombre().trim(),
       apellido: this.editApellido().trim(),
       identificador: this.editIdentificador(),
-      numeroIdentificador: this.editNumeroIdentificador().trim(),
+      numeroIdentificador: this.normalizarDocumento(this.editNumeroIdentificador()),
       fechaNacimiento: this.editFechaNacimiento(),
       sexo: this.editSexo(),
       email: this.editEmail().trim().toLowerCase(),

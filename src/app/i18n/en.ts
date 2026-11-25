@@ -1009,6 +1009,7 @@ export const en: Record<TranslationKey, string> = {
   'adminUsers.noEmployees': 'No employees match the selected filters.',
   'adminUsers.filterActiveIndicator': 'Employee filter active',
   'adminUsers.employeesBadge': 'Staff / Employees',
+  'adminUsers.phoneInvalid': 'Enter a 10-digit phone number, with no spaces or symbols.',
   // Admin - Sales (VentasAdmin)
   'adminSales.eyebrow': 'Admin panel',
   'adminSales.title': 'Sales & transactions',
